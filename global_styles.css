@@ -1,0 +1,70 @@
+/* Define global variables for your button theme */
+:root {
+  --btn-bg: #a8927b;           /* base color */
+  --btn-color: #ffffff;        /* text color */
+  --btn-color-hover: #ddd8ba;  /* text color on hover */
+  --btn-border: #a8927b;       /* border color */
+  --btn-hover-bg: #5e4f3e;     /* hover background */
+  --btn-hover-border: #5e4f3e; /* hover border */
+  --btn-active-bg: #7a684f;    /* active background */
+  --btn-active-border: #7a684f;/* active border */
+  --btn-focus-shadow: rgba(188, 168, 140, 0.5); /* focus shadow */
+  --btn-radius: 12px;          /* border radius */
+  --btn-padding: 0.6rem 3.5rem;
+  --btn-font-weight: 600;
+  --btn-font-size: 1rem;
+}
+
+body {
+  font-family: 'Lato', sans-serif;
+  background-color: #ebe8e1;
+}
+
+
+
+/* Global primary button using CSS variables */
+.btn-primary-custom {
+  background-color: var(--btn-bg);
+  color: var(--btn-color);
+  border: 1px solid var(--btn-border);
+  border-radius: var(--btn-radius);
+  padding: var(--btn-padding);
+  font-weight: var(--btn-font-weight);
+  font-size: var(--btn-font-size);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+/* Hover effect */
+.btn-primary-custom:hover {
+  background-color: var(--btn-hover-bg);
+  border-color: var(--btn-hover-border);
+  color: var(--btn-color-hover);
+  transform: translateY(-1px);
+}
+
+/* Active / pressed effect */
+.btn-primary-custom:active {
+  background-color: var(--btn-active-bg);
+  border-color: var(--btn-active-border);
+  transform: scale(0.97);
+}
+
+/* Focus effect */
+.btn-primary-custom:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.25rem var(--btn-focus-shadow);
+}
+
+/* Disabled state */
+.btn-primary-custom:disabled {
+  background-color: #ccc;
+  border-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  pointer-events: none;
+}

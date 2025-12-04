@@ -1,0 +1,43 @@
+.product-card {
+    position: relative;
+    background: transparent;
+    border: none;
+    border-radius: 20px;
+    padding: 40px 20px 20px 20px;
+    text-align: left;
+    transition: all 0.25s ease;
+    overflow: visible !important; /* allows image to overflow */
+}
+
+/* The BLUE SELECTED state */
+.product-card.active {
+    background: #dbd8b9;
+    color: white;
+    box-shadow: 0 15px 25px rgba(0,0,0,0.15);
+}
+
+.product-card.active .product-desc {
+    color: rgba(255,255,255,0.9) !important;
+}
+
+/* The image floating above */
+.product-image {
+    width: 100%;
+    text-align: center;
+    margin-top: -80px; /* move it above the card */
+    margin-bottom: 10px;
+}
+
+.product-image img {
+    max-height: 170px;
+}
+
+/* Typography */
+.product-title {
+    font-weight: 700;
+}
+
+.product-desc {
+    color: #777;
+    font-size: 0.85rem;
+}
