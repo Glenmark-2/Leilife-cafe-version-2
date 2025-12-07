@@ -46,7 +46,7 @@
         <div class="mx-auto d-flex gap-2">
           <a class="btn btn-text" href="index.php?page=home">Home</a>
           <a class="btn btn-text" href="index.php?page=menu">Menu</a>
-          <a class="btn btn-text" href="#">Contact</a>
+          <a class="btn btn-text" href="index.php?page=home#contact-us">Contact</a>
         </div>
         <div class="d-flex gap-2">
           <a class="btn btn-text" href="#" id="webLogin">Login</a>
@@ -62,8 +62,8 @@
     <div id="navbarDropdownContent">
        <a class="btn btn-text" href="index.php?page=home">Home</a>
       <a class="btn btn-text" href="index.php?page=menu">Menu</a>
-      <a class="btn btn-text" href="#">About</a>
-      <a class="btn btn-text" href="#">Contact</a>
+      <a class="btn btn-text" href="index.php?page=home#about-us">About</a>
+      <a class="btn btn-text" href="index.php?page=home#contact-us">Contact</a>
       <hr style="width: 80%; border-top: 1px solid #cccccc; margin: 0.5rem auto;">
       <a class="btn btn-text" href="#" id="mobileLogin">Login</a>
       <a class="btn btn-text" href="index.php?page=sign_up">Sign up</a>

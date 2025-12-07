@@ -1,0 +1,73 @@
+.info-card-container {
+    flex: 1 1 250px; /* grow, shrink, base width */
+    display: flex;
+    justify-content: center;
+    margin: 10px;
+    min-width: 200px;
+    max-width: 300px;
+}
+
+.info-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: #f9f9f9;
+    padding: clamp(16px, 4vw, 22px);
+    border-radius: 16px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    width: 100%;
+}
+
+.info-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.info-logo {
+    font-size: clamp(36px, 7vw, 50px);
+    margin-bottom: clamp(12px, 3vw, 18px);
+}
+
+.info-title {
+    margin: 0 0 clamp(10px, 2.5vw, 14px) 0;
+    font-size: clamp(18px, 3vw, 20px);
+    font-weight: 600;
+    color: #222;
+}
+
+.info-text {
+    margin: 0;
+    font-size: clamp(14px, 2.5vw, 15px);
+    color: #555;
+    line-height: 1.6;
+    max-width: 90%;
+}
+
+/* Container for multiple cards */
+.info-cards-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+}
+
+/* Additional responsiveness for very small screens */
+@media (max-width: 500px) {
+    .info-card {
+        padding: clamp(12px, 5vw, 18px);
+    }
+
+    .info-logo {
+        font-size: clamp(28px, 10vw, 40px);
+    }
+
+    .info-title {
+        font-size: clamp(16px, 5vw, 18px);
+    }
+
+    .info-text {
+        font-size: clamp(12px, 4vw, 14px);
+    }
+}
