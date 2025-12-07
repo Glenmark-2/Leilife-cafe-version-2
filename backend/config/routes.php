@@ -7,4 +7,5 @@ return [
     'menu' => __DIR__. '/../../pages/menu.php',
     'change_password' => __DIR__. '/../../pages/change_password.php',
     'solo_product' => __DIR__. '/../../pages/solo_product.php',
+    'checkout' => __DIR__. '/../../pages/checkout_page.php',
 ];
