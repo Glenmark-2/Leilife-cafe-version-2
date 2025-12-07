@@ -12,6 +12,10 @@
 
     }
 
+    .top-div p {
+        text-align: center;
+    }
+
     .top-div h3 {
         text-align: center;
     }
@@ -29,6 +33,7 @@
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
+        justify-content: center;
     }
 
     .mid-div {
