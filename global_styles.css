@@ -1,16 +1,20 @@
 /* Define global variables for your button theme */
 :root {
   --btn-bg: #a8927b;           /* base color */
+  --btn-bg-secondary: #2c2b2c;   /* secondary background */
   --btn-color: #ffffff;        /* text color */
   --btn-color-hover: #ddd8ba;  /* text color on hover */
   --btn-border: #a8927b;       /* border color */
+  --btn-border-secondary: #2c2b2c; /* secondary border */
   --btn-hover-bg: #5e4f3e;     /* hover background */
   --btn-hover-border: #5e4f3e; /* hover border */
   --btn-active-bg: #7a684f;    /* active background */
   --btn-active-border: #7a684f;/* active border */
   --btn-focus-shadow: rgba(188, 168, 140, 0.5); /* focus shadow */
   --btn-radius: 12px;          /* border radius */
+  --btn-radius-secondary: 20px; /* secondary border radius */
   --btn-padding: 0.6rem 3.5rem;
+  --btn-padding-secondary: 0px 1rem;
   --btn-font-weight: 600;
   --btn-font-size: 1rem;
 }
@@ -39,8 +43,31 @@ body {
   text-decoration: none;
 }
 
+.btn-secondary-custom {
+  background-color: var(--btn-bg-secondary);
+  color: var(--btn-color);
+  border: 1px solid var(--btn-border-secondary);
+  border-radius: var(--btn-radius-secondary);
+  padding: var(--btn-padding-secondary);
+  font-weight: var(--btn-font-weight);
+  font-size: var(--btn-font-size);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
 /* Hover effect */
 .btn-primary-custom:hover {
+  background-color: var(--btn-hover-bg);
+  border-color: var(--btn-hover-border);
+  color: var(--btn-color-hover);
+  transform: translateY(-1px);
+}
+
+.btn-secondary-custom:hover {
   background-color: var(--btn-hover-bg);
   border-color: var(--btn-hover-border);
   color: var(--btn-color-hover);

@@ -10,5 +10,5 @@ return [
         '../css/users/partials/menu-card.css'
     ],
     'change_password' => ['../css/users/change_password.css'],
-
+    'solo_product' => ['../css/users/solo_product.css'],
 ];
