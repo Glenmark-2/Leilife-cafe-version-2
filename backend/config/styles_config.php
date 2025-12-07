@@ -13,6 +13,6 @@ return [
     'profile' => [
         '../css/users/profile.css',
         '../css/users/partials/favorite_card.css'
-    ]
+    ],
     'solo_product' => ['../css/users/solo_product.css'],
 ];
