@@ -1,0 +1,32 @@
+    #menu-body {
+        padding: 20px 200px;
+    }
+
+    #mainCat,
+    #subCat {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .main-categories {
+        background-color: transparent;
+        color: #5d4f3f;
+    }
+
+    .main-categories.active {
+        background-color: #5d4f3f ;
+        color: #ddd8ba;
+    }
+
+    .sub-categories {
+        background-color: transparent;
+        color: #5d4f3f;
+        height: 35px;
+    }
+
+    .sub-categories.active {
+        background-color: #5d4f3f;
+        color: #ddd8ba;
+    }
