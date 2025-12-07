@@ -3,6 +3,7 @@ return [
     'home' => [
         '../css/users/home.css',
         '../css/users/partials/card.css',
+        '../css/users/partials/info_card.css',
     ],
     'sign_up' => ['../css/users/sign_up.css'],
     'menu' => [
