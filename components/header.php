@@ -44,8 +44,8 @@
       <!-- Desktop menu (middle + right buttons) -->
       <div class="d-none d-sm-flex w-100 justify-content-between">
         <div class="mx-auto d-flex gap-2">
-          <a class="btn btn-text" href="#">Home</a>
-          <a class="btn btn-text" href="#">Menu</a>
+          <a class="btn btn-text" href="index.php?page=home">Home</a>
+          <a class="btn btn-text" href="index.php?page=menu">Menu</a>
           <a class="btn btn-text" href="#">Contact</a>
         </div>
         <div class="d-flex gap-2">
@@ -60,11 +60,12 @@
 
     <!-- Mobile dropdown menu -->
     <div id="navbarDropdownContent">
-      <a class="btn btn-text" href="#">Menu</a>
+       <a class="btn btn-text" href="index.php?page=home">Home</a>
+      <a class="btn btn-text" href="index.php?page=menu">Menu</a>
       <a class="btn btn-text" href="#">About</a>
       <a class="btn btn-text" href="#">Contact</a>
       <hr style="width: 80%; border-top: 1px solid #cccccc; margin: 0.5rem auto;">
-      <a class="btn btn-text" href="#">Login</a>
+      <a class="btn btn-text" href="#" id="mobileLogin">Login</a>
       <a class="btn btn-text" href="index.php?page=sign_up">Sign up</a>
       <a class="btn btn-text" href="#">Cart</a>
     </div>
@@ -79,10 +80,4 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-      const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
-      document.getElementById('webLogin').addEventListener('click', function(e) {
-        e.preventDefault();
-        loginModal.show();
-      });
-    </script>
+    <script src="../scripts/users/components/header.js"></script>
