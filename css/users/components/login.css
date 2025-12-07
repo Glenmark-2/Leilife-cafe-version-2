@@ -1,44 +1,3 @@
-  .btn-text {
-    background: none;     /* No background */
-    border: none;         /* No border */
-    color: #070707ff;          /* Your desired text color */
-    padding: 0.25rem 0.5rem; /* Optional: adjust padding */
-    font-size: 1rem;      /* Optional: adjust size */
-  }
-
-#navbarDropdownContent {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  background-color: #ffffff; /* White background */
-  z-index: 999;
-  display: none;
-  flex-direction: column;
-  border: 1px solid #cccccc; /* Light border */
-  border-top-left-radius: 0;   /* Top-left not rounded */
-  border-top-right-radius: 0;  /* Top-right not rounded */
-  border-bottom-left-radius: 20px; /* Bottom-left rounded */
-  border-bottom-right-radius: 20px; /* Bottom-right rounded */
-  padding: 1rem 0;
-}
-
-
-#navbarDropdownContent a {
-  padding: 0.5rem 1rem;
-  text-align: center;
-}
-
-#navbarDropdownContent.show {
-  display: flex;             /* Show menu when toggled */
-}
-.navbar-brand img {
-  height: 60px;
-  display: block;
-  margin: 0px 5px;
-}
-
-/* for login modal */
 .close {
         display: flex;
         justify-content: flex-end;
@@ -80,8 +39,8 @@
       }
 
       .googleBtn {
-        background-color: white !important; 
-        color: black !important;
+        background-color: white;
+        color: black;
         margin-top: 10px;
       }
 
