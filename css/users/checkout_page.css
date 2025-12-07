@@ -1,0 +1,87 @@
+
+hr {
+    border: none;                   /* remove default border */
+    border-top: 3px solid #ddd8ba;  /* use border-top to set color and thickness */
+}
+.form-check-input:checked {
+    background-color: #aa9177;
+    border-color: #aa9177;
+}
+
+/* Optional: change the border color when not checked */
+.form-check-input {
+    border-color: #aa9177;
+    margin-bottom: 100px;
+}
+
+.order-card {
+    background-color: #ffffff;
+    border-radius: 20px;
+    max-width: 350px;
+    width: 100%;
+    padding-bottom: 20px;
+}
+
+/* Items container – allows more items */
+.items {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;          /* space between each order item */
+    max-height: 260px;  /* enough height before scrolling */
+    height: 260px;
+    overflow-y: auto;   /* scroll when many items */
+    padding-right: 5px; /* avoid scrollbar overlap */
+}
+
+/* Each product row */
+.order-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+/* Remove border from last item */
+.order-item:last-child {
+    border-bottom: none;
+}
+
+/* Product image */
+.order-img {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+/* Right price aligned */
+.order-price {
+    white-space: nowrap;
+}
+
+/* Make order card full width on mobile */
+@media (max-width: 986px) {
+    .order-card {
+        max-width: 100%;
+    }
+
+    .order-img {
+        width: 60px;
+        height: 60px;
+    }
+
+    .items {
+        max-height: 200px;
+        height: auto;
+    }
+}
+
+/* Fix spacing for mobile */
+@media (max-width: 768px) {
+    .ms-4 {
+        margin-left: 20px !important;
+    }
+}
+
+

@@ -8,4 +8,5 @@ return [
     'change_password' => __DIR__. '/../../pages/change_password.php',
     'profile' => __DIR__. '/../../pages/profile.php',
     'solo_product' => __DIR__. '/../../pages/solo_product.php',
+    'checkout' => __DIR__. '/../../pages/checkout_page.php',
 ];
