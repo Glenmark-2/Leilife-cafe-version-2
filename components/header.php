@@ -50,7 +50,7 @@
       </div>
       <div class="d-flex gap-2">
         <a class="btn btn-text" href="#">Login</a>
-        <a class="btn btn-text" href="#">Sign up</a>
+        <a class="btn btn-text" href="index.php?page=sign_up">Sign up</a>
         <a href="#" class="btn btn-link p-0">
           <i class="bi bi-cart-fill" style="color: black; font-size: 1.5rem;"></i>
         </a>
@@ -65,7 +65,7 @@
     <a class="btn btn-text" href="#">Contact</a>
     <hr style="width: 80%; border-top: 1px solid #cccccc; margin: 0.5rem auto;">
     <a class="btn btn-text" href="#">Login</a>
-    <a class="btn btn-text" href="#">Sign up</a>
+    <a class="btn btn-text" href="index.php?page=sign_up">Sign up</a>
     <a class="btn btn-text" href="#">Cart</a>
   </div>
 </nav>

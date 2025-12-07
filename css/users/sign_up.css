@@ -1,0 +1,50 @@
+    .body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        min-height: 70vh;
+    }
+
+    .top-div {
+        padding: 20px;
+        width: fit-content;
+
+    }
+
+    .top-div h3 {
+        text-align: center;
+    }
+
+    .form-control {
+        width: 300px;
+        background-color: #f4f4f4;
+    }
+
+    .form-floating {
+        width: fit-content;
+    }
+
+    .col-md {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .mid-div {
+        width: fit-content;
+        padding: 30px;
+        background-color: #f4f4f4;
+        border-radius: 15px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .terms {
+        margin-top: 10px;
+    }
+
+    .create {
+        padding-top: 10px;
+        display: flex;
+        justify-content: center;
+    }
