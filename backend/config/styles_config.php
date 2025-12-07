@@ -9,5 +9,6 @@ return [
         '../css/users/menu.css',
         '../css/users/partials/menu-card.css'
     ],
+    'change_password' => ['../css/users/change_password.css'],
 
 ];
