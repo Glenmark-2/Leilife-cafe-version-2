@@ -15,5 +15,6 @@ return [
         '../css/users/partials/favorite_card.css'
     ],
     'solo_product' => ['../css/users/solo_product.css'],
-    'checkout' => ['../css/users/checkout_page.css']
+    'checkout' => ['../css/users/checkout_page.css'],
+    'order_tracking' => ['../css/users/order_tracking.css'],
 ];

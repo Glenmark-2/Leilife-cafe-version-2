@@ -9,4 +9,5 @@ return [
     'profile' => __DIR__. '/../../pages/profile.php',
     'solo_product' => __DIR__. '/../../pages/solo_product.php',
     'checkout' => __DIR__. '/../../pages/checkout_page.php',
+    'order_tracking' => __DIR__. '/../../pages/order_tracking.php',
 ];

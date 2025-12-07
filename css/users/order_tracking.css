@@ -1,0 +1,113 @@
+/* PROGRESS BAR */
+.progress-steps {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    flex: 1;
+}
+
+.step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 22px;
+    right: -50%;
+    width: 100%;
+    height: 2px;
+    background-color: #ccc;
+    z-index: -1;
+}
+
+.prog-num {
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    background: #fff;
+    color: #333;
+    transition: all 0.3s;
+}
+
+.prog-num.active {
+    background: #24353A;
+    color: #fff;
+    border-color: #24353A;
+}
+
+.step p {
+    margin-top: 8px;
+    font-size: 14px;
+    color: #444;
+    text-align: center;
+}
+
+/* ETA TEXT */
+.eta-title {
+    color: #8f8d8d;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.eta {
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+/* MOTOR IMAGE */
+.product-img-wrapper {
+    width: 100%;
+    max-width: 380px;
+    height: 220px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+}
+
+.product-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* DELIVERY DETAILS (RIGHT COLUMN) */
+.delivery-col {
+    text-align: left;
+}
+
+.section-title {
+    color: #8f8d8d;
+    font-weight: 600;
+    text-align: left;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 16px;
+}
+
+.icon {
+    width: 28px;
+    height: auto;
+}
+
+.ord-dtls {
+    margin-top: 10px;
+}
+
+
