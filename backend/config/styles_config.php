@@ -17,4 +17,5 @@ return [
     'solo_product' => ['../css/users/solo_product.css'],
     'checkout' => ['../css/users/checkout_page.css'],
     'order_tracking' => ['../css/users/order_tracking.css'],
+    'cart' => ['../css/users/components/cart.css'],
 ];

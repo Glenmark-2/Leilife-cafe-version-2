@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link rel="stylesheet" href="../css/users/components/header.css">
   <link rel="stylesheet" href="../global_styles.css">
+  <link rel="stylesheet" href="../css/users/components/cart.css">
 
 
   <!-- Your CSS -->
@@ -28,7 +29,7 @@
 <body>
 
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-sm position-relative" style="background-color: #d0b28c;">
+  <nav class="navbar navbar-expand-sm sticky-top" style="background-color: #d0b28c;">
     <div class="container-fluid mx-3 mx-sm-5">
       <!-- Logo -->
       <a class="navbar-brand d-flex align-items-center" href="?page=home">
@@ -36,8 +37,7 @@
       </a>
 
       <!-- Hamburger toggle button -->
-      <button class="navbar-toggler" type="button" aria-label="Toggle navigation"
-        onclick="document.getElementById('navbarDropdownContent').classList.toggle('show')">
+      <button class="navbar-toggler" type="button" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
 
@@ -51,9 +51,10 @@
         <div class="d-flex gap-2">
           <a class="btn btn-text" href="#" id="webLogin">Login</a>
           <a class="btn btn-text" href="index.php?page=sign_up">Sign up</a>
-          <a href="#" class="btn btn-link p-0">
-            <i class="bi bi-cart-fill" style="color: black; font-size: 1.5rem;"></i>
-          </a>
+<a href="#" class="btn btn-link p-0" id="cartBtn">
+  <i class="bi bi-cart-fill" style="color:black; font-size:1.5rem;"></i>
+</a>
+
         </div>
       </div>
     </div>
@@ -67,10 +68,13 @@
       <hr style="width: 80%; border-top: 1px solid #cccccc; margin: 0.5rem auto;">
       <a class="btn btn-text" href="#" id="mobileLogin">Login</a>
       <a class="btn btn-text" href="index.php?page=sign_up">Sign up</a>
-      <a class="btn btn-text" href="#">Cart</a>
+      <a class="btn btn-text" href="#" id="mobileCartBtn">Cart</a>
     </div>
   </nav>
 
+  <div class="cart-container d-none" id="cart-container">
+      <?php include __DIR__ . "/cart.php"; ?>
+  </div>
 
   <div class="container-fluid px-0">
 
