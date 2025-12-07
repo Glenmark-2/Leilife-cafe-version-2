@@ -1,7 +1,6 @@
 <?php
 return [
     'home' => __DIR__ . '/../../pages/home.php',
-    'cart' => __DIR__ . '/../../pages/cart.php',
     '404' => __DIR__ . '/../../pages/404.php',
     'sign_up' => __DIR__. '/../../pages/sign_up.php',
     'menu' => __DIR__. '/../../pages/menu.php',
@@ -10,4 +9,5 @@ return [
     'solo_product' => __DIR__. '/../../pages/solo_product.php',
     'checkout' => __DIR__. '/../../pages/checkout_page.php',
     'order_tracking' => __DIR__. '/../../pages/order_tracking.php',
+    'cart' => __DIR__ . '/../../components/cart.php',
 ];
