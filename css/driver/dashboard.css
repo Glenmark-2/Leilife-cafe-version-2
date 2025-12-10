@@ -1,0 +1,36 @@
+/* Dashboard specific tweaks only (Bootrap overrides) */
+
+/* Performance Card Gradients */
+.performance-card {
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.performance-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+    border-radius: 50%;
+}
+
+/* Highlight Card Custom Gradient */
+.stat-card.highlight {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white !important;
+}
+
+.stat-card.highlight .fw-bold, 
+.stat-card.highlight .small,
+.stat-card.highlight .fs-4 {
+    color: white !important;
+}
+
+/* Ensure icons align nicely */
+.ph-fill, .ph-bold {
+    vertical-align: middle;
+}
