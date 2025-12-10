@@ -8,5 +8,9 @@ return [
         '../css/admin/staff.css',
         
     ],
+    'inbox' => [
+        '../css/admin/inbox.css',
+        
+    ],
 
 ];
