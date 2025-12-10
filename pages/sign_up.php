@@ -1,3 +1,7 @@
+<?php
+require_once __DIR__ . '/../backend/helpers/SessionManager.php';
+SessionManager::requireGuest();
+?>
 <div class="body">
     <div class="top-div">
         <h3>Ready to sign up to Leilife?</h3>
@@ -5,51 +9,53 @@
     </div>
 
     <div class="mid-div">
-        <p>User Details</p>
-        <div class="col-md">
-            <div class="form-floating">
-                <input type="text" class="form-control" id="fname" placeholder="First name">
-                <label for="fname">First name</label>
+        <form id="signupForm">
+            <p>User Details</p>
+            <div class="col-md">
+                <div class="form-floating">
+                    <input type="text" class="form-control" id="fname" placeholder="First name" required>
+                    <label for="fname">First name</label>
+                </div>
+                <div class="form-floating">
+                    <input type="text" class="form-control" id="lname" placeholder="Last name" required>
+                    <label for="lname">Last name</label>
+                </div>
             </div>
-            <div class="form-floating">
-                <input type="text" class="form-control" id="lname" placeholder="Last name">
-                <label for="lname">Last name</label>
+            <br>
+            <p>Login & Contact Details</p>
+            <div class="col-md">
+                <div class="form-floating">
+                    <input type="email" class="form-control" id="email" placeholder="email" required>
+                    <label for="email">Email</label>
+                </div>
+                <div class="form-floating">
+                    <input type="tel" class="form-control" id="phone_number" placeholder="Phone number">
+                    <label for="phone_number">Phone number</label>
+                </div>
             </div>
-        </div>
-        <br>
-        <p>Login & Contact Details</p>
-        <div class="col-md">
-            <div class="form-floating">
-                <input type="text" class="form-control" id="email" placeholder="email">
-                <label for="email">Email</label>
+            <br>
+            <div class="col-md">
+                <div class="form-floating">
+                    <input type="password" class="form-control" id="signup_password" placeholder="Password" required>
+                    <label for="signup_password">Password</label>
+                </div>
+                <div class="form-floating">
+                    <input type="password" class="form-control" id="signup_confirm_password" placeholder="Confirm password" required>
+                    <label for="signup_confirm_password">Confirm password</label>
+                </div>
             </div>
-            <div class="form-floating">
-                <input type="tel" class="form-control" id="phone_number" placeholder="Phone number">
-                <label for="phone_number">Phone number</label>
-            </div>
-        </div>
-        <br>
-        <div class="col-md">
-            <div class="form-floating">
-                <input type="text" class="form-control" id="password" placeholder="Password">
-                <label for="password">Password</label>
-            </div>
-            <div class="form-floating">
-                <input type="number" class="form-control" id="confirm_password" placeholder="Confirm password">
-                <label for="confirm_password">Confirm password</label>
-            </div>
-        </div>
 
-        <div class="terms">
-            <input type="checkbox" name="terms" id="terms" required>
-            <label for="terms">
-                By registering your details, you agree with our
-                <a href="#" id="openTerms">Terms & Conditions</a>.</label>
-        </div>
+            <div class="terms">
+                <input type="checkbox" name="terms" id="terms" required>
+                <label for="terms">
+                    By registering your details, you agree with our
+                    <a href="#" id="openTerms">Terms & Conditions</a>.</label>
+            </div>
 
-        <div class="create">
-            <button class="btn-primary-custom">Create your Account</button>
-        </div>
+            <div class="create">
+                <button type="submit" class="btn-primary-custom">Create your Account</button>
+            </div>
+        </form>
     </div>
 </div>
 <!-- Modal -->
@@ -78,6 +84,7 @@
         </div>
     </div>
 </div>
+<?php include __DIR__ . '/../components/verification_modal.php'; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../scripts/users/sign_up.js"></script>

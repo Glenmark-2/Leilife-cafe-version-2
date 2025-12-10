@@ -5,6 +5,104 @@
   overflow: hidden; /* Any part of the image outside is hidden */
 }
 
+/* Global Sections on Mobile */
+@media (max-width: 768px) {
+  .banner-container {
+    height: 35vh; /* Even shorter banner for compact feel */
+  }
+
+  h3.section-title {
+    font-size: 1.4rem; /* Smaller headings */
+    margin-bottom: 0.5rem;
+  }
+  
+  p.section-text {
+    font-size: 0.9rem;
+  }
+  
+  .about-us {
+    margin: 20px 0; /* Tighter margins */
+  }
+  
+  .contact-us-box {
+    padding: 20px 15px; /* Less padding in box */
+    gap: 25px; /* Reduce gap between info and form */
+    border-radius: 15px; /* rounded corners slightly less to match compact feel */
+  }
+  
+  .contact-form {
+    padding: 20px;
+  }
+
+  .banner-text h1 {
+    font-size: 1.6rem;
+  }
+  .banner-text p {
+    font-size: 0.9rem;
+  }
+  
+  /* Compact 'About Us' & 'Contact Box' margins */
+  .container.mt-5 {
+      margin-top: 2rem !important; /* Force smaller top margin on containers */
+  }
+  .container.mb-5 {
+      margin-bottom: 2rem !important;
+  }
+}
+
+/* Mobile Adjustments for Contact Section specifically */
+@media (max-width: 991px) {
+  .hero-img-wrapper {
+    height: 200px; /* Reduced from 250px */
+  }
+
+  .contact-us-box {
+    flex-direction: column;
+    padding: 30px 20px;
+    gap: 30px;
+  }
+
+  /* ... (rest of contact styles remain similar, but let's ensure they are compact) */
+  .contact-info {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .contact-info h5 {
+    text-align: center !important;
+    margin-bottom: 1rem;
+  }
+  
+  .info-item {
+     justify-content: center;
+     display: flex;
+     align-items: center;
+     gap: 10px;
+     margin-bottom: 10px; /* Tighter items */
+     font-size: 0.9rem;
+  }
+
+  .contact-form {
+    width: 100%;
+    padding: 20px; /* Tighter padding */
+  }
+  
+  .form-row {
+    flex-direction: column;
+    gap: 10px; /* Tighter gap */
+    margin-bottom: 10px;
+  }
+  
+  .contact-form textarea {
+      min-height: 100px; /* Shorter textarea default */
+  }
+  
+  .form-row .inputs {
+    width: 100%; 
+    min-width: 0;
+  }
+}
+
 .darken-img {
   width: 100%;
   height: 100%;
@@ -62,7 +160,14 @@ p.section-text {
     font-size: 0.95rem;
     text-align: center;
   }
-
+  
+  /* Make banner text more responsive */
+  .banner-text h1 {
+    font-size: 2rem;
+  }
+  .banner-text p {
+    font-size: 1rem;
+  }
 }
 
 @media (min-width: 992px) {
@@ -70,33 +175,34 @@ p.section-text {
     max-height: 500px; /* visible area only */
     overflow: hidden;
   }
-
-  
 }
 
-/* Mobile: smaller visible area */
+/* Mobile: smaller visible area but taller than before */
 @media (max-width: 991px) {
   .hero-img-wrapper {
-    height: 180px; /* smaller crop on mobile */
+    height: 250px; /* Increased from 180px for better visibility */
     overflow: hidden;
   }
   
+  .contact-us-box {
+    flex-direction: column;
+    padding: 30px;
+    gap: 30px;
+  }
+  
+  .contact-info, .contact-form {
+    width: 100%;
+  }
 }
-
-
 
 /* Image always keeps natural proportions */
 .hero-img {
   width: 100%;
-  height: auto; /* <- key: keep natural height */
-  object-fit: cover; /* crop sideways ONLY if needed */
+  height: 100%; /* Fill wrapper */
+  object-fit: cover; 
 }
 
-.info-cards{
-  display: flex;
-  justify-content: space-around;
-}
-
+/* RESTORED STYLES */
 
 .left-div{
   width: fit-content;
@@ -128,71 +234,242 @@ p.section-text {
   padding: 0 100px;
 }
 
-.about-us{
+/* --- Restored Base/Desktop Styles for Contact & About --- */
+
+.about-us {
   margin: 40px 0;
 }
 
-.contact-info{
+.contact-info {
   width: 50%;
 }
 
-.contact-us-box{
+.contact-us-box {
   width: 90%;
   margin: auto;
   padding: 50px;
   display: flex;
-  flex-direction: row;
+  flex-direction: row; /* Desktop defaults to row */
   justify-content: space-between;
   background-color: #d9d9d9;
   border-radius: 25px;
   margin-top: 20px;
 }
 
-.contact-form{
+.contact-form {
   width: 45%;
-  padding: 20px;
+  padding: 30px;
   background-color: #eaebef;
   border-radius: 15px;
 }
 
-  .inputs, .long-inputs {
-    padding: 8px 36px 8px 10px; 
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    width: 45%;
-    margin-right: auto;
-  }
+.inputs, .long-inputs {
+  padding: 12px 15px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  width: 100%; /* Default full width in container */
+  font-size: 1rem;
+  background-color: #fff;
+  transition: border-color 0.3s ease;
+  margin-bottom: 15px;
+}
 
-  .contact-form textarea {
-    width: 90%;
-    margin: 0 auto 10px auto;
-    display: block;
-  }
+.inputs:focus, .long-inputs:focus {
+  border-color: #a8927b;
+  outline: none;
+}
+
+.contact-form textarea {
+  width: 100%;
+  margin: 0;
+  display: block;
+  min-height: 120px;
+  resize: vertical;
+}
 
 .form-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 15px;
   width: 100%;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 
 .form-row .inputs {
-  flex: 1 1 calc(50% - 20px); 
-  min-width: 200px; 
+  flex: 1; 
+  min-width: 200px;
+  margin-bottom: 0; /* Reset margin inside row as gap handles it, or keep it safe */
 }
 
-.long-inputs{
-  width: 100% !important;
-  margin-bottom: 10px;
-}
-
-textarea{
-  margin: 0 !important;
-}
-
-#submitDiv{
+#submitDiv {
   display: flex;
   justify-content: flex-end;
   margin-top: 20px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    font-size: 1rem;
+}
+
+.info-item i {
+    color: #a8927b; /* Icon color */
+    width: 25px;
+    text-align: center;
+}
+
+/* Custom Responsive Width */
+.custom-w-75 {
+  width: 75%;
+  margin: 0 auto;
+}
+
+@media (max-width: 991px) {
+  .custom-w-75 {
+    width: 100% !important; /* Full width on mobile */
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+/* Global Sections on Mobile */
+@media (max-width: 768px) {
+  .banner-container {
+    height: 35vh; 
+  }
+
+  h3.section-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+  
+  p.section-text {
+    font-size: 0.95rem;
+    text-align: center;
+    padding: 0 15px;
+  }
+  
+  .banner-text h1 {
+    font-size: 1.8rem;
+  }
+  .banner-text p {
+    font-size: 1rem;
+  }
+  
+  /* Make containers feel "App-like" - full width, less margin */
+  .container.mt-5 {
+      margin-top: 1.5rem !important; 
+  }
+  .container.mb-5 {
+      margin-bottom: 1.5rem !important;
+  }
+  
+  /* Remove excessive side padding from main layout */
+  .row.gx-4 {
+      --bs-gutter-x: 1rem; /* tighter gutters */
+  }
+
+  /* About Us Title */
+  .about-us-title, .contact-us h3 {
+      padding: 0 15px; 
+      margin-bottom: 15px;
+  }
+}
+
+/* Mobile Adjustments for Contact/About Section specifically */
+@media (max-width: 991px) {
+  .hero-img-wrapper {
+    height: 200px;
+  }
+
+  /* Make these sections strictly full width with no rounded corners to waste space */
+  .contact-us-box, 
+  #about-us .row, 
+  .second-section .carousel {
+    width: 100%;
+    margin: 0;
+    border-radius: 0 !important; /* Flush edges */
+    box-shadow: none !important; /* Cleaner flat look */
+    background-color: #f8f9fa !important; /* Slightly lighter for separation */
+  }
+
+  .contact-us-box {
+    flex-direction: column;
+    padding: 30px 15px;
+    gap: 30px;
+    margin-top: 10px;
+  }
+
+  .contact-info {
+    width: 100%;
+    text-align: center;
+    order: 1; /* Put info first? or form? Usually Info first is fine. */
+  }
+  
+  .contact-info h5 {
+    text-align: center !important;
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+  }
+  
+  .info-item {
+     justify-content: flex-start; /* Align left for readability if stacked, or center? User wanted "separation is clear" */
+     padding-left: 20px; /* Indent slightly */
+     font-size: 0.95rem;
+     margin-bottom: 12px;
+  }
+  
+  .contact-form {
+    width: 100%;
+    padding: 0; /* Remove internal padding, use transparent bg */
+    background-color: transparent;
+    order: 2;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .form-row .inputs, .long-inputs, .contact-form textarea {
+      width: 100%;
+      min-width: 0;
+      background-color: #fff; /* White inputs on grey bg */
+      border: 1px solid #ddd;
+  }
+  
+  /* Specific styling for 'About Us' inner content to look good full width */
+  #about-us .col-lg-6 {
+      padding: 30px 20px !important;
+  }
+  
+  /* FIX: Prevent Horizontal Scroll caused by .row inside paddingless container */
+  .custom-w-75 > .row, 
+  #about-us .row,
+  .hero-img-wrapper .row {
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      width: 100% !important;
+  }
+  
+  /* Ensure the first big section (Coffee meets food) is also full width/flush */
+  .container.custom-w-75 > .row.shadow-sm {
+      border-radius: 0 !important;
+      margin: 0 !important;
+      width: 100% !important;
+      box-shadow: none !important; /* Cleaner look */
+      background-color: #f8f9fa !important; /* Consistent bg */
+  }
+}
+
+/* Prevent any horizontal overflow globally on mobile */
+@media (max-width: 991px) {
+    body, html {
+        overflow-x: hidden;
+        width: 100%;
+    }
 }

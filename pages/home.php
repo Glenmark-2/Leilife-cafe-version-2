@@ -10,7 +10,7 @@
     <h4 class="fw-bold">Hey there!</h4>
     <p>Unwind with the comforting taste of Leilife Café and Resto!</p>
 
-    <div class="row mt-5 justify-content-between">
+    <div class="row mt-5 gy-5 gx-4 justify-content-center">
         <?php
         // Card 1
         $title = "Kape Masarap";
@@ -50,7 +50,7 @@
     </div>
 </div>
 
-<div class="container-lg second-section mt-4 mb-5 w-75 bg-light">
+<div class="container-lg second-section mt-4 mb-5 custom-w-75 bg-light">
     <div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-inner">
             <div class="carousel-item active">
@@ -76,7 +76,7 @@
     </div>
 </div>
 
-<div class="container mt-5 px-3 mb-5 w-75">
+<div class="container mt-5 px-3 mb-5 custom-w-75">
     <div class="row shadow-sm rounded-4 overflow-hidden" style="background-color: #ececec;">
 
         <!-- IMAGE -->
@@ -146,7 +146,7 @@
         <p>At Leilife Cafe and Resto, we believe every meal should be a moment to savor. From freshly brewed coffee to hearty meals, we combine quality ingredients, skilled preparation, and a warm ambiance to create the perfect dining experience for every guest.</p>
     </div>
 
-    <div class="container mt-5 px-3 mb-5 w-75" id="about-us">
+    <div class="container mt-5 px-3 mb-5 custom-w-75" id="about-us">
         <div class="row shadow-sm rounded-4 overflow-hidden" style="background-color: #ececec;">
 
             <!-- TEXT -->

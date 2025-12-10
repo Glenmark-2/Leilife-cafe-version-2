@@ -7,6 +7,7 @@
     text-align: left;
     transition: all 0.25s ease;
     overflow: visible !important; /* allows image to overflow */
+    margin-top: 90px; /* Space for the floating image */
 }
 
 /* The BLUE SELECTED state */
@@ -25,19 +26,79 @@
     width: 100%;
     text-align: center;
     margin-top: -80px; /* move it above the card */
-    margin-bottom: 10px;
+    margin-bottom: 20px;
 }
 
 .product-image img {
     max-height: 170px;
+    object-fit: contain;
+    filter: drop-shadow(0 10px 10px rgba(0,0,0,0.2)); /* Add shadow to image for depth */
+    transition: transform 0.3s ease;
+}
+
+/* Hover effect for image */
+.product-card:hover .product-image img {
+    transform: scale(1.05) translateY(-5px);
 }
 
 /* Typography */
 .product-title {
     font-weight: 700;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
 }
 
 .product-desc {
     color: #777;
     font-size: 0.85rem;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+}
+
+/* Price & Size */
+.product-meta {
+    font-size: 0.9rem;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 576px) {
+    .product-card {
+        margin-top: 50px; /* Reduced top space */
+        padding: 25px 10px 15px 10px; /* Tighter padding */
+        border-radius: 15px;
+    }
+    .product-image {
+        margin-top: -50px; /* Compact negative margin */
+        margin-bottom: 10px;
+    }
+    .product-image img {
+        max-height: 100px; /* Smaller image */
+    }
+    
+    .product-title {
+        font-size: 0.95rem;
+        margin-bottom: 0.25rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .product-desc {
+        font-size: 0.75rem;
+        margin-bottom: 0.5rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block; /* ensure text-overflow works */
+    }
+    
+    .product-meta span {
+        font-size: 0.8rem;
+    }
+
+    /* Compact 'Add to cart' button */
+    .product-card button.btn-warning {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
 }

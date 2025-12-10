@@ -10,4 +10,5 @@ return [
     'checkout' => __DIR__. '/../../pages/checkout_page.php',
     'order_tracking' => __DIR__. '/../../pages/order_tracking.php',
     'cart' => __DIR__ . '/../../components/cart.php',
+    'verify' => __DIR__ . '/../../pages/verify.php',
 ];
