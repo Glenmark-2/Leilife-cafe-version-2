@@ -2,4 +2,6 @@
 return [
     'dashboard' => __DIR__ . '/../../pages/admin/dashboard.php',
     'staff' => __DIR__ . '/../../pages/admin/staff.php',
+    'inbox' => __DIR__ . '/../../pages/admin/inbox.php',
+    'reviews' => __DIR__ . '/../../pages/admin/reviews.php',
 ];

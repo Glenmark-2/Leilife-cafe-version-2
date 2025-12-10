@@ -1,4 +1,4 @@
-<div id="title-content">
+<div class="title-content">
     <div class="title-div">
         <button class="hamburger" id="hamburger" onclick="toggleSidebar()">
             <span></span>

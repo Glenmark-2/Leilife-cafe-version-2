@@ -34,8 +34,8 @@
     echo sidebarButton("__DIR__ ./../../public/assets/home.png", "Dashboard", "admin.php?page=dashboard");
     echo sidebarButton("__DIR__ ./../../public/assets/fast-food.png", "Products", "#");
     echo sidebarButton("__DIR__ ./../../public/assets/people.png", "Staffs", "admin.php?page=staff");
-    echo sidebarButton("__DIR__ ./../../public/assets/messages.png", "Inbox", "#");
-    echo sidebarButton("__DIR__ ./../../public/assets/leilife.png", "Feedbacks", "#");
+    echo sidebarButton("__DIR__ ./../../public/assets/messages.png", "Inbox", "admin.php?page=inbox");
+    echo sidebarButton("__DIR__ ./../../public/assets/leilife.png", "Reviews", "admin.php?page=reviews");
     echo sidebarButton("__DIR__ ./../../public/assets/sales.png", "Sales", "#");
     echo sidebarButton("__DIR__ ./../../public/assets/analytics.png", "Analytics", "#");
     echo sidebarButton("__DIR__ ./../../public/assets/settings.png", "Settings", "#");

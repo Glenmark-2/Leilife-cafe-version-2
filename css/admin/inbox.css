@@ -1,0 +1,93 @@
+    #search-input {
+        flex: 1;
+        padding: 0 12px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        height: 42px;
+        line-height: 42px;
+        box-sizing: border-box;
+        width: 90%;
+        min-height: 20%;
+    }
+
+    #search-input:focus {
+        box-shadow: 0 0 0 2px rgba(80, 194, 86, 0.2);
+    }
+    #search_add>div {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        height: 42px;
+        flex-shrink: 0;
+        box-sizing: border-box;
+    }
+
+    #search_add {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        width: 100%;
+        margin: 10px 0;
+    }
+
+    #search_add form {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+        min-width: 220px;
+        height: 42px;
+        box-sizing: border-box;
+    }
+
+    #search_add label {
+        font-weight: 600;
+        color: #333;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        height: 100%;
+        box-sizing: border-box;
+    }
+
+    #sortInbox{
+        background-color: transparent;
+        color: #000301;
+    }
+
+    table {
+        width: 100%;
+    }
+
+    .table-wrapper {
+        padding: 10px;
+        border-radius: 10px;
+        background-color: white;
+
+    }
+
+    th {
+        font-size: 1rem;
+        padding: 10px;
+        border-bottom: 1px solid gray;
+    }
+
+    td {
+        padding: 10px;
+    }
+
+    .archive-icon,
+    .edit-icon {
+        width: 30px;
+        height: 30px;
+    }
+
+    .archive-btn,
+    .edit-btn {
+        background-color: transparent;
+        border: none;
+    }

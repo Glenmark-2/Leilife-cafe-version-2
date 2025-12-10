@@ -106,7 +106,7 @@
     }
 
     /* para sa top part to ng page content */
-   #title-content {
+   .title-content {
         display: flex;
         flex-direction: row;
         gap: 10px;
