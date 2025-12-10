@@ -32,6 +32,7 @@ echo '</div>';
 
 // Expose current page to JS
 echo '<script>window.currentPage = "' . htmlspecialchars($page) . '";</script>';
+echo '<script src="../scripts/admin/hamburger.js"></script>';
 
 echo '<script 
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">

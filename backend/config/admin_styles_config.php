@@ -2,6 +2,7 @@
 return [
     'dashboard' => [
         '../css/admin/dashboard.css',
+        
     ],
 
 ];
