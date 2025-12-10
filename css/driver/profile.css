@@ -1,0 +1,4 @@
+/* Profile specific minimal overrides */
+.bg-opacity-10 {
+    --bs-bg-opacity: 0.1;
+}

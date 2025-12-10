@@ -1,0 +1,11 @@
+/* Mostly Bootstrap now. Minimal custom CSS for timeline dots. */
+
+.btn-white {
+    background-color: white;
+    border: none;
+}
+
+.btn-transparent {
+    background: transparent;
+    border: none;
+}
