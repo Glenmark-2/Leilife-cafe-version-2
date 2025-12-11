@@ -1,193 +1,191 @@
-    body {
-      display: flex;
-      flex-direction: row;
+body {
+    display: flex;
+    flex-direction: row;
+    margin: 0;
+    padding: 0;
+    font-family: 'Lato', sans-serif;
+    background-color: #f4f6f9; /* Light grey background for the whole page */
+    min-height: 100vh;
+}
+
+#pageContent {
+    flex: 1;
+    padding: 30px; /* Increased padding */
+    overflow-y: auto;
+    height: 100vh;
+    box-sizing: border-box;
+}
+
+/* Sidebar Styling */
+aside#navBar {
+    background-color: #ffffff;
+    height: 100vh;
+    width: 260px; /* Fixed width */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.05); /* Subtle shadow */
+    transition: transform 0.3s ease-in-out;
+    flex-shrink: 0; /* Prevent shrinking */
+    z-index: 1000;
+}
+
+/* Sidebar Header */
+#top {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 15px;
+    margin-bottom: 30px;
+    gap: 12px;
+}
+
+#top img {
+    width: 35px;
+    height: auto;
+}
+
+#sidebar-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+    color: #333;
+    line-height: 1.2;
+}
+
+/* Navigation Buttons */
+.buttonDiv {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 12px 15px; /* More padding */
+    border-radius: 8px; /* Rounded corners */
+    margin-bottom: 8px;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #555;
+    text-decoration: none; /* Ensure no underline */
+}
+
+a.buttonDiv {
+    text-decoration: none;
+    color: #555;
+}
+
+.buttonDiv:hover {
+    background-color: #f3e9dc; /* Lighter hover color matching brand */
+    color: #000;
+    transform: translateX(3px); /* Micro-interaction */
+}
+
+.buttonDiv.active {
+    background-color: #d0b28c;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 4px 6px rgba(208, 178, 140, 0.4);
+}
+
+.icons {
+    width: 20px; /* Consistent icon size */
+    height: 20px;
+    object-fit: contain;
+}
+
+.label {
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* Logout Button */
+#logout {
+    margin-top: auto;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+}
+
+/* Hamburger Menu (Mobile) */
+.hamburger {
+    display: none; /* Hidden by default */
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 30px;
+    height: 30px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 20px; /* Space below hamburger */
+}
+
+.hamburger span {
+    display: block;
+    height: 3px;
+    width: 100%;
+    background-color: #333;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+/* Title Content (Top of Pages) */
+.title-content {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 25px;
+    flex-wrap: wrap; 
+}
+
+.title {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.btns {
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    aside#navBar {
+        width: 220px;
+    }
+}
+
+@media (max-width: 768px) {
+    aside#navBar {
+        position: fixed;
+        left: 0;
+        transform: translateX(-100%); /* Hide off-screen with transform */
+        background-color: #fff;
+        height: 100vh;
+        width: 260px; /* Ensure width is kept */
     }
 
-    #pageContent{
-      flex: 1;
-      padding: 20px;
-    }
-
-    aside {
-      background-color: #fefefe;
-      height: 100vh;
-      width: fit-content;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      transition: transform 0.3s ease-in-out;
-    }
-
-    .labelDiv {
-      display: flex;
-      flex-direction: row;
-    }
-
-    .icons {
-      width: 30px;
-      padding: 5px;
-    }
-
-    a {
-      text-decoration: none;
-      color: black;
-
-    }
-
-    .buttonDiv {
-      align-items: center;
-    }
-
-    #top,
-    .buttonDiv {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      padding: 5px;
-      border-radius: 10px;
-      margin-bottom: 3px;
-      gap: 5px;
-    }
-
-    .buttonDiv:hover {
-      background-color: #e1d0b9ff;
-    }
-
-    .buttonDiv.active {
-      background-color: #d0b28c;
-      font-weight: 1000 !important;
-
-    }
-
-    .label {
-      font-size: 1.2rem;
-      margin: 0;
-    }
-
-    #logout {
-      margin-top: auto;
-    }
-
-    #sidebar-title{
-      font-size:1.4rem;
-      margin:0;
-    }
-
-    @media (max-width: 700px) {
-        aside{
-            display: none;
-        }
-    }
-
-    @media (max-width: 460px) {
-        aside{
-            display: none;
-            height: 100vh;
-        }
-
-        .label {
-      font-size: 1rem;
-    }
-    #sidebar-title{
-      font-size:1.2rem;
-      margin:0;
-    }
-    }
-
-    @media (max-width: 375px){
-      #sidebar-title{
-      font-size:.8rem;
-      margin:0;
-    }
-    aside{
-            display: none;
-            height: 100vh;
-        }
-    }
-
-    /* para sa top part to ng page content */
-   .title-content {
-        display: flex;
-        flex-direction: row;
-        gap: 10px;
-        height: fit-content;
-        align-items: center;
-        justify-content: space-between;
+    aside#navBar.open {
+        transform: translateX(0); /* Slide in */
+        box-shadow: 5px 0 15px rgba(0,0,0,0.1);
     }
 
     .hamburger {
         display: flex;
-        flex-direction: column;
-        justify-content: center;
-        gap: 4px;
-        width: 28px;
-        height: 24px;
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: 0;
-
     }
-
-    .hamburger span {
-        display: block;
-        height: 3px;
-        width: 100%;
-        background-color: #1a353c;
-        border-radius: 3px;
-        transition: all 0.3s ease;
+    
+    #pageContent {
+        padding: 15px;
     }
+}
 
-    .hamburger {
-        display: none;
-    }
-
-    .title {
-        margin-bottom: 0;
+@media (max-width: 480px) {
+     .title {
         font-size: 1.5rem;
-        font-weight: 700;
     }
-
-    @media (max-width: 700px) {
-        .hamburger {
-            display: flex;
-        }
-    }
-
-    .btns {
-        width: fit-content;
-        padding: 5px 20px;
-    }
-
-    .title-div {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 10px;
-    }
-
-    @media (max-width: 425px) {
-
-        .title,
-        .btns {
-            font-size: 1rem;
-        }
-
-        .btns {
-            font-size: .7rem !important;
-        }
-
-    }
-
-    @media (max-width: 330px) {
-
-        .title,
-        .btns {
-            font-size: 1rem !important;
-        }
-
-        .btns {
-            font-size: .5rem !important;
-        }
-
-    }
+}

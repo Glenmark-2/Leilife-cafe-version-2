@@ -1,93 +1,151 @@
-    #search-input {
-        flex: 1;
-        padding: 0 12px;
-        border-radius: 8px;
-        border: 1px solid #ccc;
-        outline: none;
-        transition: border-color 0.2s, box-shadow 0.2s;
-        height: 42px;
-        line-height: 42px;
-        box-sizing: border-box;
-        width: 90%;
-        min-height: 20%;
-    }
+/* Inbox Styles */
 
-    #search-input:focus {
-        box-shadow: 0 0 0 2px rgba(80, 194, 86, 0.2);
-    }
-    #search_add>div {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        height: 42px;
-        flex-shrink: 0;
-        box-sizing: border-box;
-    }
+/* Header Area */
+.title-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
 
-    #search_add {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 12px;
-        width: 100%;
-        margin: 10px 0;
-    }
+.title-div {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
 
-    #search_add form {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        flex: 1;
-        min-width: 220px;
-        height: 42px;
-        box-sizing: border-box;
-    }
+.title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    color: #2c3e50;
+}
 
-    #search_add label {
-        font-weight: 600;
-        color: #333;
-        white-space: nowrap;
-        display: flex;
-        align-items: center;
-        height: 100%;
-        box-sizing: border-box;
-    }
+.btns {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+}
 
-    #sortInbox{
-        background-color: transparent;
-        color: #000301;
-    }
+/* Search and Filters */
+#search_add {
+    background: #fff;
+    padding: 15px 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
 
-    table {
-        width: 100%;
-    }
+#search_add form.search-bar {
+    flex: 1;
+    max-width: 400px;
+    display: flex;
+}
 
-    .table-wrapper {
-        padding: 10px;
-        border-radius: 10px;
-        background-color: white;
+#search-input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+}
 
-    }
+#search-input:focus {
+    border-color: #d0b28c;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(208, 178, 140, 0.2);
+}
 
-    th {
-        font-size: 1rem;
-        padding: 10px;
-        border-bottom: 1px solid gray;
-    }
+#sortInbox {
+    background-color: #f8f9fa;
+    color: #333;
+    border: 1px solid #ddd;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
 
-    td {
-        padding: 10px;
-    }
+#sortInbox:hover {
+    background-color: #e9ecef;
+}
 
-    .archive-icon,
-    .edit-icon {
-        width: 30px;
-        height: 30px;
-    }
+/* Table Design */
+.table-container {
+    width: 100%;
+}
 
-    .archive-btn,
-    .edit-btn {
-        background-color: transparent;
-        border: none;
-    }
+.table-wrapper {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    overflow: hidden;
+    padding: 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 700px;
+}
+
+thead {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #eee;
+}
+
+th {
+    padding: 16px;
+    text-align: left;
+    font-weight: 600;
+    color: #555;
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+}
+
+td {
+    padding: 16px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #333;
+    font-size: 0.95rem;
+    vertical-align: middle;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover {
+    background-color: #fafafa;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.edit-btn, .archive-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    transition: transform 0.2s;
+    opacity: 0.8;
+}
+
+.edit-btn:hover, .archive-btn:hover {
+    transform: scale(1.1);
+    opacity: 1;
+}
+
+.edit-icon, .archive-icon {
+    width: 20px;
+    height: 20px;
+}

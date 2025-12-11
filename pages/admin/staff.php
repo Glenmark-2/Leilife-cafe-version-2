@@ -38,8 +38,8 @@
                     <td>Day</td>
                     <td>Available</td>
                     <td>
-                        <button title="edit" type="button" class="edit-btn"><img src="__DIR_ ./../../public/assets/pencil.png" class="edit-icon"></button>
-                        <button title="archive" type="button" class="archive-btn"><img src="__DIR_ ./../../public/assets/archive.png" class="archive-icon"></button>
+                        <button title="edit" type="button" class="edit-btn"><img src="../public/assets/pencil.png" class="edit-icon"></button>
+                        <button title="archive" type="button" class="archive-btn"><img src="../public/assets/archive.png" class="archive-icon"></button>
                     </td>
                 </tr>
             </tbody>
