@@ -14,11 +14,23 @@ function sidebarButton($imagePath, $title, $page)
     //     </a>
     // </div>
     // ";
+    // Get current page from URL query parameter
+    $currentPage = $_GET['page'] ?? 'dashboard';
+    
+    // Extract target page from href (e.g., "admin.php?page=staff" -> "staff")
+    $targetPage = 'dashboard'; // default
+    if (strpos($page, 'page=') !== false) {
+        $parts = explode('page=', $page);
+        $targetPage = $parts[1];
+    } else if ($page === '#' || $page === '') {
+        $targetPage = 'none';
+    }
+
+    $activeClass = ($currentPage === $targetPage) ? 'active' : '';
+
     echo "
-    <a href='$page'>
-      <div class='buttonDiv'>
+    <a href='$page' class='buttonDiv $activeClass'>
         <img src='$imagePath' id='logo' class='icons'>
-        <p class='label' >$title</p>
-      </div>
+        <p class='label'>$title</p>
     </a>";
 }

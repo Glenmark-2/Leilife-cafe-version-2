@@ -10,7 +10,9 @@ return [
     ],
     'inbox' => [
         '../css/admin/inbox.css',
-        
+    ],
+    'reviews' => [
+        '../css/admin/reviews.css', 
     ],
 
 ];
