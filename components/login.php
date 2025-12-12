@@ -34,14 +34,15 @@
                    data-auto_prompt="false">
               </div>
 
-              <div class="g_id_signin"
-                   data-type="standard"
-                   data-shape="rectangular"
-                   data-theme="outline"
-                   data-text="continue_with"
-                   data-size="large"
-                   data-logo_alignment="left"
-                   data-width="100%">
+              <div class="d-flex justify-content-center w-100">
+                  <div class="g_id_signin"
+                       data-type="standard"
+                       data-shape="rectangular"
+                       data-theme="outline"
+                       data-text="signin_with"
+                       data-size="large"
+                       data-logo_alignment="left">
+                  </div>
               </div>
             </form>
 

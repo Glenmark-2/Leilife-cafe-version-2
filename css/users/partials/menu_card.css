@@ -1,46 +1,82 @@
 .card-box {
-        width: 180px;
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
-        font-family: Arial, sans-serif;
-        background: #DBD8BA;
-        margin: 2.5px;
-        display: inline-block;
-        vertical-align: top;
-    }
+    width: 100%; 
+    max-width: 250px; /* Slightly larger max constraint */
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Softer shadow */
+    font-family: 'Lato', sans-serif; 
+    background: #DBD8BA;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    /* transition: transform 0.2s; Handled in generic card class, but good to have safety */
+    height: 100%; /* Fill grid height */
+}
 
-    .product-image {
-        width: 100%;
-        height: 150px;
-        object-fit: cover;
-    }
+.product-image {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4/3; /* Maintain consistent rectangular shape */
+    object-fit: cover; /* Fill the shape without stretching */
+    display: block;
+}
 
-    #price-div {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
+div[style="padding: 8px;"] {
+    padding: 12px !important;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Allow text area to fill remaining space */
+    justify-content: space-between;
+    gap: 8px;
+}
 
-    #price-div p {
-        font-size: 13px;
-        font-weight: bold;
-        margin: 0;
-        color: #ff8b18;
-    }
+.card-box p {
+    margin: 0;
+    font-weight: 700;
+    color: #333;
+    /* Responsive font size */
+    font-size: clamp(0.9rem, 2.5vw, 1rem); 
+    line-height: 1.2;
+}
 
-    .buyBtn {
-        background: #2c3e50;
-        color: #fff;
-        border: none;
-        padding: 4px 10px;
-        border-radius: 16px;
-        cursor: pointer;
-        font-size: 12px;
-        transition: background 0.3s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0;
+#price-div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: auto; 
+}
 
+#price-div p {
+    font-size: clamp(0.9rem, 2.5vw, 1.05rem);
+    font-weight: 800;
+    color: #ff8b18;
+}
+
+.buyBtn {
+    background: #2c3e50;
+    color: #fff;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.buyBtn:hover {
+    background: #1a252f;
+}
+
+/* Mobile optimizations */
+@media (max-width: 576px) {
+    .card-box {
+        max-width: none; /* Let grid control width on mobile */
     }
+    div[style="padding: 8px;"] {
+        padding: 10px !important;
+        gap: 6px;
+    }
+}

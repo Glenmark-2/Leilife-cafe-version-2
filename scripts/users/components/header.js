@@ -39,6 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
     e.preventDefault();
     cartModal.classList.toggle("d-none");
     cartModal.classList.toggle("d-flex");
+    document.body.classList.toggle("cart-open");
   }
 
   if (cartBtn) cartBtn.addEventListener("click", toggleCart);
@@ -51,6 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
       mobileCartBtn && !mobileCartBtn.contains(e.target)) {
       cartModal.classList.add("d-none");
       cartModal.classList.remove("d-flex");
+      document.body.classList.remove("cart-open");
     }
   });
 
