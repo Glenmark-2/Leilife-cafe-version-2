@@ -1,32 +1,173 @@
+/* Scoped styles for menu page */
+#menu-body {
+    /* Using bootstrap container now, so no custom padding needed, or minimal */
+    padding-bottom: 50px;
+}
+
+/* Extra margin/padding for desktop to center content more narrowly */
+/* Extra margin/padding for desktop to center content more narrowly */
+@media (min-width: 1200px) {
     #menu-body {
-        padding: 20px 200px;
+        padding-left: 5rem;
+        padding-right: 5rem;
+    }
+}
+@media (min-width: 1400px) {
+    #menu-body {
+        padding-left: 10rem;
+        padding-right: 10rem;
+    }
+}
+
+.product-card {
+    transition: transform 0.2s;
+    border-radius: 15px; /* Softer edges */
+    overflow: hidden;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+}
+
+.main-cat-btn {
+    min-width: 120px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+}
+
+/* Custom Primary Button override/adaptation */
+.btn-primary-custom {
+    background-color: #5d4f3f;
+    color: #fff;
+    border: none;
+    transition: background-color 0.2s;
+}
+
+
+.btn-primary-custom:hover {
+    background-color: #4a3e32;
+    color: #fff;
+}
+
+/* Responsive adjustments for menu specific elements */
+@media (max-width: 576px) {
+    #menu-body {
+        padding-bottom: 30px;
+    }
+    
+    .main-cat-btn {
+        min-width: 80px; 
+    }
+}
+
+/* Mobile Category Scroll Container */
+.mobile-cat-scroll {
+    -webkit-overflow-scrolling: touch; 
+    scrollbar-width: none; /* Hide scrollbar Firefox */
+    
+    /* Sticky Positioning */
+    position: sticky;
+    /* top is set via JS to match header height dynamically */
+    top: 70px; 
+    z-index: 99; /* Below header (usually 1020-1030 in bootstrap) but above content */
+    
+    /* Transition for background appearance */
+    transition: background-color 0.3s ease, margin 0.3s ease, padding 0.3s ease, box-shadow 0.3s ease;
+    
+    /* Default state (Unstuck): Transparent, no extra padding/margin tricks */
+    background: transparent;
+    padding: 5px 0;
+    margin: 0 0 20px 0;
+}
+
+/* Stuck State: Themed Background */
+.mobile-cat-scroll.is-stuck {
+    background: rgba(255, 255, 255, 0.95); /* or use your theme color e.g. #FDFBF0 */
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    
+    /* Stretch to full width of container to look like a bar */
+    margin-left: -12px; 
+    margin-right: -12px;
+    padding-left: 12px; 
+    padding-right: 12px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.mobile-cat-scroll::-webkit-scrollbar {
+    display: none; /* Hide scrollbar Chrome/Safari */
+}
+
+/* Mobile Category Pills */
+.main-cat-mobile {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #5d4f3f;
+    color: #5d4f3f;
+    border-radius: 50px; 
+    padding: 8px 18px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    /* initial shadow */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+/* When stuck, pills can be a bit more subtle if measuring against a white background */
+.mobile-cat-scroll.is-stuck .main-cat-mobile {
+    background-color: #fff; /* Solid white against the blurred bar */
+}
+
+.main-cat-mobile.active {
+    background-color: #5d4f3f !important; /* Force override */
+    color: #fff;
+    transform: scale(1.05); 
+    box-shadow: 0 4px 10px rgba(93, 79, 63, 0.4);
+}
+
+/* Cart Sidebar Animation: Push content aside */
+/* Cart Sidebar Animation: Push content aside */
+@media (min-width: 992px) {
+    #menu-body {
+        transition: max-width 0.3s ease, margin-right 0.3s ease, padding 0.3s ease;
     }
 
-    #mainCat,
-    #subCat {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-bottom: 10px;
+    body.cart-open #menu-body {
+        /* Force container to shrink and move left to accommodate fixed cart */
+        max-width: calc(100% - 370px) !important; 
+        margin-right: 350px !important; 
+        margin-left: auto;
+        
+        /* Reduce padding to give space back to cards */
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
     }
+    
+    /* Override Grid Columns when sidebar shrinks container width */
+    /* Standard lg-5 (20%) becomes too small, force 3 or 4 columns */
+    
+    /* For standard laptops when cart is open (simulated width < 1200px) */
+    body.cart-open #menu-content .row-cols-lg-5 > * {
+        flex: 0 0 auto;
+        width: 33.3333%; /* Force 3 columns */
+    }
+}
 
-    .main-categories {
-        background-color: transparent;
-        color: #5d4f3f;
+@media (min-width: 1300px) {
+    /* Large desktops with cart open: fit 4 columns */
+    body.cart-open #menu-content .row-cols-lg-5 > * {
+        width: 25%; 
     }
+}
 
-    .main-categories.active {
-        background-color: #5d4f3f ;
-        color: #ddd8ba;
+@media (min-width: 1600px) {
+    /* Extra large screens with cart open: fit 5 columns again */
+    body.cart-open #menu-content .row-cols-lg-5 > * {
+        width: 20%; 
     }
-
-    .sub-categories {
-        background-color: transparent;
-        color: #5d4f3f;
-        height: 35px;
-    }
-
-    .sub-categories.active {
-        background-color: #5d4f3f;
-        color: #ddd8ba;
-    }
+}

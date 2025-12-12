@@ -54,7 +54,7 @@
               require_once __DIR__ . '/../backend/helpers/SessionManager.php';
               if (SessionManager::isLoggedIn()): 
               ?>
-                  <span class="me-2 text-dark">Welcome, <?php echo htmlspecialchars(SessionManager::get('user_name')); ?></span>
+                                <a class="btn btn-text" href="index.php?page=profile">Profile</a>
                   <a class="btn btn-text" href="/Leilife_2nd/backend/api/logout_user.php">Logout</a>
               <?php else: ?>
                   <a class="btn btn-text" href="#" id="webLogin">Login</a>
@@ -77,7 +77,7 @@
           <a class="btn btn-text" href="index.php?page=home#contact-us">Contact</a>
           <hr style="width: 80%; border-top: 1px solid #cccccc; margin: 0.5rem auto;">
           <?php if (SessionManager::isLoggedIn()): ?>
-              <span class="btn btn-text">Welcome, <?php echo htmlspecialchars(SessionManager::get('user_name')); ?></span>
+              <a class="btn btn-text" href="index.php?page=profile">Profile</a>
               <a class="btn btn-text" href="/Leilife_2nd/backend/api/logout_user.php">Logout</a>
           <?php else: ?>
               <a class="btn btn-text" href="#" id="mobileLogin">Login</a>
