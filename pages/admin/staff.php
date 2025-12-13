@@ -24,22 +24,29 @@
         <table>
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Position</th>
-                    <th>Shift</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th class="nameCol">Name</th>
+                    <th class="posCol">Position</th>
+                    <th class="shiftCol">Shift</th>
+                    <th class="statCol">Status</th>
+                    <th class="actionCol">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>Ellie</td>
-                    <td>Manager</td>
-                    <td>Day</td>
-                    <td>Available</td>
-                    <td>
-                        <button title="edit" type="button" class="edit-btn"><img src="../public/assets/pencil.png" class="edit-icon"></button>
-                        <button title="archive" type="button" class="archive-btn"><img src="../public/assets/archive.png" class="archive-icon"></button>
+                    <td class="nameCol">
+                        <div class="staffNameDiv">
+                            <img src="__DIR__./../../public/assets/cheesy_bacon_&_egg.jpeg" alt="" class="staffPhoto">
+                            <p>Ellie</p>
+                        </div>
+                    </td>
+                    <td class="posCol">Manager</td>
+                    <td class="shiftCol">Day</td>
+                    <td class="statCol">Available</td>
+                    <td class="actionCol">
+                        <div class="action-header-buttons">
+                            <button title="edit" type="button" class="edit-btn"><img src="../public/assets/pencil.png" class="edit-icon"></button>
+                            <button title="archive" type="button" class="archive-btn"><img src="../public/assets/archive.png" class="archive-icon"></button>
+                        </div>
                     </td>
                 </tr>
             </tbody>

@@ -178,3 +178,53 @@ tr:hover {
         overflow-x: auto;
     }
 }
+
+.action-header-buttons{
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+}
+.nameCol{
+    width: 30%;
+}
+.posCol{
+    width: 15%;
+}
+.shiftCol{
+    width: 10%;
+
+}
+.statCol{
+    width: 15%;
+
+}
+.actionCol{
+    width: 10%;
+    text-align: center;
+}
+
+    .staffPhoto {
+        width: 50px;
+        height: 50px;
+    }
+
+    td {
+        padding: 16px;
+        border-bottom: 1px solid #f0f0f0;
+        color: #333;
+        font-size: 0.95rem;
+        vertical-align: middle;
+    }
+
+
+    .staffNameDiv {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .staffNameDiv p {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
