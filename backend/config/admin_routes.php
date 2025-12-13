@@ -6,5 +6,6 @@ return [
     'reviews' => __DIR__ . '/../../pages/admin/reviews.php',
     'products' => __DIR__ . '/../../pages/admin/products.php',
     'sales' => __DIR__ . '/../../pages/admin/sales.php',
+    'analytics' => __DIR__ . '/../../pages/admin/analytics.php',
     
 ];
