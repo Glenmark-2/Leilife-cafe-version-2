@@ -15,3 +15,4 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Optional: Create a default admin user (password: admin123)
 -- INSERT INTO users (first_name, last_name, email, password, role) VALUES ('Admin', 'User', 'admin@leilife.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin');
+-- done nobi
