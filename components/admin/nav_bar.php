@@ -37,7 +37,7 @@
     echo sidebarButton("../public/assets/messages.png", "Inbox", "admin.php?page=inbox");
     echo sidebarButton("../public/assets/leilife.png", "Reviews", "admin.php?page=reviews");
     echo sidebarButton("../public/assets/sales.png", "Sales", "admin.php?page=sales");
-    echo sidebarButton("../public/assets/analytics.png", "Analytics", "#");
+    echo sidebarButton("../public/assets/analytics.png", "Analytics", "admin.php?page=analytics");
     echo sidebarButton("../public/assets/settings.png", "Settings", "#");
 
     ?>
