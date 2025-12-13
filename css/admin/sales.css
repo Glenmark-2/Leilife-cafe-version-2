@@ -1,0 +1,113 @@
+    .filters {
+        background: #fff;
+        padding: 15px 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        margin-bottom: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    #statusFilter,
+    #paymentFilter,
+    #fromDate,
+    #toDate {
+        background-color: #f8f9fa;
+        color: #333;
+        border: 1px solid #ddd;
+        padding: 10px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .btn-primary-custom {
+        background-color: #d0b28c;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    .btn-primary-custom:hover {
+        background-color: #c4a076;
+    }
+
+
+    .table-container {
+        width: 100%;
+    }
+
+    .table-wrapper {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        padding: 0;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 700px;
+    }
+
+    thead {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #eee;
+    }
+
+    th {
+        padding: 16px;
+        text-align: left;
+        font-weight: 600;
+        color: #555;
+        font-size: 0.95rem;
+        letter-spacing: 0.5px;
+    }
+
+    td {
+        padding: 16px;
+        border-bottom: 1px solid #f0f0f0;
+        color: #333;
+        font-size: 0.95rem;
+        vertical-align: middle;
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    tr:hover {
+        background-color: #fafafa;
+    }
+
+    .oIDCol{
+        width: 25%;
+    }
+
+    .nameCol{
+        width: 20%;
+    }
+
+    .totalCol{
+        width: 10%;
+    }
+
+    .statusCol{
+        width: 15%;
+    }
+
+    .paymentCol{
+        width: 15%;
+    }
+
+    .dateCol{
+        width: 20%;
+    }

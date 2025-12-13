@@ -17,5 +17,8 @@ return [
     'products' => [
         '../css/admin/products.css', 
     ],
+    'sales' => [
+        '../css/admin/sales.css', 
+    ],
 
 ];
