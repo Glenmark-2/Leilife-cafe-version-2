@@ -9,3 +9,5 @@ CREATE TABLE IF NOT EXISTS user_registrations (
     token_expires_at DATETIME NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- done nobi
