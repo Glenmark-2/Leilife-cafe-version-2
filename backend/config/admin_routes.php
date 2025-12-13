@@ -4,4 +4,6 @@ return [
     'staff' => __DIR__ . '/../../pages/admin/staff.php',
     'inbox' => __DIR__ . '/../../pages/admin/inbox.php',
     'reviews' => __DIR__ . '/../../pages/admin/reviews.php',
+    'products' => __DIR__ . '/../../pages/admin/products.php',
+    
 ];

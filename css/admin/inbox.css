@@ -149,3 +149,42 @@ tr:hover {
     width: 20px;
     height: 20px;
 }
+
+.btn-primary-custom {
+    background-color: #d0b28c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-primary-custom:hover {
+    background-color: #c4a076;
+}
+
+.action-header-buttons{
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+}
+.nameCol{
+    width: 20%;
+}
+.emailCol{
+    width: 25%;
+}
+.subCol{
+    width: 25%;
+
+}
+.dateCol{
+    width: 20%;
+
+}
+.actionCol{
+    width: 10%;
+    text-align: center;
+}

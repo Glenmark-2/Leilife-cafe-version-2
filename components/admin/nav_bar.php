@@ -32,7 +32,7 @@
 
     <?php include "sidebar_button.php";
     echo sidebarButton("../public/assets/home.png", "Dashboard", "admin.php?page=dashboard");
-    echo sidebarButton("../public/assets/fast-food.png", "Products", "#");
+    echo sidebarButton("../public/assets/fast-food.png", "Products", "admin.php?page=products");
     echo sidebarButton("../public/assets/people.png", "Staffs", "admin.php?page=staff");
     echo sidebarButton("../public/assets/messages.png", "Inbox", "admin.php?page=inbox");
     echo sidebarButton("../public/assets/leilife.png", "Reviews", "admin.php?page=reviews");
