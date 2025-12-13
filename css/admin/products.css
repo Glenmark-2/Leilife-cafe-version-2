@@ -1,17 +1,3 @@
-    .btn-outline-primary {
-        border: 1px solid burlywood;
-        color: #b0974cff;
-    }
-
-    .btn-outline-primary:hover {
-        background-color: burlywood;
-        border: 1px solid burlywood;
-        color: white;
-    }
-
-    .btn-outline-primary:active {
-        background-color: burlywood;
-    }
 
     .table-container {
         width: 100%;
