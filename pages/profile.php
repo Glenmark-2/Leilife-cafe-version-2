@@ -1,3 +1,21 @@
+<?php
+require_once __DIR__ . '/../backend/helpers/SessionManager.php';
+require_once __DIR__ . '/../backend/config/Database.php';
+require_once __DIR__ . '/../backend/repositories/UserRepository.php';
+
+SessionManager::requireLogin();
+$userId = SessionManager::get('user_id');
+
+$db = (new Database())->getConnection();
+$userRepo = new UserRepository($db);
+$user = $userRepo->findById($userId);
+
+if (!$user) {
+    // Handle case where user is not found (shouldn't happen if logged in properly)
+    echo "User not found.";
+    exit;
+}
+?>
 <div id="body">
     <div id="sideTabs">
         <div id="imgDiv">
@@ -18,26 +36,26 @@
             <div class="box-input">
                 <div class="info">
                     <p class="label">First Name</p>
-                    <p class="display-value">Leilife</p>
-                    <input class="edit-input" type="text" name="first_name" value="" style="display:none;">
+                    <p class="display-value"><?php echo htmlspecialchars($user->first_name); ?></p>
+                    <input class="edit-input" type="text" name="first_name" value="<?php echo htmlspecialchars($user->first_name); ?>" style="display:none;">
                 </div>
 
                 <div class="info">
                     <p class="label">Last Name</p>
-                    <p class="display-value">Cafe</p>
-                    <input class="edit-input" type="text" name="last_name" value="" style="display:none;">
+                    <p class="display-value"><?php echo htmlspecialchars($user->last_name); ?></p>
+                    <input class="edit-input" type="text" name="last_name" value="<?php echo htmlspecialchars($user->last_name); ?>" style="display:none;">
                 </div>
 
                 <div class="info">
                     <p class="label">Phone Number</p>
-                    <p class="display-value">0912345678</p>
-                    <input class="edit-input" type="tel" name="phone_number" value="" style="display:none;">
+                    <p class="display-value"><?php echo htmlspecialchars($user->phone_number); ?></p>
+                    <input class="edit-input" type="tel" name="phone_number" value="<?php echo htmlspecialchars($user->phone_number); ?>" style="display:none;">
                 </div>
 
                 <div class="info">
                     <p class="label">Email</p>
-                    <p class="display-value">leilife.test@gmail.com</p>
-                    <input class="edit-input" type="text" name="email" value="" style="display:none;">
+                    <p class="display-value"><?php echo htmlspecialchars($user->email); ?></p>
+                    <input class="edit-input" type="text" name="email" value="<?php echo htmlspecialchars($user->email); ?>" style="display:none;">
                 </div>
             </div>
         </div>

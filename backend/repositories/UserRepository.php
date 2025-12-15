@@ -10,6 +10,20 @@ class UserRepository {
         $this->conn = $db;
     }
 
+    // Implement this method to find a user by ID
+    public function findById($id) {
+        $query = "SELECT * FROM users WHERE id = :id LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":id", $id);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return new User($row);
+        }
+        return null;
+    }
+
     // TODO: Implement this method to insert a new user into the database
     // Implement this method to insert a new user into the database
     public function create(User $user) {
