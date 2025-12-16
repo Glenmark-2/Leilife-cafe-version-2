@@ -9,12 +9,13 @@
     right: 0;
     width: 350px;
     max-width: 500px;
-    height: 90vh;
+    height: calc(100vh - 87px); /* Full available height */
     background: #f5f5f5;
-    overflow-y: auto;
     padding: 0;
     z-index: 2000;
     box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+    display: flex; /* Flexbox for layout */
+    flex-direction: column;
 }
     .pickup-box {
         background: #fff;
@@ -29,24 +30,40 @@
         margin-top: 20px;
     }
 
+    /* Cart Item Container inside Modal */
+    #cart-items-container {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding-bottom: 20px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
     .cart-item {
         width: 90%;
         max-width: 420px;
         display: flex;
-        align-items: start;
-        justify-content: space-between;
+        align-items: start; /* Center Vertically */
+        /* justify-content: space-between; */
         /* padding: 12px 5px; */
         border-bottom: 1px solid #eee;
         font-size: 15px;
+        flex-shrink: 0; /* Prevent shrinking */
+        min-height: auto;
+        margin-bottom: 10px;
     }
 
     .totals-box {
         width: 100%;
         background: #b4ad86;
         padding: 18px;
-        /* margin-top: 40px; */
+        /* margin-top: auto; Handled by flex-grow above, but good for safety */
         color: #000;
         font-size: 16px;
+        flex-shrink: 0; /* Dont shrink */
     }
 
     .checkout-btn {
@@ -77,9 +94,7 @@
         .btn-primary-custom-cart:active {
         color: white;
     }
-    .cart-item{
-        height: 100%;
-    }
+
     .totals-box button {
     display: block;
     margin: 12px auto 0 auto; /* centers just the button */
@@ -100,9 +115,11 @@
         background: #ffffff;
         border-top-left-radius: 24px;
         border-top-right-radius: 24px;
-        overflow-y: auto;
+        /* overflow-y: auto;  REMOVED because flex container handles scroll */
         box-shadow: 0px -4px 12px rgba(0,0,0,0.18);
         animation: slideUp 0.35s ease-out;
+        display: flex;
+        flex-direction: column;
     }
 
     /* smooth slide-up animation */
