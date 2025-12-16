@@ -1,44 +1,17 @@
 <!-- Menu Page -->
 <?php
-// Mock Data Structure
-$menuData = [
-    'Meals' => [
-        'Rice Meals' => [
-            ['name' => 'Pork Chao Fan', 'price' => 99.00, 'image' => '../public/assets/cheesy_bacon_&_egg.jpeg'],
-            ['name' => 'Beef Chao Fan', 'price' => 109.00, 'image' => '../public/assets/cheesy_bacon_&_egg.jpeg'],
-            ['name' => 'Chicken Teriyaki', 'price' => 129.00, 'image' => '../public/assets/cheesy_bacon_&_egg.jpeg'],
-            ['name' => 'Pork Sisig', 'price' => 119.00, 'image' => '../public/assets/cheesy_bacon_&_egg.jpeg'],
-            ['name' => 'Chicken Adobo', 'price' => 115.00, 'image' => '../public/assets/cheesy_bacon_&_egg.jpeg'],
-            ['name' => 'Beef Steak', 'price' => 135.00, 'image' => '../public/assets/cheesy_bacon_&_egg.jpeg'],
-        ],
-        'Pasta' => [
-            ['name' => 'Creamy Carbonara', 'price' => 149.00, 'image' => '../public/assets/cheesy_bacon_&_egg.jpeg'],
-            ['name' => 'Spaghetti Bolognese', 'price' => 139.00, 'image' => '../public/assets/cheesy_bacon_&_egg.jpeg'],
-            ['name' => 'Tuna Pesto', 'price' => 145.00, 'image' => '../public/assets/cheesy_bacon_&_egg.jpeg'],
-        ]
-    ],
-    'Drinks' => [
-        'Coffee' => [
-            ['name' => 'Iced Americano', 'price' => 85.00, 'image' => '../public/assets/cheesy_bacon_&_egg.jpeg'],
-            ['name' => 'Caramel Macchiato', 'price' => 110.00, 'image' => '../public/assets/cheesy_bacon_&_egg.jpeg'],
-            ['name' => 'Vanilla Latte', 'price' => 105.00, 'image' => '../public/assets/cheesy_bacon_&_egg.jpeg'],
-            ['name' => 'Cappuccino', 'price' => 95.00, 'image' => '../public/assets/cheesy_bacon_&_egg.jpeg'],
-            ['name' => 'Espresso', 'price' => 75.00, 'image' => '../public/assets/cheesy_bacon_&_egg.jpeg'],
-        ],
-        'Refreshers' => [
-            ['name' => 'Lemonade', 'price' => 70.00, 'image' => '../public/assets/cheesy_bacon_&_egg.jpeg'],
-            ['name' => 'Cucumber Lemon', 'price' => 75.00, 'image' => '../public/assets/cheesy_bacon_&_egg.jpeg'],
-            ['name' => 'Blue Lemonade', 'price' => 75.00, 'image' => '../public/assets/cheesy_bacon_&_egg.jpeg'],
-        ]
-    ],
-    'Featured' => [
-        'Best Sellers' => [
-            ['name' => 'Leilife Special Burger', 'price' => 189.00, 'image' => '../public/assets/cheesy_bacon_&_egg.jpeg'],
-            ['name' => 'Clubhouse Sandwich', 'price' => 160.00, 'image' => '../public/assets/cheesy_bacon_&_egg.jpeg'],
-            ['name' => 'Signature Milk Tea', 'price' => 100.00, 'image' => '../public/assets/cheesy_bacon_&_egg.jpeg'],
-        ]
-    ]
-];
+require_once __DIR__ . '/../backend/services/ProductService.php';
+
+$productService = new ProductService();
+$menuData = $productService->getMenuStructure();
+
+// Fallback if empty (optional, but good for stability if DB is empty)
+if (empty($menuData)) {
+    $menuData = []; 
+}
+
+// Determine the first category to show by default
+$firstCategory = array_key_first($menuData);
 ?>
 
 <div id="menu-body" class="container my-4">
@@ -46,7 +19,7 @@ $menuData = [
     <div class="d-none d-sm-flex justify-content-start gap-3 mb-5 border-bottom pb-3">
         <?php foreach (array_keys($menuData) as $category): ?>
             <button type="button" 
-                    class="btn btn-primary-custom main-cat-desktop <?php echo $category === 'Meals' ? 'active' : ''; ?>" 
+                    class="btn btn-primary-custom main-cat-desktop <?php echo $category === $firstCategory ? 'active' : ''; ?>" 
                     onclick="switchCategory('<?php echo $category; ?>')">
                 <?php echo $category; ?>
             </button>
@@ -60,7 +33,7 @@ $menuData = [
     <div id="mobileNav" class="d-flex d-sm-none overflow-auto pb-3 mb-4 mobile-cat-scroll" style="white-space: nowrap;">
         <?php foreach (array_keys($menuData) as $category): ?>
             <button type="button" 
-                    class="btn btn-sm main-cat-mobile me-2 <?php echo $category === 'Meals' ? 'active' : ''; ?>" 
+                    class="btn btn-sm main-cat-mobile me-2 <?php echo $category === $firstCategory ? 'active' : ''; ?>" 
                     onclick="switchCategory('<?php echo $category; ?>')">
                 <?php echo $category; ?>
             </button>
@@ -75,6 +48,7 @@ $menuData = [
 
 <script>
     const menuData = <?php echo json_encode($menuData); ?>;
+    const initialCategory = <?php echo json_encode($firstCategory); ?>;
 
     /**
      * Renders a single product card HTML using the structure from partials/menu_card.php
@@ -105,8 +79,9 @@ $menuData = [
         const container = document.getElementById('menu-content');
         container.innerHTML = ''; // Clear current content
 
+        if (!menuData || !menuData[categoryName]) return;
+
         const subCategories = menuData[categoryName];
-        if (!subCategories) return;
 
         // Loop deeply to maintain order
         Object.entries(subCategories).forEach(([subCatName, products]) => {
@@ -164,7 +139,9 @@ $menuData = [
 
     // Initialize Default
     document.addEventListener('DOMContentLoaded', () => {
-        switchCategory('Meals');
+        if (initialCategory) {
+            switchCategory(initialCategory);
+        }
 
         // Sticky Mobile Header Logic
         const mobileNav = document.getElementById('mobileNav');
@@ -195,4 +172,3 @@ $menuData = [
         }
     });
 </script>
-

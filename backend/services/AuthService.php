@@ -1,5 +1,6 @@
 <?php
 
+require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../repositories/UserRepository.php';
 
 class AuthService {
@@ -134,27 +135,17 @@ class AuthService {
     }
 
     public function loginWithGoogle($idToken) {
-        // Validate Token with Google API (No external library required)
-        $url = "https://oauth2.googleapis.com/tokeninfo?id_token=" . $idToken;
-        $response = file_get_contents($url);
-        
-        if ($response === FALSE) {
-            return ['success' => false, 'message' => 'Invalid Google Token.'];
+        // Initialize Google Client
+        $client = new Google_Client(['client_id' => getenv('GOOGLE_CLIENT_ID')]);
+
+        try {
+            $payload = $client->verifyIdToken($idToken);
+        } catch (Exception $e) {
+            return ['success' => false, 'message' => 'Invalid Google Token: ' . $e->getMessage()];
         }
 
-        $payload = json_decode($response, true);
-        
-        if (!isset($payload['email'])) {
-             return ['success' => false, 'message' => 'Google Account does not have an email.'];
-        }
-
-        // Verify Application ID (Audience) to prevent token reuse from other apps
-        // Enforce checking if env var is set
-        $envClientId = getenv('GOOGLE_CLIENT_ID');
-        if (empty($envClientId)) {
-             // Fallback or skip check if not set (development risk)
-        } elseif ($payload['aud'] !== $envClientId) {
-             return ['success' => false, 'message' => 'Invalid Client ID.'];
+        if (!$payload) {
+             return ['success' => false, 'message' => 'Invalid Google Token.'];
         }
 
         $email = $payload['email'];
