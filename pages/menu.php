@@ -58,8 +58,8 @@ $firstCategory = array_key_first($menuData);
         // CSS handles width and margins now.
         return `
             <div class="col">
-                <div class="card-box">
-                    <img class="product-image" src="${product.image}" alt="${product.name}">
+                <div class="card-box" onclick="window.location.href='index.php?page=solo_product&id=${product.id}'" style="cursor: pointer;">
+                    <img class="product-image" src="${(product.image && typeof product.image === 'string' && product.image.trim() !== '' ? ((!product.image.startsWith('http') && !product.image.startsWith('/')) ? '/Leilife_2nd/public/assets/products/' + product.image.trim() : product.image) : '/Leilife_2nd/public/assets/products/not_available.png')}" alt="${product.name}">
                     <div style="padding: 8px;">
                         <p class="mb-1 text-truncate" title="${product.name}">${product.name}</p>
                         <div id="price-div">

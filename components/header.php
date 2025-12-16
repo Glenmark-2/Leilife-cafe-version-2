@@ -61,8 +61,11 @@
                   <a class="btn btn-text" href="index.php?page=sign_up">Sign up</a>
               <?php endif; ?>
               
-              <a href="#" class="btn btn-link p-0" id="cartBtn">
+              <a href="#" class="btn btn-link p-0 position-relative" id="cartBtn">
                 <i class="bi bi-cart-fill" style="color:black; font-size:1.5rem;"></i>
+                <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none; font-size: 0.75rem;">
+                  0
+                </span>
               </a>
 
             </div>

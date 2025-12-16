@@ -1,5 +1,5 @@
 .solo-product-section img {
-    max-height: 500px;      /* Adjust this height as you prefer */
+    max-height: 600px;      /* Adjust this height as you prefer */
     width: auto;
     object-fit: cover;
     border-radius: 10px;    /* Optional: gives the image softer corners */
@@ -51,4 +51,17 @@
     height: 100%;
     object-fit: cover;    /* Prevents distortion, fills the box beautifully */
     border-radius: 14px;
+}
+
+/* Cart Shift Animation for Solo Product Page */
+@media (min-width: 992px) {
+    .solo-product-section {
+        transition: max-width 0.3s ease, margin-right 0.3s ease;
+    }
+
+    body.cart-open .solo-product-section {
+        max-width: calc(100% - 370px) !important; 
+        margin-right: 350px !important;
+        margin-left: auto; /* keep centered in the remaining space */
+    }
 }

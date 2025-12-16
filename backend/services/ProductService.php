@@ -36,4 +36,8 @@ class ProductService {
 
         return $menuData;
     }
+
+    public function getProductById($id) {
+        return $this->productRepo->findById($id);
+    }
 }
