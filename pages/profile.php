@@ -28,7 +28,7 @@ if (!$user) {
         <button type="button" class="btn-primary-custom sideTabBtns">Settings</button>
     </div>
     <!-- personal info -->
-    <section class="tab" id="personal_info" style="display: none;">
+    <section class="tab" id="personal_info" style="display: none; ">
         <h3 class="tab-title">Personal Information</h3>
         <hr>
         <div style="overflow-y: auto;">
@@ -70,44 +70,53 @@ if (!$user) {
     <section class="tab" id="address" style="display: none;">
         <h3 class="tab-title">Address</h3>
         <hr>
+
         <div style="overflow-y: auto;">
 
+        <?php if (!$user->street):?> 
+            <button type="button" class="btn-primary-custom" id="editAddressBtn">Add Address</button>
+
+        <?php else:?>
             <div class="box-input">
                 <div class="info">
                     <p class="label">Street</p>
-                    <p class="display-value">Biringan</p>
-                    <input class="edit-input" type="text" name="street" value="" style="display:none;">
+                    <p class="display-value"><?php echo htmlspecialchars($user->street ?? 'Not set'); ?></p>
+                    <input class="edit-input" type="text" name="street" value="<?php echo htmlspecialchars($user->street ?? ''); ?>" style="display:none;">
                 </div>
 
                 <div class="info">
                     <p class="label">Barangay</p>
-                    <p class="display-value">Cafe</p>
-                    <input class="edit-input" type="text" name="barangay" value="" style="display:none;">
+                    <p class="display-value"><?php echo htmlspecialchars($user->barangay ?? 'Not set'); ?></p>
+                    <input class="edit-input" type="text" name="barangay" value="<?php echo htmlspecialchars($user->barangay ?? ''); ?>" style="display:none;">
                 </div>
 
                 <div class="info">
                     <p class="label">City</p>
-                    <p class="display-value">Caloocan City</p>
-                    <input class="edit-input" type="tel" name="city" value="" style="display:none;">
+                    <p class="display-value"><?php echo htmlspecialchars($user->city ?? 'Caloocan City'); ?></p>
+                    <input class="edit-input" type="tel" name="city" value="<?php echo htmlspecialchars($user->city ?? ''); ?>" style="display:none;">
                 </div>
 
                 <div class="info">
                     <p class="label">Province</p>
-                    <p class="display-value">Metro Manila</p>
-                    <input class="edit-input" type="text" name="province" value="" style="display:none;">
+                    <p class="display-value"><?php echo htmlspecialchars($user->province ?? 'Metro Manila'); ?></p>
+                    <input class="edit-input" type="text" name="province" value="<?php echo htmlspecialchars($user->province ?? ''); ?>" style="display:none;">
                 </div>
 
                 <div class="info">
                     <p class="label">Region</p>
-                    <p class="display-value">NCR</p>
-                    <input class="edit-input" type="text" name="region" value="" style="display:none;">
+                    <p class="display-value"><?php echo htmlspecialchars($user->region ?? 'NCR'); ?></p>
+                    <input class="edit-input" type="text" name="region" value="<?php echo htmlspecialchars($user->region ?? ''); ?>" style="display:none;">
                 </div>
             </div>
+
+        <?php endif;?>
         </div>
 
-        <div class="editDiv">
-            <button type="button" class="btn-primary-custom">Edit</button>
-        </div>
+        <?php if ($user->street):?> 
+                <div class="editDiv">
+                    <button type="button" class="btn-primary-custom" id="editAddressBtn">Edit</button>
+                </div>
+        <?php endif;?>
     </section>
 
     <!-- favorties -->
@@ -150,5 +159,8 @@ if (!$user) {
         <button type="button" class="btn-primary-custom changePass" style="width: 300px;">Change password</button>
     </section>
 </div>
+
+<?php include __DIR__ . "/../components/edit_address_modal.php"; ?>
+
 
 <script src="../scripts/users/profile.js"></script>

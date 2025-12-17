@@ -29,4 +29,33 @@ class UserService {
 
         return ['success' => false, 'message' => 'Failed to update database.'];
     }
+
+    public function updateAddress($userId, $data) {
+        // Validation
+        if (empty($data['street']) || empty($data['barangay']) || empty($data['latitude']) || empty($data['longitude'])) {
+            return ['success' => false, 'message' => 'Street, Barangay, and Location Pin are required.'];
+        }
+
+        // Hardcoded constraints check (double check server side)
+        $city = "Caloocan City";
+        $province = "Metro Manila";
+        $region = "NCR"; // Assuming NCR for Metro Manila
+
+        $success = User::updateUserAddress(
+            $this->db,
+            $userId,
+            $data['street'],
+            $data['barangay'],
+            $city,
+            $province,
+            $region,
+            $data['latitude'],
+            $data['longitude']
+        );
+
+        if ($success) {
+            return ['success' => true, 'message' => 'Address updated successfully!'];
+        }
+        return ['success' => false, 'message' => 'Failed to update address in database.'];
+    }
 }

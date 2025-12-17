@@ -12,7 +12,11 @@ class UserRepository {
 
     // Implement this method to find a user by ID
     public function findById($id) {
-        $query = "SELECT * FROM users WHERE id = :id LIMIT 1";
+        $query = "SELECT u.*, 
+                         ua.street, ua.barangay, ua.city, ua.province, ua.region, ua.latitude, ua.longitude 
+                  FROM users u
+                  LEFT JOIN user_addresses ua ON u.id = ua.user_id
+                  WHERE u.id = :id LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":id", $id);
         $stmt->execute();
