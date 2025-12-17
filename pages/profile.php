@@ -32,7 +32,7 @@ if (!$user) {
         <h3 class="tab-title">Personal Information</h3>
         <hr>
         <div style="overflow-y: auto;">
-
+    <form id="personal-info-form" action="../backend/api/update_user_personal_info.php" method="POST">
             <div class="box-input">
                 <div class="info">
                     <p class="label">First Name</p>
@@ -61,8 +61,9 @@ if (!$user) {
         </div>
 
         <div class="editDiv">
-            <button type="button" class="btn-primary-custom">Edit</button>
+            <button type="button" class="btn-primary-custom" id="editPersonalInfoBtn">Edit</button>
         </div>
+        </form>
     </section>
 
     <!-- address -->

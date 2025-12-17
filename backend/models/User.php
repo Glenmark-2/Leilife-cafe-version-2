@@ -22,4 +22,9 @@ class User {
         $this->created_at = $data['created_at'] ?? null;
         $this->updated_at = $data['updated_at'] ?? null;
     }
+
+    public static function updateUserPersonalInfo($db, $id, $firstName, $lastName, $phone) {
+        $stmt = $db->prepare("UPDATE users SET first_name = ?, last_name = ?, phone_number = ? WHERE id = ?");
+        return $stmt->execute([$firstName, $lastName, $phone, $id]);
+    }
 }
