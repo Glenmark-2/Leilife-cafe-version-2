@@ -320,3 +320,20 @@ if (addressForm) {
         }
     });
 }
+
+
+// change password
+const changePassBtn = document.getElementById("changePassBtn");
+const changePasswordModal = document.getElementById("changePasswordModal");
+
+if (changePassBtn) {
+    changePassBtn.addEventListener("click", () => {
+        changePasswordModal.style.display = "flex";
+    });
+}
+
+window.addEventListener("click", (e) => {
+    if (e.target === changePasswordModal) {
+        changePasswordModal.style.display = "none";
+    }
+});

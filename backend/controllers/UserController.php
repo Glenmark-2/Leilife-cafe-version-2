@@ -38,4 +38,18 @@ class UserController {
         $result = $this->userService->updateAddress($userId, $data);
         echo json_encode($result);
     }
+
+    public function updatePassword(){
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $userId = $_SESSION['user_id'] ?? null;
+
+        if (!$userId) {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            return;
+        }
+
+        $data = json_decode(file_get_contents("php://input"), true) ?: $_POST;
+        $result = $this->userService->updatePassword($userId, $data);
+        echo json_encode($result);
+    }
 }

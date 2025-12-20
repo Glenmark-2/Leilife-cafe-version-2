@@ -71,4 +71,8 @@ class User {
         return $stmt->execute([$user_id, $street, $barangay, $city, $province, $region, $lat, $lng]);
         }
     }
+
+    public static function updateUserPassword($db, $user_id, $password) {
+        
+    }
 }

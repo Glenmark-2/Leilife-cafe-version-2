@@ -24,6 +24,7 @@
     height: 70vh;
     max-height: 90vh; /* Prevent overflow on small screens */
     overflow-y: auto;
+
 }
 
 .modal-content h3 {
@@ -81,7 +82,7 @@
 
 .modal-actions {
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     gap: 10px;
     margin-top: 20px;
 }
