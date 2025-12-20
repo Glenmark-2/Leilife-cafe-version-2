@@ -162,8 +162,8 @@ class AuthService {
             $user->last_name = $lname;
             $user->email = $email;
             $user->phone_number = ''; // Optional
-            // Random password for Google users (they can't login with password unless they reset it)
-            $user->password = password_hash(bin2hex(random_bytes(16)), PASSWORD_BCRYPT);
+            // No password for Google users
+            $user->password = null;
             $user->role = 'customer';
             
             if (!$this->userRepository->create($user)) {
@@ -180,6 +180,9 @@ class AuthService {
         SessionManager::set('user_name', $user->first_name . ' ' . $user->last_name);
         SessionManager::set('user_email', $user->email);
         
+        // Remove password from returned object for security
+        $user->password = null;
+
         return ['success' => true, 'user' => $user];
     }
 }

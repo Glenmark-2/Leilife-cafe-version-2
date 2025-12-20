@@ -44,10 +44,25 @@ function renderCart() {
 
     // Update Badge (Count unique items, not total quantity)
     const badge = document.getElementById('cart-badge');
+    const stickyCart = document.getElementById('mobile-sticky-cart');
+    const stickyCount = document.getElementById('mobile-sticky-count');
+
     if (badge) {
         badge.textContent = cart.length;
         badge.style.display = cart.length > 0 ? 'inline-block' : 'none';
-        // Also update mobile badge if it exists
+    }
+
+    // Sticky Mobile Cart Visibility
+    if (stickyCart && stickyCount) {
+        stickyCount.textContent = cart.length;
+        if (cart.length > 0) {
+            stickyCart.classList.remove('d-none');
+            // Ensure d-sm-none is kept, simplified by just toggling d-none if screen size check handled by CSS classes
+            // But logic: if items > 0, shud be visible on mobile. The classes d-sm-none d-none means hidden everywhere initially.
+            // removing d-none makes it visible on mobile (as d-sm-none hides it on desk).
+        } else {
+            stickyCart.classList.add('d-none');
+        }
     }
 
     const deliveryFee = (!isPickup && cart.length > 0) ? 50 : 0;
@@ -57,6 +72,26 @@ function renderCart() {
     if (subtotalEl) subtotalEl.textContent = '₱' + subtotal.toFixed(2);
     if (deliveryFeeEl) deliveryFeeEl.textContent = '₱' + deliveryFee.toFixed(2);
     if (totalEl) totalEl.textContent = '₱' + total.toFixed(2);
+
+    // Check out button
+    const checkoutBtn = document.querySelector('.totals-box .btn-primary-custom.justify-content-center');
+    if (checkoutBtn) {
+        // Disable on init if empty
+        if (cart.length === 0) {
+            checkoutBtn.setAttribute('disabled', true);
+            checkoutBtn.style.opacity = '0.6';
+            checkoutBtn.style.cursor = 'not-allowed';
+        }
+
+        checkoutBtn.addEventListener('click', () => {
+            if (cart.length === 0) return;
+            // Save state to localStorage for checkout page to pick up
+            localStorage.setItem('leilife_delivery_choice', isPickup ? 'pickup' : 'delivery');
+
+            // Redirect
+            window.location.href = 'index.php?page=checkout';
+        });
+    }
 
     // --- Smart Item Rendering ---
     // Reuse existing DOM elements to avoid "vanishing" / focus loss
@@ -164,10 +199,12 @@ window.updateCartQty = function (index, delta) {
 }
 
 window.addToCart = function (product) {
+    const qtyToAdd = product.qty ? parseInt(product.qty) : 1;
+
     // Check if exists
     const existing = cart.find(item => item.id == product.id);
     if (existing) {
-        existing.qty += 1;
+        existing.qty += qtyToAdd;
     } else {
         // Sanitize Image Path: Store only filename if possible, or full path.
         // The user said "make the product image to always include this... so i only need to save the image name"
@@ -181,7 +218,7 @@ window.addToCart = function (product) {
             id: product.id,
             name: product.name,
             price: parseFloat(product.price),
-            qty: 1,
+            qty: qtyToAdd,
             image: imageToSave
         });
     }
