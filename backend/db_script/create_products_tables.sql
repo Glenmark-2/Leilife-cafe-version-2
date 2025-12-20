@@ -36,3 +36,5 @@ CREATE TABLE IF NOT EXISTS product_flavors (
     is_available BOOLEAN DEFAULT 1,
     FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
 );
+
+-- done nobi

@@ -40,4 +40,20 @@ class ProductService {
     public function getProductById($id) {
         return $this->productRepo->findById($id);
     }
+
+    public function addFavorite($user_id, $product_id) {
+        return $this->productRepo->addFavorite($user_id, $product_id);
+    }
+
+    public function removeFavorite($user_id, $product_id) {
+        return $this->productRepo->removeFavorite($user_id, $product_id);
+    }
+
+    public function isFavorite($user_id, $product_id) {
+        return $this->productRepo->isFavorite($user_id, $product_id);
+    }
+
+    public function getUserFavorites($user_id) {
+        return $this->productRepo->getFavoritesByUserId($user_id);
+    }
 }

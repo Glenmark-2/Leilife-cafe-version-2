@@ -39,7 +39,7 @@ if (!$product) {
                 <!-- HEART ICON -->
                 <div class="container-fluid d-flex justify-content-between align-items-center p-0">
                     <h2 class="fw-bold"><?php echo htmlspecialchars($product['name']); ?></h2>
-                    <button class="favorite" id="favoriteBtn">
+                    <button class="favorite <?php echo (isset($_SESSION['user_id']) && $productService->isFavorite($_SESSION['user_id'], $product['product_id'])) ? 'active' : ''; ?>" id="favoriteBtn">
                         <i class="bi bi-heart-fill wishlist-icon"></i>
                     </button>
                 </div>
@@ -72,4 +72,35 @@ if (!$product) {
 <?php } ?>
 
 <script src="/Leilife_2nd/scripts/users/solo_product.js"></script>
+<script>
+    // Favorite Button Toggle (Visual only for now)
+    const userId = <?= $_SESSION['user_id'] ?? 'null' ?>;
+    const favBtn = document.getElementById('favoriteBtn');
+    console.log(userId);
 
+    if (favBtn) {
+        favBtn.addEventListener('click', async function () {
+            if(!userId){ alert('Please log in to add favorites'); return; }
+            this.classList.toggle('active');
+            try{
+                    const resp = await fetch('../backend/api/add_favorite.php',{
+                        method:'POST',
+                        headers:{'Content-Type':'application/x-www-form-urlencoded'},
+                        body:`user_id=${userId}&product_id=<?= $product['product_id'] ?>`
+                    });
+                    const result = await resp.json();
+                    if(!result.success){ 
+                        this.classList.toggle('active'); 
+                        alert(result.message||'Failed'); 
+                        return; 
+                    }
+                    // Optional: log action
+                    console.log(result.action);
+            }catch(e){ 
+                this.classList.toggle('active'); 
+                alert('Network error'); 
+            }
+        });
+    }
+
+</script>
