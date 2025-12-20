@@ -135,6 +135,9 @@ $firstCategory = array_key_first($menuData);
         
         // Render Content
         renderCategory(categoryName);
+
+        // Reset Scroll Position
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     }
 
     // Initialize Default

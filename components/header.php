@@ -61,12 +61,14 @@
                   <a class="btn btn-text" href="index.php?page=sign_up">Sign up</a>
               <?php endif; ?>
               
-              <a href="#" class="btn btn-link p-0 position-relative" id="cartBtn">
-                <i class="bi bi-cart-fill" style="color:black; font-size:1.5rem;"></i>
-                <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none; font-size: 0.75rem;">
-                  0
-                </span>
-              </a>
+                <?php if ($page !== 'checkout'): ?>
+                  <a href="#" class="btn btn-link p-0 position-relative" id="cartBtn">
+                    <i class="bi bi-cart-fill" style="color:black; font-size:1.5rem;"></i>
+                    <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none; font-size: 0.75rem;">
+                      0
+                    </span>
+                  </a>
+                <?php endif; ?>
 
             </div>
           </div>
@@ -86,13 +88,26 @@
               <a class="btn btn-text" href="#" id="mobileLogin">Login</a>
               <a class="btn btn-text" href="index.php?page=sign_up">Sign up</a>
           <?php endif; ?>
-          <a class="btn btn-text" href="#" id="mobileCartBtn">Cart</a>
+          <?php if ($page !== 'checkout'): ?>
+            <a class="btn btn-text" href="#" id="mobileCartBtn">Cart</a>
+          <?php endif; ?>
         </div>
       </nav>
 
       <div class="cart-container d-none" id="cart-container">
           <?php include __DIR__ . "/cart.php"; ?>
       </div>
+
+      <!-- Mobile Sticky View Bag Button -->
+      <?php if ($page !== 'checkout'): ?>
+      <div id="mobile-sticky-cart" class="fixed-bottom p-3 d-sm-none d-none" style="z-index: 1040; background: white; border-top: 1px solid #dee2e6;">
+        <!-- rounded-5 or rounded-pill for fully rounded -->
+        <button id="sticky-bag-btn" class="btn btn-primary-custom w-100 shadow-sm d-flex justify-content-center align-items-center gap-2 py-2 px-3 rounded-pill">
+            <span class="fw-bold">View my bag</span>
+            <span class="badge bg-white text-dark rounded-pill" id="mobile-sticky-count">0</span>
+        </button>
+      </div>
+      <?php endif; ?>
 
       <div class="container-fluid px-0">
 

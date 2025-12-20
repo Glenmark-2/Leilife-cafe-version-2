@@ -35,21 +35,71 @@ document.addEventListener("DOMContentLoaded", function () {
   const mobileCartBtn = document.getElementById("mobileCartBtn");
   const cartModal = document.getElementById("cart-container");
 
+  // Sticky Bag Button handled by ID
+  const stickyBagBtn = document.getElementById("sticky-bag-btn");
+
   function toggleCart(e) {
-    e.preventDefault();
+    if (e) e.preventDefault(); // Check if e exists
     cartModal.classList.toggle("d-none");
     cartModal.classList.toggle("d-flex");
     document.body.classList.toggle("cart-open");
   }
 
+  // --- Swipe Down to Close (Mobile Cart) ---
+  if (cartModal) {
+    let touchStartY = 0;
+    let touchEndY = 0;
+    const swipeThreshold = 50; // Minimum distance to be considered a swipe
+
+    cartModal.addEventListener('touchstart', e => {
+      // Only track if we are at the top of the container (scrolled to top)
+      // or if the touch is on the header part (pickup-box etc)
+      // Otherwise we might interfere with scrolling inside the list.
+      // Easiest is to check if scrollTop is 0
+      if (cartModal.scrollTop <= 0) {
+        touchStartY = e.changedTouches[0].screenY;
+      } else {
+        touchStartY = -1; // Ignore this swipe attempt as we are scrolled down
+      }
+    }, { passive: true });
+
+    cartModal.addEventListener('touchmove', e => {
+      // Prevent default only if we are swiping down and at top?
+      // Be careful not to block normal scrolling.
+      // For simplicity, just tracking end position here.
+    }, { passive: true });
+
+    cartModal.addEventListener('touchend', e => {
+      if (touchStartY === -1) return;
+
+      touchEndY = e.changedTouches[0].screenY;
+      const distance = touchEndY - touchStartY;
+
+      if (distance > swipeThreshold) {
+        // Swiped down
+        // Close Cart
+        cartModal.classList.add("d-none");
+        cartModal.classList.remove("d-flex");
+        document.body.classList.remove("cart-open");
+      }
+    }, { passive: true });
+  }
+
+  // --- Initialize Listeners ---
   if (cartBtn) cartBtn.addEventListener("click", toggleCart);
   if (mobileCartBtn) mobileCartBtn.addEventListener("click", toggleCart);
+  if (stickyBagBtn) stickyBagBtn.addEventListener("click", toggleCart);
 
   document.addEventListener("click", function (e) {
+    // If the clicked element was removed from DOM (e.g. cart item removed), ignore
+    if (!e.target.isConnected) return;
+
     if (cartModal &&
+      !cartModal.classList.contains('d-none') && // Only check if open
       !cartModal.contains(e.target) &&
       cartBtn && !cartBtn.contains(e.target) &&
-      mobileCartBtn && !mobileCartBtn.contains(e.target)) {
+      mobileCartBtn && !mobileCartBtn.contains(e.target) &&
+      stickyBagBtn && !stickyBagBtn.contains(e.target)) {
       cartModal.classList.add("d-none");
       cartModal.classList.remove("d-flex");
       document.body.classList.remove("cart-open");

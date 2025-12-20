@@ -14,6 +14,47 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Quantity Logic
+    const qtyValueDisplay = document.querySelector('.qty-value');
+    const btnMinus = document.querySelector('.btn-slctr:first-child'); // Assuming structure: - span +
+    const btnPlus = document.querySelector('.btn-slctr:last-child');
+    let currentQty = 1;
+
+    function updateQtyUI() {
+        if (qtyValueDisplay) qtyValueDisplay.textContent = currentQty;
+        if (btnMinus) {
+            if (currentQty <= 1) {
+                btnMinus.setAttribute('disabled', true);
+                // Optional: add visual disabled style if the framework doesn't handle it
+                btnMinus.style.cursor = 'not-allowed';
+                btnMinus.style.opacity = '0.5';
+            } else {
+                btnMinus.removeAttribute('disabled');
+                btnMinus.style.cursor = 'pointer';
+                btnMinus.style.opacity = '1';
+            }
+        }
+    }
+
+    // Initialize
+    updateQtyUI();
+
+    if (btnMinus) {
+        btnMinus.addEventListener('click', () => {
+            if (currentQty > 1) {
+                currentQty--;
+                updateQtyUI();
+            }
+        });
+    }
+
+    if (btnPlus) {
+        btnPlus.addEventListener('click', () => {
+            currentQty++;
+            updateQtyUI();
+        });
+    }
+
     // Add to Cart Logic
     const addToCartBtn = document.getElementById('addToCartBtn');
     if (addToCartBtn) {
@@ -28,7 +69,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 id: btn.getAttribute('data-id'),
                 name: btn.getAttribute('data-name'),
                 price: btn.getAttribute('data-price'),
-                image: imgSrc // Pass full src, cart.js will strip it if needed
+                image: imgSrc,
+                qty: currentQty // Pass the selected quantity
             };
 
             // Add to global cart
@@ -47,13 +89,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const existing = cart.find(item => item.id == product.id);
                 if (existing) {
-                    existing.qty += 1;
+                    existing.qty += currentQty;
                 } else {
                     cart.push({
                         id: product.id,
                         name: product.name,
                         price: parseFloat(product.price),
-                        qty: 1,
+                        qty: currentQty,
                         image: imageToSave
                     });
                 }
@@ -67,8 +109,4 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'index.php?page=menu';
         });
     }
-
-    // Quantity Selectors (Visual only for now on solo page, Logic in Cart)
-    // If you want these buttons to actually change the quantity *before* adding to cart,
-    // you need to capturing that value. For now, assuming default 1.
 });
