@@ -125,17 +125,58 @@ if (!$user) {
         <hr>
         <div style="overflow-y: auto;">
 
-            <div class="box-input">
-                <?php include __DIR__ . "/../partials/favorite_card.php"; ?>
-                <?php include __DIR__ . "/../partials/favorite_card.php"; ?>
-                <?php include __DIR__ . "/../partials/favorite_card.php"; ?>
-                <?php include __DIR__ . "/../partials/favorite_card.php"; ?>
-                <?php include __DIR__ . "/../partials/favorite_card.php"; ?>
-                <?php include __DIR__ . "/../partials/favorite_card.php"; ?>
-                <?php include __DIR__ . "/../partials/favorite_card.php"; ?>
-                <?php include __DIR__ . "/../partials/favorite_card.php"; ?>
-                <?php include __DIR__ . "/../partials/favorite_card.php"; ?>
+            <!-- Container for JS rendering -->
+            <div id="favorites-container" class="box-input" style="flex-direction: row; flex-wrap: wrap; gap: 20px;">
+                <!-- JS will populate this -->
             </div>
+            
+            <?php 
+                require_once __DIR__ . '/../backend/services/ProductService.php';
+                $productService = new ProductService();
+                $favorites = $productService->getUserFavorites($userId);
+                // Prepare data for JS
+                $jsFavorites = array_map(function($fav) {
+                    return [
+                        'id' => $fav['product_id'],
+                        'name' => $fav['product_name'],
+                        'price' => (float)$fav['price'],
+                        'image' => $fav['image_path']
+                    ];
+                }, $favorites);
+            ?>
+
+            <script>
+                const userFavorites = <?php echo json_encode($jsFavorites); ?>;
+                
+                // Duplicated from menu.php for consistency as requested
+                function createCardHtml(product) {
+                    // Using "card-box" structure strictly as requested.
+                    // CSS handles width and margins now.
+                    return `
+                        <div class="col" style="width: 200px;">
+                            <div class="card-box" onclick="window.location.href='solo_product.php?id=${product.id}'" style="cursor: pointer; border: 1px solid #ddd; border-radius: 10px; overflow: hidden;">
+                                <img class="product-image" src="${(product.image && typeof product.image === 'string' && product.image.trim() !== '' ? ((!product.image.startsWith('http') && !product.image.startsWith('/')) ? '/Leilife_2nd/public/assets/products/' + product.image.trim() : product.image) : '/Leilife_2nd/public/assets/products/not_available.png')}" alt="${product.name}" style="width: 100%; height: 150px; object-fit: cover;">
+                                <div style="padding: 8px;">
+                                    <p class="mb-1 text-truncate" title="${product.name}" style="font-weight: bold; margin-bottom: 5px;">${product.name}</p>
+                                    <div id="price-div" style="display: flex; justify-content: space-between; align-items: center;">
+                                        <p>₱${product.price ? product.price.toFixed(2) : '0.00'}</p>
+                                        <button class="buyBtn btn-primary-custom" style="padding: 5px 15px; font-size: 0.8rem;">Buy</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                document.addEventListener('DOMContentLoaded', () => {
+                   const container = document.getElementById('favorites-container');
+                   if (userFavorites && userFavorites.length > 0) {
+                       container.innerHTML = userFavorites.map(product => createCardHtml(product)).join('');
+                   } else {
+                       container.innerHTML = '<p>No favorites yet.</p>';
+                   }
+                });
+            </script>
         </div>
     </section>
 

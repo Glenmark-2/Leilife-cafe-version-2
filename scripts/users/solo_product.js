@@ -1,19 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Favorite Button Toggle (Visual only for now)
-    const favBtn = document.getElementById('favoriteBtn');
-    if (favBtn) {
-        favBtn.addEventListener('click', function () {
-            this.classList.toggle('active');
-            const icon = this.querySelector('i');
-            if (this.classList.contains('active')) {
-                icon.classList.remove('bi-heart-fill'); // or keep fill but change color via CSS
-                icon.style.color = 'white';
-            } else {
-                icon.style.color = ''; // reset
-            }
-        });
-    }
-
     // Quantity Logic
     const qtyValueDisplay = document.querySelector('.qty-value');
     const btnMinus = document.querySelector('.btn-slctr:first-child'); // Assuming structure: - span +

@@ -46,4 +46,52 @@ class ProductRepository {
         
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    public function addFavorite($user_id, $product_id) {
+        $query = "INSERT INTO favorites (user_id, product_id) VALUES (:user_id, :product_id)";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':user_id', $user_id);
+        $stmt->bindParam(':product_id', $product_id);
+        try {
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            // Handle duplicate entry gracefully if needed, or let controller handle it
+            return false; 
+        }
+    }
+
+    public function removeFavorite($user_id, $product_id) {
+        $query = "DELETE FROM favorites WHERE user_id = :user_id AND product_id = :product_id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':user_id', $user_id);
+        $stmt->bindParam(':product_id', $product_id);
+        return $stmt->execute();
+    }
+
+    public function isFavorite($user_id, $product_id) {
+        $query = "SELECT favorite_id FROM favorites WHERE user_id = :user_id AND product_id = :product_id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':user_id', $user_id);
+        $stmt->bindParam(':product_id', $product_id);
+        $stmt->execute();
+        return $stmt->rowCount() > 0;
+    }
+
+    public function getFavoritesByUserId($user_id) {
+        $query = "
+            SELECT 
+                p.product_id,
+                p.name AS product_name,
+                p.price,
+                p.image_path
+            FROM favorites f
+            JOIN products p ON f.product_id = p.product_id
+            WHERE f.user_id = :user_id
+            ORDER BY f.created_at DESC
+        ";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':user_id', $user_id);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

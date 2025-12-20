@@ -1,9 +1,12 @@
 <?php
 
-require_once __DIR__ . '/../vendor/autoload.php';
+// require_once __DIR__ . '/../vendor/autoload.php';
+// require_once __DIR__ . '/../repositories/UserRepository.php';
+require_once __DIR__ . '/../../vendor/autoload.php'; 
 require_once __DIR__ . '/../repositories/UserRepository.php';
 
 class AuthService {
+    private $userRepository;
     private $userRegistrationRepository;
 
     public function __construct(UserRepository $userRepository, UserRegistrationRepository $userRegistrationRepository = null) {
