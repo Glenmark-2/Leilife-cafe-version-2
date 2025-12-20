@@ -13,7 +13,8 @@ return [
     'change_password' => ['../css/users/change_password.css'],
     'profile' => [
         '../css/users/profile.css',
-        '../css/users/partials/favorite_card.css'
+        '../css/users/partials/favorite_card.css',
+        '../css/users/components/edit_address_modal.css'
     ],
     'solo_product' => ['../css/users/solo_product.css'],
     'checkout' => ['../css/users/checkout_page.css'],

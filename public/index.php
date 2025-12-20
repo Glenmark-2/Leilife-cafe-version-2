@@ -15,7 +15,7 @@ require_once __DIR__ . '/../backend/db_script/init.php';
 $target = $routes[$page] ?? $routes['404'];
 
 // 5) Enforce access control
-// requireLogin($page);
+requireLogin($page);
 
 // 6) Render layout + page
 if ($page === 'user-receipt') {

@@ -10,6 +10,15 @@ class User {
     public $role;
     public $created_at;
     public $updated_at;
+    
+    // Address fields
+    public $street;
+    public $barangay;
+    public $city;
+    public $province;
+    public $region;
+    public $latitude;
+    public $longitude;
 
     public function __construct($data = []) {
         $this->id = $data['id'] ?? null;
@@ -21,5 +30,45 @@ class User {
         $this->role = $data['role'] ?? 'customer'; // Default role
         $this->created_at = $data['created_at'] ?? null;
         $this->updated_at = $data['updated_at'] ?? null;
+
+        // Address initialization
+        $this->street = $data['street'] ?? null;
+        $this->barangay = $data['barangay'] ?? null;
+        $this->city = $data['city'] ?? null;
+        $this->province = $data['province'] ?? null;
+        $this->region = $data['region'] ?? null;
+        $this->latitude = $data['latitude'] ?? null;
+        $this->longitude = $data['longitude'] ?? null;
+    }
+
+    public static function updateUserPersonalInfo($db, $id, $firstName, $lastName, $phone) {
+        $stmt = $db->prepare("UPDATE users SET first_name = ?, last_name = ?, phone_number = ? WHERE id = ?");
+        return $stmt->execute([$firstName, $lastName, $phone, $id]);
+    }
+
+    public static function updateUserAddress($db, $user_id, $street, $barangay, $city, $province, $region, $lat, $lng) {
+    $stmt = $db->prepare("SELECT user_id FROM user_addresses WHERE user_id = :user_id");
+    $stmt->execute([':user_id' => $user_id]);
+    $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if($existing) {
+            $sql = "UPDATE user_addresses SET street = ?, barangay = ?, city = ?, province = ?, region = ?, latitude = ?, longitude = ? WHERE user_id = ?";
+            $stmt = $db->prepare($sql);
+            return $stmt->execute([$street, $barangay, $city, $province, $region, $lat, $lng, $user_id]);
+        } else {
+            $sql = "INSERT INTO user_addresses (user_id, street, barangay, city, province, region, latitude, longitude)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE
+                street = VALUES(street),
+                barangay = VALUES(barangay),
+                city = VALUES(city),
+                province = VALUES(province),
+                region = VALUES(region),        
+                latitude = VALUES(latitude),
+                longitude = VALUES(longitude)";
+        
+        $stmt = $db->prepare($sql);
+        return $stmt->execute([$user_id, $street, $barangay, $city, $province, $region, $lat, $lng]);
+        }
     }
 }
