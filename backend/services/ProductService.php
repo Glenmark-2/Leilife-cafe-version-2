@@ -68,4 +68,8 @@ class ProductService {
     public function archiveProduct($productId, $isArchived = 1) {
         return $this->productRepo->updateArchivedStatus($productId, $isArchived);
     }
+
+    public function updateProduct($id, $data) {
+        return $this->productRepo->updateProduct($id, $data);
+    }
 }

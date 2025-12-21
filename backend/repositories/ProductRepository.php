@@ -150,4 +150,33 @@ class ProductRepository {
         $stmt->bindParam(':id', $productId, PDO::PARAM_INT);
         return $stmt->execute();
     }
+
+    public function updateProduct($id, $data) {
+        $query = "UPDATE " . $this->table_products . " 
+                  SET name = :name, 
+                      description = :description, 
+                      price = :price, 
+                      category_id = :category_id, 
+                      is_available = :is_available";
+        
+        if (isset($data['image_path'])) {
+            $query .= ", image_path = :image_path";
+        }
+        
+        $query .= " WHERE product_id = :id";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':name', $data['name']);
+        $stmt->bindParam(':description', $data['description']);
+        $stmt->bindParam(':price', $data['price']);
+        $stmt->bindParam(':category_id', $data['category_id']);
+        $stmt->bindParam(':is_available', $data['is_available']);
+        $stmt->bindParam(':id', $id);
+        
+        if (isset($data['image_path'])) {
+            $stmt->bindParam(':image_path', $data['image_path']);
+        }
+        
+        return $stmt->execute();
+    }
 }

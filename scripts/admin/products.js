@@ -191,11 +191,124 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Make editProduct and save logic accessible
+    window.editProduct = function (id) {
+        const product = localProducts.find(p => p.product_id == id);
+        if (!product) return;
+
+        // Populate Modal
+        document.getElementById('edit-product-id').value = product.product_id;
+        document.getElementById('edit-name').value = product.name;
+        document.getElementById('edit-description').value = product.description || '';
+        document.getElementById('edit-price').value = product.price;
+        document.getElementById('edit-category').value = product.category_id;
+        document.getElementById('edit-status').value = product.is_available;
+
+        // Populate Image Preview
+        const preview = document.getElementById('edit-img-preview');
+        const filename = (product.image_path && product.image_path.trim() !== '') ? product.image_path.trim().replace(/\s+/g, '_') : 'not_available.png';
+        preview.src = `assets/products/${filename}`;
+
+        // Reset file input
+        document.getElementById('edit-image').value = '';
+
+        // Show Modal
+        const editModal = new bootstrap.Modal(document.getElementById('editProductModal'));
+        editModal.show();
+    };
+
+    // Link preview for the file input
+    document.getElementById('edit-image').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                document.getElementById('edit-img-preview').src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    const saveProductBtn = document.getElementById('save-product-btn');
+    const editForm = document.getElementById('editProductForm');
+
+    saveProductBtn.addEventListener('click', async () => {
+        // Validation
+        if (!editForm.checkValidity()) {
+            editForm.classList.add('was-validated');
+            return;
+        }
+
+        const productId = document.getElementById('edit-product-id').value;
+
+        // Use FormData for file upload
+        const formData = new FormData();
+        formData.append('product_id', productId);
+        formData.append('name', document.getElementById('edit-name').value.trim());
+        formData.append('description', document.getElementById('edit-description').value.trim());
+        formData.append('price', document.getElementById('edit-price').value);
+        formData.append('category_id', document.getElementById('edit-category').value);
+        formData.append('is_available', document.getElementById('edit-status').value);
+
+        const imageFile = document.getElementById('edit-image').files[0];
+        if (imageFile) {
+            formData.append('image', imageFile);
+        }
+
+        try {
+            saveProductBtn.disabled = true;
+            saveProductBtn.innerText = 'Saving...';
+
+            const response = await fetch('../backend/api/admin/update_product.php', {
+                method: 'POST',
+                body: formData // Body is now FormData
+            });
+
+            const responseText = await response.text();
+            console.log("Response from server:", responseText);
+
+            let result;
+            try {
+                result = JSON.parse(responseText);
+            } catch (e) {
+                console.error("Failed to parse JSON:", responseText);
+                throw new Error("Invalid server response");
+            }
+
+            if (result.success) {
+                // Update local data for real-time refresh
+                const prodIndex = localProducts.findIndex(p => p.product_id == productId);
+                if (prodIndex !== -1) {
+                    // Update object properties
+                    localProducts[prodIndex].name = formData.get('name');
+                    localProducts[prodIndex].description = formData.get('description');
+                    localProducts[prodIndex].price = parseFloat(formData.get('price'));
+                    localProducts[prodIndex].category_id = formData.get('category_id');
+                    localProducts[prodIndex].is_available = formData.get('is_available');
+
+                    if (result.new_image_path) {
+                        localProducts[prodIndex].image_path = result.new_image_path;
+                    }
+
+                    // Also update category name visually in table
+                    const catSelect = document.getElementById('edit-category');
+                    localProducts[prodIndex].category_name = catSelect.options[catSelect.selectedIndex].text.replace('— ', '');
+                }
+
+                bootstrap.Modal.getInstance(document.getElementById('editProductModal')).hide();
+                filterProducts();
+            } else {
+                alert(result.message);
+            }
+        } catch (error) {
+            console.error('Error updating product:', error);
+            alert('An error occurred while saving.');
+        } finally {
+            saveProductBtn.disabled = false;
+            saveProductBtn.innerText = 'Save Changes';
+        }
+    });
+
     // Initial filter and render
     filterProducts();
 });
-
-function editProduct(id) {
-    console.log('Edit product:', id);
-    // Future implementation: open edit modal
-}

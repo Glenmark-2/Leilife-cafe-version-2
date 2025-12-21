@@ -101,30 +101,42 @@ try {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="editProductForm" class="needs-validation" novalidate>
+                <form id="editProductForm" class="needs-validation" novalidate enctype="multipart/form-data">
                     <input type="hidden" id="edit-product-id">
+                    <div class="row mb-3">
+                        <div class="col-12 text-center">
+                            <div class="mb-2">
+                                <img src="" id="edit-img-preview" class="img-thumbnail" style="max-height: 150px; width: auto; border: 2px dashed #d0b28c; padding: 5px;">
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit-image" class="form-label fw-semibold">Change Product Photo</label>
+                                <input type="file" class="form-control" id="edit-image" accept="image/*">
+                                <div class="form-text">Choose a new file to replace the current image.</div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="row g-3">
                         <div class="col-md-8">
                             <div class="mb-3">
                                 <label for="edit-name" class="form-label fw-semibold">Product Name</label>
-                                <input type="text" class="form-control" id="edit-name" required minlength="3">
+                                <input type="text" class="form-control" id="edit-name" name="name" required minlength="3">
                                 <div class="invalid-feedback">Please enter a valid product name (min 3 characters).</div>
                             </div>
                             <div class="mb-3">
                                 <label for="edit-description" class="form-label fw-semibold">Description</label>
-                                <textarea class="form-control" id="edit-description" rows="3" required></textarea>
+                                <textarea class="form-control" id="edit-description" name="description" rows="3" required></textarea>
                                 <div class="invalid-feedback">Please provide a product description.</div>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="edit-price" class="form-label fw-semibold">Price (₱)</label>
-                                <input type="number" class="form-control" id="edit-price" step="0.01" min="0" required>
-                                <div class="invalid-feedback">Please enter a valid price.</div>
+                                <input type="number" class="form-control" id="edit-price" name="price" step="0.01" min="0.01" required>
+                                <div class="invalid-feedback">Please enter a price greater than 0.</div>
                             </div>
                             <div class="mb-3">
                                 <label for="edit-category" class="form-label fw-semibold">Category</label>
-                                <select class="form-select" id="edit-category" required>
+                                <select class="form-select" id="edit-category" name="category_id" required>
                                     <?php foreach ($categories as $cat): ?>
                                         <option value="<?= $cat['category_id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
                                     <?php endforeach; ?>
@@ -133,7 +145,7 @@ try {
                             </div>
                             <div class="mb-3">
                                 <label for="edit-status" class="form-label fw-semibold">Availability</label>
-                                <select class="form-select" id="edit-status">
+                                <select class="form-select" id="edit-status" name="is_available">
                                     <option value="1">Available</option>
                                     <option value="0">Unavailable</option>
                                 </select>
@@ -144,8 +156,8 @@ try {
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" form="editProductForm" class="btn-primary-custom" style="padding: 7px 25px;">Save Changes</button>
-            </div>
+                <button type="button" class="btn btn-primary-custom px-4" id="save-product-btn">Save Changes</button>
+            </div>      
         </div>
     </div>
 </div>
