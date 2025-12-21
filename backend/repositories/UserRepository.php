@@ -63,4 +63,11 @@ class UserRepository {
         }
         return null; // Return null if user not found
     }
+    public function updatePassword($userId, $newHash) {
+        $query = "UPDATE users SET password = :password WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':password', $newHash);
+        $stmt->bindParam(':id', $userId);
+        return $stmt->execute();
+    }
 }
