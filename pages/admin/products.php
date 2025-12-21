@@ -22,7 +22,6 @@ try {
         <p class="title">Products</p>
     </div>
     <div class="d-flex gap-2">
-        <button type="button" class="btn-primary-custom btns" id="add-product-btn">Add New Product</button>
         <button type="button" class="btn-primary-custom btns" id="toggle-archive">View Archive</button>
     </div>
 </div>
@@ -58,6 +57,11 @@ try {
     <div class="search-container">
         <i class="bi bi-search search-icon"></i>
         <input type="search" id="product-search" placeholder="Search product name or description..." aria-label="Search products">
+    </div>
+
+    <div>
+        <button type="button" class="btn-primary-custom btns" id="add-product-btn">Add New Product</button>
+
     </div>
 </div>
 
