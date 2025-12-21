@@ -214,7 +214,7 @@
             <p>Let us know how we get back to you</p>
             <form id="contactForm">
                 <div class="form-row">
-                    <input class="inputs" type="text" placeholder="Name" name="name" required>
+                    <input class="inputs" type="text" placeholder="Name" name="name">
                     <input class="inputs" type="email" placeholder="Email Address" name="email" required>
                 </div>
                 <input class="long-inputs" type="text" placeholder="Subject" class="form-control" name="subject">
@@ -232,3 +232,5 @@
         </div>
     </div>
 </div>
+
+<script src="../scripts/users/home.js"></script>
