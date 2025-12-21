@@ -28,7 +28,7 @@ class ProductRepository {
             FROM " . $this->table_products . " p
             JOIN " . $this->table_categories . " c ON p.category_id = c.category_id
             JOIN " . $this->table_categories . " parent ON c.parent_id = parent.category_id
-            WHERE p.is_available = 1
+            WHERE p.is_available = 1 AND p.is_archived = 0
             ORDER BY parent.category_id, c.category_id, p.name ASC
         ";
 
@@ -93,5 +93,61 @@ class ProductRepository {
         $stmt->bindParam(':user_id', $user_id);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getAllProductsAdmin($filter = []) {
+        $query = "
+            SELECT 
+                p.*, 
+                c.name as category_name,
+                c.parent_id as parent_category_id,
+                parent.name as parent_category_name
+            FROM " . $this->table_products . " p
+            LEFT JOIN " . $this->table_categories . " c ON p.category_id = c.category_id
+            LEFT JOIN " . $this->table_categories . " parent ON c.parent_id = parent.category_id
+            WHERE 1=1
+        ";
+
+        $params = [];
+
+        if (isset($filter['is_archived']) && $filter['is_archived'] !== 'all') {
+            $query .= " AND p.is_archived = :is_archived";
+            $params[':is_archived'] = $filter['is_archived'];
+        }
+
+        if (!empty($filter['category_id'])) {
+            $query .= " AND (p.category_id = :category_id OR c.parent_id = :category_id)";
+            $params[':category_id'] = $filter['category_id'];
+        }
+
+        if (!empty($filter['search'])) {
+            $query .= " AND (p.name LIKE :search OR p.description LIKE :search)";
+            $params[':search'] = '%' . $filter['search'] . '%';
+        }
+
+        $query .= " ORDER BY p.product_id DESC";
+
+        $stmt = $this->conn->prepare($query);
+        foreach ($params as $key => $val) {
+            $stmt->bindValue($key, $val);
+        }
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getAllCategories() {
+        $query = "SELECT * FROM " . $this->table_categories . " ORDER BY name ASC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function updateArchivedStatus($productId, $isArchived) {
+        $query = "UPDATE " . $this->table_products . " SET is_archived = :is_archived WHERE product_id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':is_archived', $isArchived, PDO::PARAM_INT);
+        $stmt->bindParam(':id', $productId, PDO::PARAM_INT);
+        return $stmt->execute();
     }
 }

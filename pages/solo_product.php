@@ -9,8 +9,8 @@ if (isset($_GET['id'])) {
 }
 
 // Redirect or show error if product not found (optional, but good UX)
-if (!$product) {
-    echo "<div class='container mt-5'><p>Product not found.</p></div>";
+if (!$product || $product['is_archived'] == 1) {
+    echo "<div class='container mt-5'><p>Product not found or no longer available.</p></div>";
     // Alternatively redirect: header('Location: index.php?page=menu'); exit;
 } else {
 ?>

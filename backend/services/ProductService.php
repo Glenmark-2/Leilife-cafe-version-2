@@ -56,4 +56,16 @@ class ProductService {
     public function getUserFavorites($user_id) {
         return $this->productRepo->getFavoritesByUserId($user_id);
     }
+
+    public function getAllProductsAdmin($filter = []) {
+        return $this->productRepo->getAllProductsAdmin($filter);
+    }
+
+    public function getAllCategories() {
+        return $this->productRepo->getAllCategories();
+    }
+
+    public function archiveProduct($productId, $isArchived = 1) {
+        return $this->productRepo->updateArchivedStatus($productId, $isArchived);
+    }
 }
