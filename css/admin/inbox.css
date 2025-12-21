@@ -32,7 +32,7 @@
     background: #fff;
     padding: 15px 20px;
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     margin-bottom: 25px;
     display: flex;
     justify-content: space-between;
@@ -84,8 +84,9 @@
 .table-wrapper {
     background: #fff;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow-y: auto;
+    max-height: 600px;
     padding: 0;
 }
 
@@ -131,7 +132,8 @@ tr:hover {
     gap: 8px;
 }
 
-.edit-btn, .archive-btn {
+.edit-btn,
+.archive-btn {
     background: none;
     border: none;
     cursor: pointer;
@@ -140,12 +142,14 @@ tr:hover {
     opacity: 0.8;
 }
 
-.edit-btn:hover, .archive-btn:hover {
+.edit-btn:hover,
+.archive-btn:hover {
     transform: scale(1.1);
     opacity: 1;
 }
 
-.edit-icon, .archive-icon {
+.edit-icon,
+.archive-icon {
     width: 20px;
     height: 20px;
 }
@@ -165,26 +169,31 @@ tr:hover {
     background-color: #c4a076;
 }
 
-.action-header-buttons{
-        display: flex;
-        justify-content: center;
-        gap: 10px;
+.action-header-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
 }
-.nameCol{
+
+.nameCol {
     width: 20%;
 }
-.emailCol{
+
+.emailCol {
     width: 25%;
 }
-.subCol{
+
+.subCol {
     width: 25%;
 
 }
-.dateCol{
+
+.dateCol {
     width: 20%;
 
 }
-.actionCol{
+
+.actionCol {
     width: 10%;
     text-align: center;
 }
