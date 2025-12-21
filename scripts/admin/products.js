@@ -191,10 +191,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Make editProduct and save logic accessible
+    const addProductBtn = document.getElementById('add-product-btn');
+    const editForm = document.getElementById('editProductForm');
+    const editModalElement = document.getElementById('editProductModal');
+    const editModal = new bootstrap.Modal(editModalElement);
+    const modalTitle = document.getElementById('editProductModalLabel');
+    const saveProductBtn = document.getElementById('save-product-btn');
+
+    addProductBtn.addEventListener('click', () => {
+        // Reset form
+        editForm.reset();
+        editForm.classList.remove('was-validated');
+        document.getElementById('edit-product-id').value = '';
+        document.getElementById('edit-img-preview').src = 'assets/products/not_available.png';
+
+        // Update Modal UI
+        modalTitle.innerText = 'Add New Product';
+        saveProductBtn.innerText = 'Add Product';
+
+        editModal.show();
+    });
+
+    // Make editProduct accessible
     window.editProduct = function (id) {
         const product = localProducts.find(p => p.product_id == id);
         if (!product) return;
+
+        // Reset validation
+        editForm.classList.remove('was-validated');
 
         // Populate Modal
         document.getElementById('edit-product-id').value = product.product_id;
@@ -212,8 +236,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Reset file input
         document.getElementById('edit-image').value = '';
 
-        // Show Modal
-        const editModal = new bootstrap.Modal(document.getElementById('editProductModal'));
+        // Update Modal UI
+        modalTitle.innerText = 'Edit Product Information';
+        saveProductBtn.innerText = 'Save Changes';
+
         editModal.show();
     };
 
@@ -229,9 +255,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const saveProductBtn = document.getElementById('save-product-btn');
-    const editForm = document.getElementById('editProductForm');
-
     saveProductBtn.addEventListener('click', async () => {
         // Validation
         if (!editForm.checkValidity()) {
@@ -240,10 +263,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const productId = document.getElementById('edit-product-id').value;
+        const isEdit = productId !== '';
 
         // Use FormData for file upload
         const formData = new FormData();
-        formData.append('product_id', productId);
+        if (isEdit) formData.append('product_id', productId);
         formData.append('name', document.getElementById('edit-name').value.trim());
         formData.append('description', document.getElementById('edit-description').value.trim());
         formData.append('price', document.getElementById('edit-price').value);
@@ -259,7 +283,8 @@ document.addEventListener('DOMContentLoaded', () => {
             saveProductBtn.disabled = true;
             saveProductBtn.innerText = 'Saving...';
 
-            const response = await fetch('../backend/api/admin/update_product.php', {
+            const endpoint = isEdit ? '../backend/api/admin/update_product.php' : '../backend/api/admin/add_product.php';
+            const response = await fetch(endpoint, {
                 method: 'POST',
                 body: formData // Body is now FormData
             });
@@ -276,26 +301,34 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (result.success) {
-                // Update local data for real-time refresh
-                const prodIndex = localProducts.findIndex(p => p.product_id == productId);
-                if (prodIndex !== -1) {
-                    // Update object properties
-                    localProducts[prodIndex].name = formData.get('name');
-                    localProducts[prodIndex].description = formData.get('description');
-                    localProducts[prodIndex].price = parseFloat(formData.get('price'));
-                    localProducts[prodIndex].category_id = formData.get('category_id');
-                    localProducts[prodIndex].is_available = formData.get('is_available');
+                if (isEdit) {
+                    // Update local data for real-time refresh
+                    const prodIndex = localProducts.findIndex(p => p.product_id == productId);
+                    if (prodIndex !== -1) {
+                        // Update object properties
+                        localProducts[prodIndex].name = formData.get('name');
+                        localProducts[prodIndex].description = formData.get('description');
+                        localProducts[prodIndex].price = parseFloat(formData.get('price'));
+                        localProducts[prodIndex].category_id = formData.get('category_id');
+                        localProducts[prodIndex].is_available = formData.get('is_available');
 
-                    if (result.new_image_path) {
-                        localProducts[prodIndex].image_path = result.new_image_path;
+                        if (result.new_image_path) {
+                            localProducts[prodIndex].image_path = result.new_image_path;
+                        }
+
+                        // Also update category name visually in table
+                        const catSelect = document.getElementById('edit-category');
+                        localProducts[prodIndex].category_name = catSelect.options[catSelect.selectedIndex].text.replace('— ', '');
                     }
-
-                    // Also update category name visually in table
-                    const catSelect = document.getElementById('edit-category');
-                    localProducts[prodIndex].category_name = catSelect.options[catSelect.selectedIndex].text.replace('— ', '');
+                } else {
+                    // Handle New Product Refresh (Ideally fetch again or add manually)
+                    // For now, let's just refresh the whole list to be safe or add it if we have all data
+                    alert('Product added successfully!');
+                    window.location.reload(); // Refresh to get all required data like category_name
+                    return;
                 }
 
-                bootstrap.Modal.getInstance(document.getElementById('editProductModal')).hide();
+                editModal.hide();
                 filterProducts();
             } else {
                 alert(result.message);

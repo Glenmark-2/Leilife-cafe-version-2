@@ -179,4 +179,23 @@ class ProductRepository {
         
         return $stmt->execute();
     }
+
+    public function createProduct($data) {
+        $query = "INSERT INTO " . $this->table_products . " 
+                  (name, description, price, category_id, image_path, is_available) 
+                  VALUES (:name, :description, :price, :category_id, :image_path, :is_available)";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':name', $data['name']);
+        $stmt->bindParam(':description', $data['description']);
+        $stmt->bindParam(':price', $data['price']);
+        $stmt->bindParam(':category_id', $data['category_id']);
+        $stmt->bindParam(':image_path', $data['image_path']);
+        $stmt->bindParam(':is_available', $data['is_available']);
+        
+        if ($stmt->execute()) {
+            return $this->conn->lastInsertId();
+        }
+        return false;
+    }
 }

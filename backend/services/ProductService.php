@@ -72,4 +72,8 @@ class ProductService {
     public function updateProduct($id, $data) {
         return $this->productRepo->updateProduct($id, $data);
     }
+
+    public function createProduct($data) {
+        return $this->productRepo->createProduct($data);
+    }
 }
