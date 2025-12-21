@@ -42,7 +42,7 @@
     background: #fff;
     padding: 15px 20px;
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     margin-bottom: 25px;
     display: flex;
     justify-content: space-between;
@@ -84,15 +84,17 @@
 .table-wrapper {
     background: #fff;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    overflow: hidden; /* For rounded corners */
-    padding: 0; /* Let table fill it */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow-y: auto;
+    max-height: 600px;
+    padding: 0;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 600px; /* Ensure it scrolls on very small screens */
+    min-width: 600px;
+    /* Ensure it scrolls on very small screens */
 }
 
 thead {
@@ -127,7 +129,8 @@ tr:hover {
 }
 
 /* Action Buttons */
-.edit-btn, .archive-btn {
+.edit-btn,
+.archive-btn {
     background: none;
     border: none;
     cursor: pointer;
@@ -136,12 +139,14 @@ tr:hover {
     opacity: 0.8;
 }
 
-.edit-btn:hover, .archive-btn:hover {
+.edit-btn:hover,
+.archive-btn:hover {
     transform: scale(1.1);
     opacity: 1;
 }
 
-.edit-icon, .archive-icon {
+.edit-icon,
+.archive-icon {
     width: 20px;
     height: 20px;
 }
@@ -150,7 +155,7 @@ tr:hover {
 .modal-content {
     border-radius: 12px;
     border: none;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 .modal-header {
@@ -169,62 +174,67 @@ tr:hover {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     #search_add form.search-bar {
         max-width: none;
     }
-    
+
     .table-wrapper {
         overflow-x: auto;
     }
 }
 
-.action-header-buttons{
-        display: flex;
-        justify-content: center;
-        gap: 10px;
+.action-header-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
 }
-.nameCol{
+
+.nameCol {
     width: 30%;
 }
-.posCol{
+
+.posCol {
     width: 15%;
 }
-.shiftCol{
+
+.shiftCol {
     width: 10%;
 
 }
-.statCol{
+
+.statCol {
     width: 15%;
 
 }
-.actionCol{
+
+.actionCol {
     width: 10%;
     text-align: center;
 }
 
-    .staffPhoto {
-        width: 50px;
-        height: 50px;
-    }
+.staffPhoto {
+    width: 50px;
+    height: 50px;
+}
 
-    td {
-        padding: 16px;
-        border-bottom: 1px solid #f0f0f0;
-        color: #333;
-        font-size: 0.95rem;
-        vertical-align: middle;
-    }
+td {
+    padding: 16px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #333;
+    font-size: 0.95rem;
+    vertical-align: middle;
+}
 
 
-    .staffNameDiv {
-        display: flex;
-        flex-direction: row;
-        gap: 10px;
-        align-items: center;
-    }
+.staffNameDiv {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+}
 
-    .staffNameDiv p {
-        margin-top: 0;
-        margin-bottom: 0;
-    }
+.staffNameDiv p {
+    margin-top: 0;
+    margin-bottom: 0;
+}
