@@ -321,10 +321,11 @@ if (addressForm) {
     });
 }
 
-
-// change password
+// settings - change password 
 const changePassBtn = document.getElementById("changePassBtn");
+const setPassBtn = document.getElementById("setPassBtn");
 const changePasswordModal = document.getElementById("changePasswordModal");
+const closeChangePasswordModal = document.getElementById("closeChangePasswordModal");
 
 if (changePassBtn) {
     changePassBtn.addEventListener("click", () => {
@@ -332,8 +333,87 @@ if (changePassBtn) {
     });
 }
 
-window.addEventListener("click", (e) => {
-    if (e.target === changePasswordModal) {
+if (setPassBtn) {
+    setPassBtn.addEventListener("click", () => {
+        changePasswordModal.style.display = "flex";
+    });
+}
+
+if (closeChangePasswordModal) {
+    closeChangePasswordModal.addEventListener("click", () => {
         changePasswordModal.style.display = "none";
+    });
+}
+
+const changePasswordForm = document.getElementById("changePasswordForm");
+if (changePasswordForm) {
+    const newPassInput = changePasswordForm.querySelector('input[name="new_password"]');
+    const strengthText = document.getElementById("password-strength");
+
+    if (newPassInput && strengthText) {
+        newPassInput.addEventListener("input", () => {
+            const val = newPassInput.value;
+            if (val.length === 0) {
+                strengthText.textContent = "";
+                return;
+            }
+            if (val.length < 8) {
+                strengthText.textContent = "Too short (min 8 chars)";
+                strengthText.style.color = "red";
+            } else {
+                const hasLetter = /[a-zA-Z]/.test(val);
+                const hasNumber = /\d/.test(val);
+                const hasSpecial = /[^a-zA-Z0-9]/.test(val);
+
+                if (hasLetter && hasNumber && hasSpecial) {
+                    strengthText.textContent = "Strong";
+                    strengthText.style.color = "green";
+                } else if (hasLetter && (hasNumber || hasSpecial)) {
+                    strengthText.textContent = "Medium";
+                    strengthText.style.color = "orange";
+                } else {
+                    strengthText.textContent = "Weak";
+                    strengthText.style.color = "#d9534f";
+                }
+            }
+        });
     }
-});
+
+    changePasswordForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const fd = new FormData(changePasswordForm);
+        const newPass = fd.get("new_password");
+        const confirmPass = fd.get("confirm_password");
+
+        if (newPass.length < 8) {
+            showToast("Password must be at least 8 characters", "error");
+            return;
+        }
+
+        if (newPass !== confirmPass) {
+            showToast("New passwords do not match", "error");
+            return;
+        }
+
+        try {
+            const resp = await fetch('../backend/api/update_user_password.php', {
+                method: 'POST',
+                body: fd
+            });
+            const result = await resp.json();
+
+            if (result.success) {
+                showToast(result.message || "Password updated successfully", "success");
+                changePasswordModal.style.display = "none";
+                changePasswordForm.reset();
+                if (strengthText) strengthText.textContent = "";
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showToast(result.message || "Failed to update password", "error");
+            }
+        } catch (err) {
+            showToast("Network error: " + err.message, "error");
+        }
+    });
+}

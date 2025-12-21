@@ -197,7 +197,11 @@ if (!$user) {
     <section class="tab" id="settings" style="display: flex;">
         <h3 class="tab-title">Settings</h3>
         <hr>
+        <?php if(!$user->password): ?>
+        <button type="button" class="btn-primary-custom changePass" id="setPassBtn" style="width: 300px;">Set password</button>
+        <?php else: ?>
         <button type="button" class="btn-primary-custom changePass" id="changePassBtn" style="width: 300px;">Change password</button>
+        <?php endif; ?>
     </section>
 </div>
 
@@ -207,14 +211,12 @@ if (!$user) {
 <div id="changePasswordModal" class="modal-overlay" style="display: none;">
     <div class="modal-content glass-effect" style="height: fit-content;">
         <h3 style="margin-bottom: 20px;">Change Password</h3>
+        <?php if(!$user->password): ?>
         <form id="changePasswordForm">
-            <div class="form-group">
-                <label>Current Password</label>
-                <input type="password" name="current_password" class="modal-input" placeholder="Enter current password" required>
-            </div>
             <div class="form-group">
                 <label>New Password</label>
                 <input type="password" name="new_password" class="modal-input" placeholder="Enter new password" required>
+                <small id="password-strength" style="display:block; margin-top:5px; font-weight:bold;"></small>
             </div>
             <div class="form-group">
                 <label>Confirm New Password</label>
@@ -225,6 +227,27 @@ if (!$user) {
                 <button type="submit" class="btn-primary-custom" id="changePasswordBtn">Change Password</button>
             </div>
         </form>
+        <?php else: ?>
+        <form id="changePasswordForm">
+            <div class="form-group">
+                <label>Current Password</label>
+                <input type="password" name="current_password" class="modal-input" placeholder="Enter current password" required>
+            </div>
+            <div class="form-group">
+                <label>New Password</label>
+                <input type="password" name="new_password" class="modal-input" placeholder="Enter new password" required>
+                <small id="password-strength" style="display:block; margin-top:5px; font-weight:bold;"></small>
+            </div>
+            <div class="form-group">
+                <label>Confirm New Password</label>
+                <input type="password" name="confirm_password" class="modal-input" placeholder="Confirm new password" required>
+            </div>
+            <div class="modal-actions">
+                <button type="button" id="closeChangePasswordModal" class="btn-secondary">Cancel</button>
+                <button type="submit" class="btn-primary-custom" id="changePasswordBtn">Change Password</button>
+            </div>
+        </form>
+        <?php endif; ?>
     </div>
 </div>
 <script src="../scripts/users/profile.js"></script>
