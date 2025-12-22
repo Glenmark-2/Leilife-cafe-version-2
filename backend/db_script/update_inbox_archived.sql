@@ -1,2 +1,4 @@
 ALTER TABLE inbox ADD COLUMN is_archived BOOLEAN DEFAULT 0;
 ALTER TABLE inbox MODIFY COLUMN name VARCHAR(255) NULL;
+
+--done glenmark

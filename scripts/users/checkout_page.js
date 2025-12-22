@@ -133,4 +133,89 @@ document.addEventListener('DOMContentLoaded', () => {
             // countBadge.textContent = totalUnits + (totalUnits === 1 ? ' Item' : ' Items');
         }
     }
+    // --- Place Order Logic ---
+    const placeOrderBtn = document.getElementById('placeOrderBtn');
+    if (placeOrderBtn) {
+        placeOrderBtn.addEventListener('click', async () => {
+            // Disable button
+            placeOrderBtn.disabled = true;
+            placeOrderBtn.textContent = 'Processing...';
+
+            // Collect Data
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+            let deliveryMethod = document.querySelector('input[name="deliveryOption"]:checked').value;
+            // Fix value matching if needed (html has value="homeDelivery", backend expects 'delivery' or map it)
+            // Backend Service expected 'delivery' or 'pickup'. HTML has 'homeDelivery'.
+            if (deliveryMethod === 'homeDelivery') deliveryMethod = 'delivery';
+
+            let deliveryAddress = '';
+            let deliveryNotes = '';
+            let deliveryFee = 0;
+
+            if (deliveryMethod === 'pickup') {
+                deliveryAddress = 'Lunduyan Langaray Village, Barangay 14 Caloocan City';
+                deliveryFee = 0;
+            } else {
+                deliveryAddress = document.getElementById('deliveryAddress').value;
+                deliveryNotes = document.getElementById('deliveryNotes').value;
+                deliveryFee = 50;
+
+                if (!deliveryAddress.trim()) {
+                    alert('Please enter a delivery address.');
+                    placeOrderBtn.disabled = false;
+                    placeOrderBtn.textContent = 'Place Order';
+                    return;
+                }
+            }
+
+            // Map Cart Items
+            const items = cart.map(item => ({
+                product_id: item.id,
+                quantity: item.qty
+            }));
+
+            const orderData = {
+                items: items,
+                payment_method: paymentMethod,
+                delivery_method: deliveryMethod,
+                delivery_address: deliveryAddress,
+                delivery_notes: deliveryNotes,
+                delivery_fee: deliveryFee
+            };
+
+            try {
+                const response = await fetch('/Leilife_2nd/backend/api/place_order.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(orderData)
+                });
+
+                // Check if response is JSON (might be 401 html login redirect if not logged in)
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    const result = await response.json();
+                    if (response.ok && result.success) {
+                        // Success
+                        localStorage.removeItem('leilife_cart');
+                        window.location.href = 'index.php?page=order_tracking&order_id=' + result.order_id;
+                    } else {
+                        alert('Failed to place order: ' + (result.message || 'Unknown error'));
+                        placeOrderBtn.disabled = false;
+                        placeOrderBtn.textContent = 'Place Order';
+                    }
+                } else {
+                    // Probably HTML returned (redirect to login)
+                    window.location.href = 'index.php?page=home&login=true';
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while placing the order. Please check console.');
+                placeOrderBtn.disabled = false;
+                placeOrderBtn.textContent = 'Place Order';
+            }
+        });
+    }
 });

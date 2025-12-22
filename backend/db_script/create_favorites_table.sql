@@ -8,4 +8,6 @@ CREATE TABLE IF NOT EXISTS favorites (
     UNIQUE KEY unique_user_product (user_id, product_id)
 );
 
+--done glenmark
+
 
