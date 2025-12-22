@@ -7,3 +7,5 @@ CREATE TABLE IF NOT EXISTS inbox (
     status ENUM('unread', 'read') DEFAULT 'unread',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+--done glenmark

@@ -146,7 +146,7 @@
                         <p>₱120.00</p>
                     </div> -->
 
-                    <button class="btn btn-primary-custom w-100 mt-4">Place Order</button>
+                    <button class="btn btn-primary-custom w-100 mt-4" id="placeOrderBtn">Place Order</button>
                 </div>
             </div>
         </div>
