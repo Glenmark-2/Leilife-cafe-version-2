@@ -11,14 +11,56 @@ document.addEventListener('DOMContentLoaded', () => {
     const pageInfo = document.getElementById('pageInfo');
     const tbody = document.querySelector('table tbody');
 
+    // Load saved filters
+    const savedFilters = JSON.parse(sessionStorage.getItem('sales_filters') || '{}');
+    if (savedFilters.status) statusFilter.value = savedFilters.status;
+    if (savedFilters.payment) paymentFilter.value = savedFilters.payment;
+    if (savedFilters.from) fromDate.value = savedFilters.from;
+    if (savedFilters.to) toDate.value = savedFilters.to;
+
     // Initial Load
     fetchSalesData();
 
+    function saveFilters() {
+        const filters = {
+            status: statusFilter.value,
+            payment: paymentFilter.value,
+            from: fromDate.value,
+            to: toDate.value
+        };
+        sessionStorage.setItem('sales_filters', JSON.stringify(filters));
+    }
+
     // Event Listeners
-    statusFilter.addEventListener('change', () => { currentPage = 1; fetchSalesData(); });
-    paymentFilter.addEventListener('change', () => { currentPage = 1; fetchSalesData(); });
-    fromDate.addEventListener('change', () => { currentPage = 1; fetchSalesData(); });
-    toDate.addEventListener('change', () => { currentPage = 1; fetchSalesData(); });
+    const exportPdfBtn = Array.from(document.querySelectorAll('.btn-primary-custom.btns')).find(btn => btn.textContent === 'Export PDF');
+    if (exportPdfBtn) {
+        exportPdfBtn.addEventListener('click', () => {
+            const currentStatus = statusFilter.value;
+
+            if (currentStatus === 'Cancelled') {
+                alert('Action Denied: Cancelled orders are excluded from Sales Reports. Please select another status.');
+                return;
+            }
+
+            const from = fromDate.value;
+            const to = toDate.value;
+
+            const params = new URLSearchParams({
+                status: currentStatus,
+                payment: paymentFilter.value,
+                fromDate: from,
+                toDate: to
+            });
+
+            // Trigger export
+            window.location.href = '/Leilife_2nd/backend/api/admin/export_sales_pdf.php?' + params.toString();
+        });
+    }
+
+    statusFilter.addEventListener('change', () => { currentPage = 1; saveFilters(); fetchSalesData(); });
+    paymentFilter.addEventListener('change', () => { currentPage = 1; saveFilters(); fetchSalesData(); });
+    fromDate.addEventListener('change', () => { currentPage = 1; saveFilters(); fetchSalesData(); });
+    toDate.addEventListener('change', () => { currentPage = 1; saveFilters(); fetchSalesData(); });
 
     prevBtn.addEventListener('click', () => {
         if (currentPage > 1) {
