@@ -38,6 +38,7 @@ class SettingsRepository
                 enable_gcash BOOLEAN DEFAULT TRUE,
                 paymongo_public_key VARCHAR(255),
                 paymongo_secret_key VARCHAR(255),
+                receipt_footer TEXT,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 CONSTRAINT single_row CHECK (id = 1)
             );
@@ -77,7 +78,8 @@ class SettingsRepository
             'enable_cod',
             'enable_gcash',
             'paymongo_public_key',
-            'paymongo_secret_key'
+            'paymongo_secret_key',
+            'receipt_footer'
         ];
 
         foreach ($updatable as $key) {

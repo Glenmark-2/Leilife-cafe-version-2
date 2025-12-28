@@ -140,7 +140,7 @@ function updateDashboardUI(data) {
             <td>${dateTime}</td>
             <td class="text-center">
                 <button class="dlBtn" onclick="event.stopPropagation(); downloadReceipt(${order.id})">
-                    <img src="__DIR__./../../public/assets/downloads.png" alt="Download" class="dlButton" style="width: 20px; height: 20px;">
+                    <img src="../public/assets/downloads.png" alt="Download" class="dlButton" style="width: 20px; height: 20px;">
                 </button>
             </td>
         `;
@@ -148,6 +148,9 @@ function updateDashboardUI(data) {
     });
 }
 
+function downloadReceipt(orderId) {
+    window.open(`../pages/admin/pos_receipt.php?order_id=${orderId}`, '_blank');
+}
 function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
@@ -254,9 +257,3 @@ async function updateOrderItemStatus(itemId, newStatus) {
     }
 }
 
-function downloadReceipt(orderId) {
-    // Placeholder for receipt download implementation
-    console.log('Downloading receipt for order:', orderId);
-    // You can implement the actual download logic here, possibly opening a new window:
-    // window.open(`../backend/api/admin/download_receipt.php?orderId=${orderId}`, '_blank');
-}

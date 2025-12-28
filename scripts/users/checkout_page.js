@@ -174,19 +174,46 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- User Details Edit Logic ---
     if (editContactBtn) {
         editContactBtn.addEventListener('click', () => {
-            if (contactPhone.hasAttribute('readonly')) {
-                // Enable editing for phone only
-                contactPhone.removeAttribute('readonly');
+            // Check current state based on readOnly property
+            if (contactPhone.readOnly) {
+                // Switch to EDIT mode
+                contactPhone.readOnly = false;
                 contactPhone.focus();
                 editContactBtn.textContent = 'Save';
                 editContactBtn.classList.remove('btn-primary-custom');
                 editContactBtn.classList.add('btn-success');
             } else {
-                // Save and disable editing
-                contactPhone.setAttribute('readonly', true);
+                // Switch to READONLY mode (Save validation)
+                const phone = contactPhone.value.trim();
+
+                if (!phone) {
+                    alert('Contact number is required.');
+                    contactPhone.focus();
+                    return;
+                }
+
+                if (phone.length !== 11 || !phone.startsWith('09')) {
+                    alert('Invalid contact number format. It must be an 11-digit number starting with 09.');
+                    contactPhone.focus();
+                    return;
+                }
+
+                contactPhone.readOnly = true;
                 editContactBtn.textContent = 'Edit';
                 editContactBtn.classList.remove('btn-success');
                 editContactBtn.classList.add('btn-primary-custom');
+            }
+        });
+    }
+
+    // Phone Numeric Only Validation
+    if (contactPhone) {
+        contactPhone.addEventListener('input', (e) => {
+            // Remove non-numeric characters
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            // Limit to 11 digits (Standard PH Mobile)
+            if (e.target.value.length > 11) {
+                e.target.value = e.target.value.slice(0, 11);
             }
         });
     }
@@ -268,6 +295,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
+            const phone = document.getElementById('contactPhone').value.trim();
+            if (!phone) {
+                alert('Contact number is required.');
+                placeOrderBtn.disabled = false;
+                placeOrderBtn.textContent = 'Place Order';
+                document.getElementById('contactPhone').focus();
+                return;
+            }
+
+            if (phone.length !== 11 || !phone.startsWith('09')) {
+                alert('Invalid contact number format. Please enter an 11-digit number starting with 09 (e.g., 09123456789).');
+                placeOrderBtn.disabled = false;
+                placeOrderBtn.textContent = 'Place Order';
+                document.getElementById('contactPhone').focus();
+                return;
+            }
+
             const items = cart.map(item => ({
                 product_id: item.id,
                 quantity: item.qty
@@ -275,6 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const orderData = {
                 items: items,
+                phone: phone,
                 payment_method: paymentMethod,
                 delivery_method: deliveryMethod,
                 delivery_address: deliveryAddress,

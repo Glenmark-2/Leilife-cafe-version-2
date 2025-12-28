@@ -20,6 +20,7 @@
             <button type="button" class="tab-btn" data-tab="operations">Operations</button>
             <button type="button" class="tab-btn" data-tab="delivery">Delivery</button>
             <button type="button" class="tab-btn" data-tab="payments">Payments</button>
+            <button type="button" class="tab-btn" data-tab="system">System</button>
         </div>
 
         <div class="tab-content active" id="general">
@@ -147,6 +148,17 @@
                     <input type="password" name="paymongo_secret_key" id="paymongo_secret_key">
                 </div>
                 <p class="warning-text"><i class="bi bi-shield-lock"></i> Sensitive keys are hidden. Use with caution.</p>
+            </div>
+        </div>
+
+        <div class="tab-content" id="system">
+            <div class="settings-section">
+                <h3>Receipt Customization</h3>
+                <div class="form-group full-width">
+                    <label>Receipt Footer Message</label>
+                    <textarea name="receipt_footer" id="receipt_footer" rows="2" placeholder="Thank you for your purchase!"></textarea>
+                    <p class="help-text">This message appears at the bottom of the POS receipt.</p>
+                </div>
             </div>
         </div>
     </form>

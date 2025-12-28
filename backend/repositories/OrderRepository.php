@@ -23,14 +23,15 @@ class OrderRepository
         }
 
         $query = "INSERT INTO " . $this->table_orders . " 
-                  (order_number, user_id, total_amount, delivery_fee, status, payment_status, payment_method, delivery_method, delivery_address, delivery_notes, paymongo_checkout_session_id, paymongo_payment_intent_id) 
-                  VALUES (:order_number, :user_id, :total_amount, :delivery_fee, :status, :payment_status, :payment_method, :delivery_method, :delivery_address, :delivery_notes, :paymongo_checkout_session_id, :paymongo_payment_intent_id)";
+                  (order_number, user_id, contact_number, total_amount, delivery_fee, status, payment_status, payment_method, delivery_method, delivery_address, delivery_notes, paymongo_checkout_session_id, paymongo_payment_intent_id) 
+                  VALUES (:order_number, :user_id, :contact_number, :total_amount, :delivery_fee, :status, :payment_status, :payment_method, :delivery_method, :delivery_address, :delivery_notes, :paymongo_checkout_session_id, :paymongo_payment_intent_id)";
 
         $stmt = $this->conn->prepare($query);
 
         // Bind params
         $stmt->bindParam(':order_number', $order->order_number);
         $stmt->bindParam(':user_id', $order->user_id);
+        $stmt->bindParam(':contact_number', $order->contact_number);
         $stmt->bindParam(':total_amount', $order->total_amount);
         $stmt->bindParam(':delivery_fee', $order->delivery_fee);
         $stmt->bindParam(':status', $order->status);
@@ -124,7 +125,7 @@ class OrderRepository
     }
     public function updateItemsStatusByOrderId($orderId, $status)
     {
-        $query = "UPDATE " . $this->table_order_items . " SET status = :status WHERE order_id = :order_id";
+        $query = "UPDATE " . $this->table_order_items . " SET status = :status WHERE order_id = :order_id AND status != 'cancelled'";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':status', $status);
         $stmt->bindParam(':order_id', $orderId);
