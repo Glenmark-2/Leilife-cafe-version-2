@@ -1,0 +1,221 @@
+.settings-container {
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    margin-top: 20px;
+}
+
+.settings-tabs {
+    display: flex;
+    gap: 10px;
+    border-bottom: 2px solid #f1f1f1;
+    margin-bottom: 30px;
+    padding-bottom: 10px;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 10px 20px;
+    font-weight: 600;
+    color: #6c757d;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-radius: 8px;
+}
+
+.tab-btn:hover {
+    background: #f8f9fa;
+    color: #2c3e50;
+}
+
+.tab-btn.active {
+    color: #d0b28c;
+    background: rgba(208, 178, 140, 0.1);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.settings-section {
+    margin-bottom: 40px;
+}
+
+.settings-section h3 {
+    font-size: 1.1rem;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    font-weight: 700;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: #d0b28c;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(208, 178, 140, 0.1);
+}
+
+.help-text {
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 4px;
+}
+
+.warning-text {
+    font-size: 0.85rem;
+    color: #dc3545;
+    background: #fff5f5;
+    padding: 10px;
+    border-radius: 6px;
+    margin-top: 10px;
+}
+
+/* Toggle Switch Styling */
+.toggle-group {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.toggle-info strong {
+    display: block;
+    font-size: 1rem;
+}
+
+.toggle-info p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+}
+
+input:checked+.slider {
+    background-color: #d0b28c;
+}
+
+input:checked+.slider:before {
+    transform: translateX(26px);
+}
+
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+/* Opening Hours Grid */
+.hours-row {
+    display: grid;
+    grid-template-columns: 100px 1fr 1fr;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.hours-row label {
+    font-weight: bold;
+}
+
+@media (max-width: 600px) {
+    .settings-tabs {
+        flex-wrap: wrap;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}

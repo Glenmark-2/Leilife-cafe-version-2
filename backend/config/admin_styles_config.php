@@ -2,23 +2,25 @@
 return [
     'dashboard' => [
         '../css/admin/dashboard.css',
-        
+
     ],
     'staff' => [
         '../css/admin/staff.css',
-        
+
     ],
     'inbox' => [
         '../css/admin/inbox.css',
     ],
     'reviews' => [
-        '../css/admin/reviews.css', 
+        '../css/admin/reviews.css',
     ],
     'products' => [
-        '../css/admin/products.css', 
+        '../css/admin/products.css',
     ],
     'sales' => [
-        '../css/admin/sales.css', 
+        '../css/admin/sales.css',
     ],
-
+    'settings' => [
+        '../css/admin/settings.css',
+    ],
 ];
