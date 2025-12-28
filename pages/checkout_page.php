@@ -12,32 +12,35 @@
                 require_once __DIR__ . '/../backend/config/Database.php';
 
                 $userData = null;
+                $userAddress = null;
                 if (SessionManager::isLoggedIn()) {
                     $userId = SessionManager::get('user_id');
                     $db = (new Database())->getConnection();
                     $userRepo = new UserRepository($db);
-                    // We need a findById, or re-use findByEmail if needed, but findById is cleaner.
-                    // Assuming findById isn't there, we'll implement a quick fetch or just populate from session if enough data exists.
-                    // Actually, SessionManager has user_name and user_email. Phone might be missing.
-                    // Let's rely on Session or fetch if possible.
-                    // For now, let's just use what's in Session or placeholders.
-                    // Better: fetch fresh data.
+
+                    // Fetch user data
                     $query = "SELECT * FROM users WHERE id = :id";
                     $stmt = $db->prepare($query);
                     $stmt->execute([':id' => $userId]);
                     $userData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                    // Fetch user address if exists
+                    $addressQuery = "SELECT * FROM user_addresses WHERE user_id = :user_id";
+                    $addressStmt = $db->prepare($addressQuery);
+                    $addressStmt->execute([':user_id' => $userId]);
+                    $userAddress = $addressStmt->fetch(PDO::FETCH_ASSOC);
                 }
                 ?>
                 <div class="mb-3">
                     <div class="row g-3">
                         <div class="col-12 col-md-6">
                             <p class="small m-0">Fullname</p>
-                            <input type="text" class="form-control" id="contactName" placeholder="Full Name" 
+                            <input type="text" class="form-control" id="contactName" placeholder="Full Name"
                                 value="<?php echo $userData ? htmlspecialchars($userData['first_name'] . ' ' . $userData['last_name']) : ''; ?>" readonly>
                         </div>
                         <div class="col-12 col-md-6">
                             <p class="small m-0">Phone Number</p>
-                            <input type="text" class="form-control" id="contactPhone" placeholder="Phone Number" 
+                            <input type="text" class="form-control" id="contactPhone" placeholder="Phone Number"
                                 value="<?php echo $userData ? htmlspecialchars($userData['phone_number'] ?? '') : ''; ?>" readonly>
                         </div>
                     </div>
@@ -78,8 +81,34 @@
                 <!-- Home Delivery Inputs -->
                 <div id="homeDeliveryInputs" class="mt-2 d-none">
                     <div class="col mb-2">
-                        <p class="small m-0">Full Address</p>
-                        <input type="text" class="form-control" id="deliveryAddress" placeholder="Street, Barangay, City, etc.">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <p class="small m-0">Full Address</p>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="openAddressModalBtn">
+                                <i class="bi bi-geo-alt"></i> Select Address
+                            </button>
+                        </div>
+                        <?php
+                        // Build full address if user has saved address
+                        $savedAddress = '';
+                        $savedLat = '';
+                        $savedLng = '';
+                        if ($userAddress) {
+                            $addressParts = array_filter([
+                                $userAddress['street'] ?? '',
+                                $userAddress['barangay'] ?? '',
+                                $userAddress['city'] ?? '',
+                                $userAddress['province'] ?? ''
+                            ]);
+                            $savedAddress = implode(', ', $addressParts);
+                            $savedLat = $userAddress['latitude'] ?? '';
+                            $savedLng = $userAddress['longitude'] ?? '';
+                        }
+                        ?>
+                        <input type="text" class="form-control" id="deliveryAddress"
+                            placeholder="Street, Barangay, City, etc."
+                            value="<?php echo htmlspecialchars($savedAddress); ?>" readonly>
+                        <input type="hidden" id="addressLatitude" value="<?php echo htmlspecialchars($savedLat); ?>">
+                        <input type="hidden" id="addressLongitude" value="<?php echo htmlspecialchars($savedLng); ?>">
                     </div>
                     <div class="col">
                         <p class="small m-0">Notes to rider</p>
@@ -153,4 +182,26 @@
 
     </div>
 </div>
+
+<?php include __DIR__ . '/../components/edit_address_modal.php'; ?>
+
+<!-- Save Address Confirmation Modal -->
+<div class="modal fade" id="saveAddressConfirmModal" tabindex="-1" aria-labelledby="saveAddressConfirmLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="saveAddressConfirmLabel">Save Address to Profile?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Would you like to save this address to your profile for future orders?</p>
+            </div>
+            <div class="modal-footer d-flex gap-2">
+                <button type="button" class="btn btn-outline-dark flex-fill" id="skipSaveAddress">No, just for this order</button>
+                <button type="button" class="btn btn-primary-custom flex-fill" id="confirmSaveAddress">Yes, save to profile</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="/Leilife_2nd/scripts/users/checkout_page.js"></script>

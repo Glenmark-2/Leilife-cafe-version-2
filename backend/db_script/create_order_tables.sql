@@ -58,3 +58,4 @@ CREATE TABLE IF NOT EXISTS transactions (
     
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
 );
+-- done nobi

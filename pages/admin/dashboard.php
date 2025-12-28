@@ -1,139 +1,154 @@
-<div class="title-content">
-    <button class="hamburger" id="hamburger" onclick="toggleSidebar()">
-        <span></span>
-        <span></span>
-        <span></span>
-    </button>
-    <p class="title">Dashboard</p>
-</div>
+<style>
+    .dashboard-wrapper {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 80px);
+        /* Adjust based on navbar/header */
+        margin-bottom: 20px;
+    }
 
-<!-- Dashboard Stats Grid -->
-<div class="dashboard-grid">
-    <div class="stat-card">
-        <div class="stat-info center-text">
-            <h3>Pending Orders</h3>
-            <p class="stat-value text-pending">8</p>
-        </div>
+    .clickable-row {
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .clickable-row:hover {
+        background-color: rgba(0, 0, 0, 0.05) !important;
+    }
+
+    .status-badge {
+        position: relative;
+        z-index: 2;
+    }
+
+    .dashboard-row {
+        flex: 1;
+        overflow-y: auto;
+        min-height: 0;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        margin-top: 15px;
+    }
+
+    .dashboard-table thead {
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 10;
+        box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+    }
+</style>
+<div class="dashboard-wrapper">
+    <div class="title-content">
+        <button class="hamburger" id="hamburger" onclick="toggleSidebar()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <p class="title">Dashboard</p>
     </div>
 
-    <div class="stat-card">
-        <div class="stat-info center-text">
-            <h3>Preparing</h3>
-            <p class="stat-value text-preparing">3</p>
-        </div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-info center-text">
-            <h3>Ready for Delivery</h3>
-            <p class="stat-value text-ready">5</p>
-        </div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-info center-text">
-            <h3>Delivered Today</h3>
-            <p class="stat-value text-delivered">120</p>
-        </div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-info center-text">
-            <h3>Cancelled</h3>
-            <p class="stat-value text-cancelled">2</p>
-        </div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-info center-text">
-            <h3>Active Admins</h3>
-            <p class="stat-value text-primary">3</p>
-        </div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-info center-text">
-            <h3>Active Drivers</h3>
-            <p class="stat-value text-primary">5</p>
-        </div>
-    </div>
-</div>
-
-<div class="dashboard-row">
-    <!-- Recent Orders Section -->
-    <div class="dashboard-section recent-orders w-100">
-        <div class="section-header">
-            <h2>Recent Orders</h2>
-
-            <div class="sort-controls">
-                <select id="sortOrders" class="form-select form-select-sm" style="width: auto; display: inline-block;">
-                    <option value="date_desc">Newest First</option>
-                    <option value="date_asc">Oldest First</option>
-                    <option value="status">Status</option>
-                    <option value="total_desc">Highest Total</option>
-                    <option value="total_asc">Lowest Total</option>
-                    <option value="type_pickup">Pickup Only</option>
-                    <option value="type_delivery">Delivery Only</option>
-                </select>
+    <!-- Dashboard Stats Grid -->
+    <div class="dashboard-grid">
+        <div class="stat-card">
+            <div class="stat-info center-text">
+                <h3>Pending Orders</h3>
+                <p class="stat-value text-pending">0</p>
             </div>
         </div>
 
-        <div class="table-responsive">
-            <table class="dashboard-table table table-hover">
-                <thead>
-                    <tr>
-                        <th>Order ID</th>
-                        <th>Customer</th>
-                        <th>Type</th>
-                        <th>Status</th>
-                        <th>Total</th>
-                        <th>Time</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>#1024</td>
-                        <td>John Doe</td>
-                        <td><span class="badge bg-secondary">Delivery</span></td>
-                        <td>
-                            <button class="status-badge status-preparing btn btn-sm " onclick="openStatusModal('1024', 'preparing')">
-                                Preparing
-                            </button>
-                        </td>
-                        <td>₱450.00</td>
-                        <!-- sample lng dl button lng-->
-                        <td>10:05 AM 
-                            <button class="dlBtn" onclick="">
-                                <img src="__DIR__./../../public/assets/downloads.png" alt="" class="dlButton">
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>#1023</td>
-                        <td>Jane Smith</td>
-                        <td><span class="badge bg-info text-dark">Pickup</span></td>
-                        <td>
-                            <button class="status-badge status-delivered btn btn-sm" onclick="openStatusModal('1023', 'delivered')">
-                                Delivered
-                            </button>
-                        </td>
-                        <td>₱1,200.00</td>
-                        <td>09:45 AM</td>
-                    </tr>
-                    <tr>
-                        <td>#1022</td>
-                        <td>Mike Ross</td>
-                        <td><span class="badge bg-secondary">Delivery</span></td>
-                        <td>
-                            <button class="status-badge status-pending btn btn-sm" onclick="openStatusModal('1022', 'pending')">
-                                Pending
-                            </button>
-                        </td>
-                        <td>₱850.00</td>
-                        <td>09:30 AM</td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="stat-card">
+            <div class="stat-info center-text">
+                <h3>Preparing</h3>
+                <p class="stat-value text-preparing">0</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-info center-text">
+                <h3>Ready for Delivery</h3>
+                <p class="stat-value text-ready">0</p>
+            </div>
+        </div>
+
+
+        <div class="stat-card">
+            <div class="stat-info center-text">
+                <h3>Delivered Today</h3>
+                <p class="stat-value text-delivered">0</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-info center-text">
+                <h3>Picked up Today</h3>
+                <p class="stat-value text-picked-up">0</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-info center-text">
+                <h3>Cancelled</h3>
+                <p class="stat-value text-cancelled">0</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-info center-text">
+                <h3>Active Admins</h3>
+                <p class="stat-value text-admins">0</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-info center-text">
+                <h3>Active Drivers</h3>
+                <p class="stat-value text-drivers">0</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-row">
+        <!-- Recent Orders Section -->
+        <div class="dashboard-section recent-orders w-100 h-100 d-flex flex-column">
+            <div class="section-header">
+                <h2>Recent Orders</h2>
+
+                <div class="sort-controls">
+                    <select id="sortOrders" class="form-select form-select-sm" style="width: auto; display: inline-block;">
+                        <option value="date_desc">Newest First</option>
+                        <option value="date_asc">Oldest First</option>
+                        <option value="status">Status</option>
+                        <option value="total_desc">Highest Total</option>
+                        <option value="total_asc">Lowest Total</option>
+                        <option value="type_pickup">Pickup Only</option>
+                        <option value="type_delivery">Delivery Only</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-responsive flex-grow-1">
+                <table class="dashboard-table table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                            <th>Time</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data will be loaded via AJAX -->
+                        <tr>
+                            <td colspan="6" class="text-center">Loading orders...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -154,8 +169,10 @@
                 <div class="d-grid gap-2">
                     <button class="btn btn-outline-primary" onclick="updateStatus('pending')">Set to Pending</button>
                     <button class="btn btn-outline-warning" onclick="updateStatus('preparing')">Set to Preparing</button>
-                    <button class="btn btn-outline-info" onclick="updateStatus('ready')">Set to Ready for Delivery</button>
-                    <button class="btn btn-outline-success" onclick="updateStatus('delivered')">Set to Delivered</button>
+                    <button id="btnReadyForPickup" class="btn btn-outline-info" onclick="updateStatus('ready_for_pickup')">Set to Ready for Pickup</button>
+                    <button id="btnOutForDelivery" class="btn btn-outline-secondary" onclick="updateStatus('out_for_delivery')">Set to Out for Delivery</button>
+                    <button id="btnPickedUp" class="btn btn-outline-success" onclick="updateStatus('picked_up')">Set to Picked Up</button>
+                    <button id="btnDelivered" class="btn btn-outline-success" onclick="updateStatus('delivered')">Set to Delivered</button>
                     <button class="btn btn-outline-danger" onclick="updateStatus('cancelled')">Set to Cancelled</button>
                 </div>
             </div>
@@ -163,25 +180,65 @@
     </div>
 </div>
 
-<script>
-    // Simple JS to handle modal (Pseudo-code for now, normally would be in separate JS file)
-    let statusModal;
+<!-- Order Details Modal -->
+<div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content text-dark">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="orderDetailsModalLabel">Order Details - <span id="detailOrderNumber"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Product Name</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Subtotal</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orderDetailsBody">
+                            <!-- Items will be loaded here -->
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="3" class="text-end">Delivery Fee:</th>
+                                <td id="detailDeliveryFee">₱0.00</td>
+                            </tr>
+                            <tr>
+                                <th colspan="3" class="text-end">Total Amount:</th>
+                                <th id="detailTotalAmount">₱0.00</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-    document.addEventListener('DOMContentLoaded', function() {
-        statusModal = new bootstrap.Modal(document.getElementById('statusModal'));
-    });
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmationModalLabel">Confirm Status Change</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmationMessage">Are you sure you want to change the status?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmStatusBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-    function openStatusModal(orderId, currentStatus) {
-        document.getElementById('modalOrderId').value = orderId;
-        document.getElementById('displayOrderId').innerText = orderId;
-        statusModal.show();
-    }
-
-    function updateStatus(newStatus) {
-        const orderId = document.getElementById('modalOrderId').value;
-        // In a real app, you would make an AJAX call here
-        alert(`Order #${orderId} status updated to: ${newStatus}`);
-        statusModal.hide();
-        // optionally reload page or update UI row
-    }
-</script>
+<script src="/Leilife_2nd/scripts/admin/dashboard.js"></script>

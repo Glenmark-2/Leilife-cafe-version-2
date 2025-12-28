@@ -8,10 +8,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const editContactBtn = document.getElementById('editContactBtn');
     const contactName = document.getElementById('contactName');
     const contactPhone = document.getElementById('contactPhone');
+    const openAddressModalBtn = document.getElementById('openAddressModalBtn');
+    const deliveryAddressInput = document.getElementById('deliveryAddress');
 
     // --- State ---
     let cart = JSON.parse(localStorage.getItem('leilife_cart')) || [];
     let deliveryChoice = localStorage.getItem('leilife_delivery_choice') || 'pickup';
+    let tempAddressData = null; // Store address before confirmation
 
     // --- Empty Cart Check ---
     if (cart.length === 0) {
@@ -26,13 +29,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
 
-            // Redirect after 2 seconds
             setTimeout(() => {
                 window.location.href = 'index.php?page=menu';
             }, 2000);
         }
-        // Disable interaction with other elements if needed or just let the redirect happen
-        return; // Stop further execution
+        return;
     }
 
     // --- Delivery Logic ---
@@ -41,13 +42,11 @@ document.addEventListener('DOMContentLoaded', () => {
             pickupRadio.checked = true;
             pickupAddress.classList.remove('d-none');
             homeInputs.classList.add('d-none');
-            // Update Totals (Delivery Fee = 0)
             renderOrderSummary(0);
         } else {
             homeRadio.checked = true;
             pickupAddress.classList.add('d-none');
             homeInputs.classList.remove('d-none');
-            // Update Totals (Delivery Fee = 50)
             renderOrderSummary(50);
         }
     }
@@ -60,21 +59,130 @@ document.addEventListener('DOMContentLoaded', () => {
     homeRadio.addEventListener('change', () => toggleDeliveryOptions('delivery'));
 
 
+    // --- Address Modal Integration ---
+    // Use event delegation since the button might be hidden initially
+    document.addEventListener('click', (e) => {
+        if (e.target && e.target.id === 'openAddressModalBtn') {
+            e.preventDefault();
+            const addressModal = document.getElementById('addressModal');
+            console.log('Address modal element:', addressModal);
+
+            if (addressModal) {
+                addressModal.style.display = 'flex';
+
+                // Initialize the map if not already done
+                if (typeof initializeAddressModal === 'function') {
+                    initializeAddressModal();
+                } else {
+                    console.error('initializeAddressModal function not found');
+                }
+            } else {
+                console.error('Address modal element not found');
+            }
+        }
+    });
+
+    // Handle address modal save
+    const addressForm = document.getElementById('addressForm');
+    if (addressForm) {
+        addressForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(addressForm);
+            const street = formData.get('street');
+            const barangay = formData.get('barangay');
+            const city = formData.get('city');
+            const province = formData.get('province');
+            const region = formData.get('region');
+            const latitude = formData.get('latitude');
+            const longitude = formData.get('longitude');
+
+            // Store address data temporarily
+            tempAddressData = {
+                street,
+                barangay,
+                city,
+                province,
+                region,
+                latitude,
+                longitude,
+                fullAddress: `${street}, ${barangay}, ${city}, ${province}`
+            };
+
+            // Update the delivery address field
+            deliveryAddressInput.value = tempAddressData.fullAddress;
+            document.getElementById('addressLatitude').value = latitude;
+            document.getElementById('addressLongitude').value = longitude;
+
+            // Close address modal
+            const addressModal = document.getElementById('addressModal');
+            if (addressModal) {
+                addressModal.style.display = 'none';
+            }
+
+            // Show confirmation modal
+            const confirmModal = new bootstrap.Modal(document.getElementById('saveAddressConfirmModal'));
+            confirmModal.show();
+        });
+    }
+
+    // Handle save to profile confirmation
+    const confirmSaveBtn = document.getElementById('confirmSaveAddress');
+    const skipSaveBtn = document.getElementById('skipSaveAddress');
+
+    if (confirmSaveBtn) {
+        confirmSaveBtn.addEventListener('click', async () => {
+            if (tempAddressData) {
+                try {
+                    const response = await fetch('/Leilife_2nd/backend/api/update_address.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(tempAddressData)
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        console.log('Address saved to profile successfully');
+                    } else {
+                        console.error('Failed to save address:', result.message);
+                    }
+                } catch (error) {
+                    console.error('Error saving address:', error);
+                }
+            }
+
+            // Close confirmation modal
+            const confirmModal = bootstrap.Modal.getInstance(document.getElementById('saveAddressConfirmModal'));
+            if (confirmModal) {
+                confirmModal.hide();
+            }
+        });
+    }
+
+    if (skipSaveBtn) {
+        skipSaveBtn.addEventListener('click', () => {
+            // Just close the modal without saving
+            const confirmModal = bootstrap.Modal.getInstance(document.getElementById('saveAddressConfirmModal'));
+            if (confirmModal) {
+                confirmModal.hide();
+            }
+        });
+    }
+
     // --- User Details Edit Logic ---
     if (editContactBtn) {
         editContactBtn.addEventListener('click', () => {
-            if (contactName.hasAttribute('readonly')) {
-                // Enable Editing
-                contactName.removeAttribute('readonly');
+            if (contactPhone.hasAttribute('readonly')) {
+                // Enable editing for phone only
                 contactPhone.removeAttribute('readonly');
-                contactName.focus();
+                contactPhone.focus();
                 editContactBtn.textContent = 'Save';
                 editContactBtn.classList.remove('btn-primary-custom');
                 editContactBtn.classList.add('btn-success');
             } else {
-                // Save (Disable Editing)
-                // Here you might validation or API update call
-                contactName.setAttribute('readonly', true);
+                // Save and disable editing
                 contactPhone.setAttribute('readonly', true);
                 editContactBtn.textContent = 'Edit';
                 editContactBtn.classList.remove('btn-success');
@@ -92,14 +200,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!container) return;
 
-        // Render Items
         container.innerHTML = '';
         let subtotal = 0;
 
         cart.forEach(item => {
             subtotal += item.price * item.qty;
 
-            // Image Path Fix
             let imageSrc = item.image;
             if (!imageSrc.startsWith('http') && !imageSrc.startsWith('/')) {
                 imageSrc = '/Leilife_2nd/public/assets/products/' + imageSrc;
@@ -120,7 +226,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const total = subtotal + deliveryFee;
 
-        // Update UI
         if (subtotalEl) subtotalEl.textContent = '₱' + subtotal.toFixed(2);
         if (deliveryFeeEl) deliveryFeeEl.textContent = '₱' + deliveryFee.toFixed(2);
         if (totalEl) totalEl.textContent = '₱' + total.toFixed(2);
@@ -128,24 +233,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const countBadge = document.getElementById('order-summary-count');
         if (countBadge) {
             countBadge.textContent = cart.length + (cart.length === 1 ? ' Item' : ' Items');
-            // If you want total units instead of unique items:
-            // const totalUnits = cart.reduce((acc, item) => acc + item.qty, 0);
-            // countBadge.textContent = totalUnits + (totalUnits === 1 ? ' Item' : ' Items');
         }
     }
+
     // --- Place Order Logic ---
     const placeOrderBtn = document.getElementById('placeOrderBtn');
     if (placeOrderBtn) {
         placeOrderBtn.addEventListener('click', async () => {
-            // Disable button
             placeOrderBtn.disabled = true;
             placeOrderBtn.textContent = 'Processing...';
 
-            // Collect Data
             const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
             let deliveryMethod = document.querySelector('input[name="deliveryOption"]:checked').value;
-            // Fix value matching if needed (html has value="homeDelivery", backend expects 'delivery' or map it)
-            // Backend Service expected 'delivery' or 'pickup'. HTML has 'homeDelivery'.
+
             if (deliveryMethod === 'homeDelivery') deliveryMethod = 'delivery';
 
             let deliveryAddress = '';
@@ -161,14 +261,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 deliveryFee = 50;
 
                 if (!deliveryAddress.trim()) {
-                    alert('Please enter a delivery address.');
+                    alert('Please select a delivery address.');
                     placeOrderBtn.disabled = false;
                     placeOrderBtn.textContent = 'Place Order';
                     return;
                 }
             }
 
-            // Map Cart Items
             const items = cart.map(item => ({
                 product_id: item.id,
                 quantity: item.qty
@@ -192,12 +291,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify(orderData)
                 });
 
-                // Check if response is JSON (might be 401 html login redirect if not logged in)
                 const contentType = response.headers.get("content-type");
                 if (contentType && contentType.indexOf("application/json") !== -1) {
                     const result = await response.json();
                     if (response.ok && result.success) {
-                        // Success
                         localStorage.removeItem('leilife_cart');
                         window.location.href = 'index.php?page=order_tracking&order_id=' + result.order_id;
                     } else {
@@ -206,7 +303,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         placeOrderBtn.textContent = 'Place Order';
                     }
                 } else {
-                    // Probably HTML returned (redirect to login)
                     window.location.href = 'index.php?page=home&login=true';
                 }
 

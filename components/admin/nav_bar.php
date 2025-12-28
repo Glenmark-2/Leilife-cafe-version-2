@@ -43,7 +43,7 @@
     ?>
 
     <div id="logout">
-      <?= sidebarButton("../public/assets/logout.png", "Logout", "#"); ?>
+      <?= sidebarButton("../public/assets/logout.png", "Logout", "index.php?page=home"); ?>
     </div>
 
 
