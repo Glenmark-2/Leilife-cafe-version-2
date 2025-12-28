@@ -48,7 +48,8 @@
         background: #fff;
         border-radius: 12px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        overflow: hidden;
+        overflow-x: auto;
+        min-height: 400px;
         padding: 0;
     }
 
@@ -88,26 +89,26 @@
         background-color: #fafafa;
     }
 
-    .oIDCol{
+    .oIDCol {
         width: 25%;
     }
 
-    .nameCol{
+    .nameCol {
         width: 20%;
     }
 
-    .totalCol{
+    .totalCol {
         width: 10%;
     }
 
-    .statusCol{
+    .statusCol {
         width: 15%;
     }
 
-    .paymentCol{
+    .paymentCol {
         width: 15%;
     }
 
-    .dateCol{
+    .dateCol {
         width: 20%;
     }

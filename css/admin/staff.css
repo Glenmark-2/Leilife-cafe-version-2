@@ -85,8 +85,9 @@
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    min-height: 400px;
     overflow-y: auto;
-    max-height: 600px;
+    /* max-height: 600px; Removed for better layout scaling if needed */
     padding: 0;
 }
 
@@ -237,4 +238,14 @@ td {
 .staffNameDiv p {
     margin-top: 0;
     margin-bottom: 0;
+}
+
+/* Pagination */
+.pagination-container {
+    display: flex;
+    justify-content: flex-end;
+    /* Right align standard */
+    align-items: center;
+    margin-top: 15px;
+    gap: 10px;
 }

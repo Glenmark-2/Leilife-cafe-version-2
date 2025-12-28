@@ -166,4 +166,100 @@ class OrderRepository
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return $row['count'];
     }
+
+    public function getSalesOrders($filters, $limit, $offset)
+    {
+        // Base filter: Only show finished orders (picked_up, delivered, cancelled)
+        $where = "o.status IN ('picked_up', 'delivered', 'cancelled')";
+        $params = [];
+
+        // Status Filter
+        if (!empty($filters['status']) && $filters['status'] !== 'All') {
+            $where .= " AND o.status = :status";
+            $params[':status'] = strtolower($filters['status']);
+        }
+
+        // Payment Filter
+        if (!empty($filters['payment']) && $filters['payment'] !== 'All') {
+            if ($filters['payment'] === 'Gcash') {
+                // Assuming 'gcash' is the value in DB, or payment_method enum
+                $where .= " AND o.payment_method = :payment";
+                $params[':payment'] = 'gcash';
+            } elseif ($filters['payment'] === 'Cash') {
+                $where .= " AND o.payment_method = :payment";
+                $params[':payment'] = 'cod'; // Assuming 'cod' is Cash on Delivery
+            }
+        }
+
+        // Date Range Filter
+        if (!empty($filters['fromDate'])) {
+            $where .= " AND o.created_at >= :fromDate";
+            $params[':fromDate'] = $filters['fromDate'] . " 00:00:00";
+        }
+        if (!empty($filters['toDate'])) {
+            $where .= " AND o.created_at <= :toDate";
+            $params[':toDate'] = $filters['toDate'] . " 23:59:59";
+        }
+
+        $query = "SELECT o.*, u.first_name, u.last_name 
+                  FROM " . $this->table_orders . " o 
+                  LEFT JOIN users u ON o.user_id = u.id 
+                  WHERE $where 
+                  ORDER BY o.created_at DESC 
+                  LIMIT :limit OFFSET :offset";
+
+        $stmt = $this->conn->prepare($query);
+
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function countSalesOrders($filters)
+    {
+        // Base filter: Only show finished orders (picked_up, delivered, cancelled)
+        $where = "o.status IN ('picked_up', 'delivered', 'cancelled')";
+        $params = [];
+
+        if (!empty($filters['status']) && $filters['status'] !== 'All') {
+            $where .= " AND o.status = :status";
+            $params[':status'] = strtolower($filters['status']);
+        }
+
+        if (!empty($filters['payment']) && $filters['payment'] !== 'All') {
+            if ($filters['payment'] === 'Gcash') {
+                $where .= " AND o.payment_method = :payment";
+                $params[':payment'] = 'gcash';
+            } elseif ($filters['payment'] === 'Cash') {
+                $where .= " AND o.payment_method = :payment";
+                $params[':payment'] = 'cod';
+            }
+        }
+
+        if (!empty($filters['fromDate'])) {
+            $where .= " AND o.created_at >= :fromDate";
+            $params[':fromDate'] = $filters['fromDate'] . " 00:00:00";
+        }
+        if (!empty($filters['toDate'])) {
+            $where .= " AND o.created_at <= :toDate";
+            $params[':toDate'] = $filters['toDate'] . " 23:59:59";
+        }
+
+        $query = "SELECT COUNT(*) as total FROM " . $this->table_orders . " o WHERE $where";
+        $stmt = $this->conn->prepare($query);
+
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row['total'];
+    }
 }

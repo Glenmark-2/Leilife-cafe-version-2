@@ -86,7 +86,8 @@
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     overflow-y: auto;
-    max-height: 600px;
+    min-height: 400px;
+    /* Standardize min-height */
     padding: 0;
 }
 
@@ -196,4 +197,14 @@ tr:hover {
 .actionCol {
     width: 10%;
     text-align: center;
+}
+
+/* Pagination */
+.pagination-container {
+    display: flex;
+    justify-content: flex-end;
+    /* Right align standard */
+    align-items: center;
+    margin-top: 15px;
+    gap: 10px;
 }

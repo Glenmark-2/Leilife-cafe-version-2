@@ -44,12 +44,10 @@ $messages = $inboxService->getInboxMessages();
         </table>
     </div>
     <!-- Pagination -->
-    <div id="pagination" class="d-flex justify-content-between align-items-center mt-3">
+    <div class="pagination-container">
+        <button id="prevPage" class="btn-primary-custom" disabled>Previous</button>
         <span id="page-info">Showing 0 of 0 messages</span>
-        <div class="pagination-buttons d-flex gap-2">
-            <button id="prevPage" class="btn btn-sm btn-outline-secondary">Previous</button>
-            <button id="nextPage" class="btn btn-sm btn-outline-secondary">Next</button>
-        </div>
+        <button id="nextPage" class="btn-primary-custom" disabled>Next</button>
     </div>
 </div>
 

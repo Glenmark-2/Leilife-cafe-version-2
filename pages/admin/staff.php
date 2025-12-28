@@ -46,12 +46,12 @@ $archivedStaff = $staffService->getArchivedStaffs();
         </table>
     </div>
     <!-- Pagination -->
-    <div id="pagination" class="d-flex justify-content-between align-items-center mt-3">
+    <!-- Pagination -->
+    <!-- Pagination -->
+    <div class="pagination-container">
+        <button id="prevPage" class="btn-primary-custom" disabled>Previous</button>
         <span id="page-info">Showing 0 of 0 staff</span>
-        <div class="pagination-buttons d-flex gap-2">
-            <button id="prevPage" class="btn btn-sm btn-outline-secondary">Previous</button>
-            <button id="nextPage" class="btn btn-sm btn-outline-secondary">Next</button>
-        </div>
+        <button id="nextPage" class="btn-primary-custom" disabled>Next</button>
     </div>
 </div>
 
@@ -90,7 +90,7 @@ $archivedStaff = $staffService->getArchivedStaffs();
                     <div class="mb-3 text-center">
                         <label for="staffPicture" class="form-label d-block fw-bold">Photo Profile</label>
                         <div class="mb-2">
-                             <img id="staff-img-preview" src="/Leilife_2nd/public/assets/default_user.png" alt="Preview" class="rounded-circle shadow-sm" style="width: 100px; height: 100px; object-fit: cover; border: 3px solid #d0b28c;">
+                            <img id="staff-img-preview" src="/Leilife_2nd/public/assets/default_user.png" alt="Preview" class="rounded-circle shadow-sm" style="width: 100px; height: 100px; object-fit: cover; border: 3px solid #d0b28c;">
                         </div>
                         <input type="file" class="form-control form-control-sm mx-auto" id="staffPicture" name="staffPicture" style="max-width: 250px;" accept="image/*">
                     </div>
