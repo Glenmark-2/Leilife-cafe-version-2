@@ -7,5 +7,5 @@ return [
     'products' => __DIR__ . '/../../pages/admin/products.php',
     'sales' => __DIR__ . '/../../pages/admin/sales.php',
     'analytics' => __DIR__ . '/../../pages/admin/analytics.php',
-    
+    'settings' => __DIR__ . '/../../pages/admin/settings.php',
 ];
