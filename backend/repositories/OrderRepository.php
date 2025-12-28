@@ -69,7 +69,10 @@ class OrderRepository
 
     public function findById($id)
     {
-        $query = "SELECT * FROM " . $this->table_orders . " WHERE id = :id LIMIT 1";
+        $query = "SELECT o.*, CONCAT(u.first_name, ' ', u.last_name) as customer_name 
+                  FROM " . $this->table_orders . " o
+                  LEFT JOIN users u ON o.user_id = u.id
+                  WHERE o.id = :id LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id', $id);
         $stmt->execute();

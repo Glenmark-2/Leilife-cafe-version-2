@@ -84,6 +84,9 @@
 /* DELIVERY DETAILS (RIGHT COLUMN) */
 .delivery-col {
     text-align: left;
+    width: fit-content;
+    margin-bottom: 20px;
+    padding: 50px;
 }
 
 .section-title {
@@ -106,8 +109,32 @@
     height: auto;
 }
 
+.dev-details,
 .ord-dtls {
-    margin-top: 10px;
+    max-width: 360px;
+    margin: 0 auto 30px;
 }
 
+.text-primary-custom {
+    color: #24353A !important;
+}
 
+.bg-danger-subtle {
+    background-color: #fce8e8 !important;
+}
+
+.border-danger-subtle {
+    border-color: #f5c2c2 !important;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.35em 0.65em;
+    font-size: 0.75em;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.375rem;
+}

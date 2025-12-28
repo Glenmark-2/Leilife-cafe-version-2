@@ -1,56 +1,54 @@
 <?php
 require_once __DIR__ . '/../backend/config/Database.php';
 require_once __DIR__ . '/../backend/repositories/OrderRepository.php';
+require_once __DIR__ . '/../backend/repositories/SettingsRepository.php';
 
 $orderId = $_GET['order_id'] ?? null;
 $order = null;
 $error = null;
+$settings = null;
 
-if ($orderId) {
-    try {
-        $database = new Database();
-        $db = $database->getConnection();
+try {
+    $database = new Database();
+    $db = $database->getConnection();
+
+    $settingsRepo = new SettingsRepository();
+    $settings = $settingsRepo->getSettings();
+
+    if ($orderId) {
         $orderRepo = new OrderRepository($db);
         $order = $orderRepo->findById($orderId);
 
         if (!$order) {
             $error = "Order not found.";
         }
-    } catch (Exception $e) {
-        $error = "Error loading order.";
+    } else {
+        $error = "No order ID specified.";
     }
-} else {
-    $error = "No order ID specified.";
+} catch (Exception $e) {
+    $error = "Error loading tracking data.";
 }
 
 // Status Mapping
-$statusSteps = [
-    'pending' => 1,
-    'preparing' => 2,
-    'ready' => 3, // Assuming 'ready' implies ready for pickup/delivery usually
-    'out_for_delivery' => 3,
-    'delivered' => 4,
-    'completed' => 4
-];
-
 $currentStep = 1;
-$statusText = 'Queuing'; // Default
+$statusText = 'Queuing';
+$isPickup = ($order && $order->delivery_method === 'pickup');
+
 if ($order) {
-    // Normalize status
     $s = strtolower($order->status);
-    // Rough mapping
+
     if ($s == 'pending') {
         $currentStep = 1;
         $statusText = "Queuing";
     } elseif ($s == 'preparing') {
         $currentStep = 2;
         $statusText = "Preparing";
-    } elseif ($s == 'ready' || $s == 'out_for_delivery' || $s == 'on_delivery') {
+    } elseif ($s == 'ready_for_pickup' || $s == 'out_for_delivery' || $s == 'on_delivery' || $s == 'ready') {
         $currentStep = 3;
-        $statusText = "Out for delivery";
-    } elseif ($s == 'delivered' || $s == 'completed') {
+        $statusText = $isPickup ? "Ready for Pickup" : "Out for delivery";
+    } elseif ($s == 'delivered' || $s == 'completed' || $s == 'picked_up') {
         $currentStep = 4;
-        $statusText = "Delivered";
+        $statusText = $isPickup ? "Picked Up" : "Delivered";
     } elseif ($s == 'cancelled') {
         $currentStep = 0;
         $statusText = "Cancelled";
@@ -82,12 +80,12 @@ if ($order) {
 
                 <div class="step">
                     <div class="prog-num <?php echo ($currentStep >= 3) ? 'active' : ''; ?>">3</div>
-                    <p>Out for delivery</p>
+                    <p><?php echo $isPickup ? 'Ready for Pickup' : 'Out for delivery'; ?></p>
                 </div>
 
                 <div class="step">
                     <div class="prog-num <?php echo ($currentStep >= 4) ? 'active' : ''; ?>">4</div>
-                    <p>Delivered</p>
+                    <p><?php echo $isPickup ? 'Picked Up' : 'Delivered'; ?></p>
                 </div>
             </div>
         <?php else: ?>
@@ -95,16 +93,30 @@ if ($order) {
         <?php endif; ?>
 
         <!-- ETA + DELIVERY DETAILS -->
-        <div class="row justify-content-center align-items-start mt-5 g-4">
+        <div class="row justify-content-center align-items-start">
 
             <!-- LEFT SIDE -->
-            <div class="col-12 col-md-6 text-center mb-4 mb-md-0">
+            <div class="col-12 col-md-6 text-center mb-4 mb-md-0" style="width: fit-content; padding: 50px;">
                 <?php if ($currentStep > 0): ?>
-                    <p class="eta-title">Estimated time of delivery</p>
-                    <p class="eta">30 - 45 mins</p>
+                    <p class="eta-title">
+                        <?php
+                        if ($currentStep == 4) {
+                            echo $isPickup ? 'Pick up successful' : 'Delivery successful';
+                        } else {
+                            echo $isPickup ? 'Estimated pickup time' : 'Estimated time of delivery';
+                        }
+                        ?>
+                    </p>
+                    <p class="eta"><?php echo ($currentStep == 4) ? 'Order Completed' : '30 - 45 mins'; ?></p>
 
                     <div class="product-img-wrapper">
-                        <img src="/Leilife_2nd/public/assets/motorbike.png" alt="Motorbike" class="product-img">
+                        <?php if ($currentStep == 4): ?>
+                            <img src="/Leilife_2nd/public/assets/success-order.png" alt="Success" class="product-img">
+                        <?php elseif ($isPickup): ?>
+                            <img src="/Leilife_2nd/public/assets/walk.png" alt="Pickup" class="product-img">
+                        <?php else: ?>
+                            <img src="/Leilife_2nd/public/assets/motorbike.png" alt="Motorbike" class="product-img">
+                        <?php endif; ?>
                     </div>
                 <?php else: ?>
                     <p class="eta-title text-danger">Your order has been cancelled</p>
@@ -118,16 +130,54 @@ if ($order) {
             <!-- RIGHT SIDE -->
             <div class="col-12 col-md-6 delivery-col">
 
-                <p class="section-title text-center">Delivery details</p>
+                <p class="section-title text-center"><?php echo $isPickup ? 'Pickup details' : 'Delivery details'; ?></p>
 
                 <div class="dev-details">
-                    <div class="detail-item">
-                        <img src="/Leilife_2nd/public/assets/pin.png" class="icon">
-                        <span><?php echo htmlspecialchars($order->delivery_address ?? 'No address provided'); ?></span>
+                    <!-- Customer/Shop Name -->
+                    <div class="detail-item mb-3">
+                        <img src="/Leilife_2nd/public/assets/leilife-logo.png" class="icon" style="width: 20px; height: 20px;">
+                        <span class="fw-bold">
+                            <?php
+                            if ($isPickup) {
+                                echo htmlspecialchars($settings['store_name'] ?? 'Leilife Cafe & Resto');
+                            } else {
+                                echo htmlspecialchars($order->customer_name ?? 'Valued Customer');
+                            }
+                            ?>
+                        </span>
                     </div>
 
-                    <div class="detail-item mt-3">
-                        <img src="/Leilife_2nd/public/assets/credit-card.png" class="icon">
+                    <!-- Contact Number -->
+                    <div class="detail-item mb-3">
+                        <img src="/Leilife_2nd/public/assets/white-call.png" class="icon" style="width: 20px; height: 20px; filter: invert(0.5);">
+                        <span>
+                            <?php
+                            if ($isPickup) {
+                                echo htmlspecialchars($settings['contact_phone'] ?? '09123456789');
+                            } else {
+                                echo htmlspecialchars($order->contact_number ?? 'No contact number');
+                            }
+                            ?>
+                        </span>
+                    </div>
+
+                    <!-- Address -->
+                    <div class="detail-item mb-3">
+                        <img src="/Leilife_2nd/public/assets/pin.png" class="icon" style="width: 20px; height: 20px;">
+                        <span>
+                            <?php
+                            if ($isPickup) {
+                                echo htmlspecialchars($settings['physical_address'] ?? '123 Coffee Street, Caloocan City');
+                            } else {
+                                echo htmlspecialchars($order->delivery_address ?? 'No address provided');
+                            }
+                            ?>
+                        </span>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="detail-item">
+                        <img src="/Leilife_2nd/public/assets/credit-card.png" class="icon" style="width: 20px; height: 20px;">
                         <span>
                             <?php
                             if ($order->payment_method === 'cod') {
@@ -144,24 +194,43 @@ if ($order) {
 
                 <div class="ord-dtls">
                     <?php foreach ($order->items as $item): ?>
-                        <div class="detail-item mb-2">
-                            <p style="<?php echo ($item->status == 'cancelled') ? 'text-decoration: line-through; color: #999;' : ''; ?>">
-                                <?php echo $item->quantity; ?> × <?php echo htmlspecialchars($item->product_name); ?> — ₱<?php echo number_format($item->subtotal, 2); ?>
+                        <div class="detail-item mb-3 d-flex align-items-center gap-3">
+                            <?php
+                            $itemImg = $item->product_image ?: 'not_available.png';
+                            if (!str_starts_with($itemImg, 'http') && !str_starts_with($itemImg, '/')) {
+                                $itemImg = '/Leilife_2nd/public/assets/products/' . $itemImg;
+                            }
+                            ?>
+                            <img src="<?php echo htmlspecialchars($itemImg); ?>" class="rounded" style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #eee; <?php echo ($item->status == 'cancelled') ? 'filter: grayscale(1); opacity: 0.6;' : ''; ?>">
+
+                            <div class="flex-grow-1">
+                                <p class="mb-0 fw-bold" style="<?php echo ($item->status == 'cancelled') ? 'text-decoration: line-through; color: #999;' : ''; ?>">
+                                    <?php echo htmlspecialchars($item->product_name); ?>
+                                </p>
+                                <p class="small text-muted mb-0">₱<?php echo number_format($item->price, 2); ?> × <?php echo $item->quantity; ?></p>
+                                <?php if ($item->status == 'cancelled'): ?>
+                                    <span class="badge bg-danger-subtle text-danger border-danger-subtle border px-2 py-1" style="font-size: 0.7rem;">Cancelled</span>
+                                <?php endif; ?>
+                            </div>
+
+                            <p class="fw-bold mb-0" style="<?php echo ($item->status == 'cancelled') ? 'text-decoration: line-through; color: #999;' : ''; ?>">
+                                ₱<?php echo number_format($item->subtotal, 2); ?>
                             </p>
-                            <?php if ($item->status == 'cancelled'): ?>
-                                <p class="text-danger small ms-3 fst-italic" style="margin-top: -5px; text-decoration: line-through;">Cancelled Item</p>
-                            <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
 
-                    <?php if ($order->delivery_fee > 0): ?>
-                        <div class="detail-item mt-2 border-top pt-2">
-                            <p>Delivery Fee: ₱<?php echo number_format($order->delivery_fee, 2); ?></p>
-                        </div>
-                    <?php endif; ?>
+                    <div class="border-top mt-3 pt-3">
+                        <?php if ($order->delivery_fee > 0): ?>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Delivery Fee</span>
+                                <span>₱<?php echo number_format($order->delivery_fee, 2); ?></span>
+                            </div>
+                        <?php endif; ?>
 
-                    <div class="detail-item mt-3 border-top pt-2">
-                        <p class="fw-bold">Total: ₱<?php echo number_format($order->total_amount, 2); ?></p>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <span class="fw-bold fs-5">Total</span>
+                            <span class="fw-bold fs-5 text-primary-custom" style="color: #24353A;">₱<?php echo number_format($order->total_amount, 2); ?></span>
+                        </div>
                     </div>
                 </div>
 
