@@ -35,4 +35,17 @@ class FeedbackRepository
 
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    public function getAllFeedbacks()
+    {
+        $query = "SELECT f.*, u.first_name, u.last_name, u.profile_photo, o.order_number 
+                  FROM order_feedbacks f
+                  JOIN users u ON f.user_id = u.id
+                  JOIN orders o ON f.order_id = o.id
+                  ORDER BY f.created_at DESC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

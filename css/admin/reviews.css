@@ -23,7 +23,8 @@
 
 /* Grid Layout */
 .reviews-container {
-    padding: 0; /* Remove default padding as parent has it */
+    padding: 0;
+    /* Remove default padding as parent has it */
 }
 
 .reviews-minimalist-grid {
@@ -71,6 +72,16 @@
     flex-shrink: 0;
 }
 
+.minimalist .reviewer-photo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 12px;
+    flex-shrink: 0;
+    border: 1px solid #eee;
+}
+
 .minimalist .reviewer-title {
     font-weight: 700;
     color: #333;
@@ -86,7 +97,8 @@
     color: #555;
     margin-bottom: 20px;
     line-height: 1.6;
-    flex-grow: 1; /* Pushes metadata to bottom */
+    flex-grow: 1;
+    /* Pushes metadata to bottom */
 }
 
 .minimalist .review-metadata {
@@ -101,6 +113,7 @@
 }
 
 .minimalist .review-stars {
-    color: #ffc107; /* Standard yellow/gold for stars */
+    color: #ffc107;
+    /* Standard yellow/gold for stars */
     letter-spacing: 2px;
 }

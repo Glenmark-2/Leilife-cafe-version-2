@@ -19,7 +19,10 @@ if (!$user) {
 <div id="body">
     <div id="sideTabs">
         <div id="imgDiv">
-            <img id="profile_photo" src="../public/assets/cheesy_bacon_&_egg.jpeg" alt="profile photo">
+            <?php
+            $photo = $user->profile_photo ? '../public/assets/profiles/' . $user->profile_photo : '../public/assets/default_user.png';
+            ?>
+            <img id="profile_photo" src="<?php echo htmlspecialchars($photo); ?>" alt="profile photo">
         </div>
         <button type="button" class="btn-primary-custom sideTabBtns">Personal Info</button>
         <button type="button" class="btn-primary-custom sideTabBtns">Address</button>

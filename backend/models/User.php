@@ -1,6 +1,7 @@
 <?php
 
-class User {
+class User
+{
     public $id;
     public $first_name;
     public $last_name;
@@ -8,9 +9,10 @@ class User {
     public $phone_number;
     public $password;
     public $role;
+    public $profile_photo;
     public $created_at;
     public $updated_at;
-    
+
     // Address fields
     public $street;
     public $barangay;
@@ -20,7 +22,8 @@ class User {
     public $latitude;
     public $longitude;
 
-    public function __construct($data = []) {
+    public function __construct($data = [])
+    {
         $this->id = $data['id'] ?? null;
         $this->first_name = $data['first_name'] ?? null;
         $this->last_name = $data['last_name'] ?? null;
@@ -28,6 +31,7 @@ class User {
         $this->phone_number = $data['phone_number'] ?? null;
         $this->password = $data['password'] ?? null;
         $this->role = $data['role'] ?? 'customer'; // Default role
+        $this->profile_photo = $data['profile_photo'] ?? null;
         $this->created_at = $data['created_at'] ?? null;
         $this->updated_at = $data['updated_at'] ?? null;
 
@@ -41,17 +45,19 @@ class User {
         $this->longitude = $data['longitude'] ?? null;
     }
 
-    public static function updateUserPersonalInfo($db, $id, $firstName, $lastName, $phone) {
+    public static function updateUserPersonalInfo($db, $id, $firstName, $lastName, $phone)
+    {
         $stmt = $db->prepare("UPDATE users SET first_name = ?, last_name = ?, phone_number = ? WHERE id = ?");
         return $stmt->execute([$firstName, $lastName, $phone, $id]);
     }
 
-    public static function updateUserAddress($db, $user_id, $street, $barangay, $city, $province, $region, $lat, $lng) {
-    $stmt = $db->prepare("SELECT user_id FROM user_addresses WHERE user_id = :user_id");
-    $stmt->execute([':user_id' => $user_id]);
-    $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+    public static function updateUserAddress($db, $user_id, $street, $barangay, $city, $province, $region, $lat, $lng)
+    {
+        $stmt = $db->prepare("SELECT user_id FROM user_addresses WHERE user_id = :user_id");
+        $stmt->execute([':user_id' => $user_id]);
+        $existing = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if($existing) {
+        if ($existing) {
             $sql = "UPDATE user_addresses SET street = ?, barangay = ?, city = ?, province = ?, region = ?, latitude = ?, longitude = ? WHERE user_id = ?";
             $stmt = $db->prepare($sql);
             return $stmt->execute([$street, $barangay, $city, $province, $region, $lat, $lng, $user_id]);
@@ -66,13 +72,11 @@ class User {
                 region = VALUES(region),        
                 latitude = VALUES(latitude),
                 longitude = VALUES(longitude)";
-        
-        $stmt = $db->prepare($sql);
-        return $stmt->execute([$user_id, $street, $barangay, $city, $province, $region, $lat, $lng]);
+
+            $stmt = $db->prepare($sql);
+            return $stmt->execute([$user_id, $street, $barangay, $city, $province, $region, $lat, $lng]);
         }
     }
 
-    public static function updateUserPassword($db, $user_id, $password) {
-        
-    }
+    public static function updateUserPassword($db, $user_id, $password) {}
 }
