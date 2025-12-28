@@ -84,8 +84,12 @@ document.addEventListener('DOMContentLoaded', () => {
             status = status.charAt(0).toUpperCase() + status.slice(1);
 
             // Format Payment
-            let payment = order.payment_method === 'cod' ? 'Cash' : 'E-Wallet (Gcash)'; // Adjust mapping as per DB values
-            if (order.payment_method === 'gcash') payment = 'E-Wallet (Gcash)';
+            let payment = '';
+            if (order.payment_method === 'cod') {
+                payment = order.delivery_method === 'delivery' ? 'Cash on Delivery' : 'Cash';
+            } else {
+                payment = 'E-Wallet (Gcash)';
+            }
 
             // Format Date
             const date = new Date(order.created_at).toLocaleDateString('en-US', {

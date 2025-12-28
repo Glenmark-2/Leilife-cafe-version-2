@@ -40,16 +40,22 @@
                         </div>
                         <div class="col-12 col-md-6">
                             <p class="small m-0">Phone Number</p>
-                            <input type="text" class="form-control" id="contactPhone" placeholder="Phone Number"
-                                value="<?php echo $userData ? htmlspecialchars($userData['phone_number'] ?? '') : ''; ?>" readonly>
+                            <input type="text" class="form-control" id="contactPhone" placeholder="Ex. 09123456789"
+                                value="<?php echo $userData ? htmlspecialchars($userData['phone_number'] ?? '') : ''; ?>"
+                                <?php echo ($userData && !empty($userData['phone_number'])) ? 'readonly' : ''; ?>>
                         </div>
                     </div>
                 </div>
                 <!-- Hidden inputs for validation / submission -->
                 <input type="hidden" id="contactEmail" value="<?php echo $userData ? htmlspecialchars($userData['email']) : ''; ?>">
 
+                <?php
+                $isPhoneReadonly = ($userData && !empty($userData['phone_number']));
+                $btnText = $isPhoneReadonly ? 'Edit' : 'Save';
+                $btnClass = $isPhoneReadonly ? 'btn-primary-custom' : 'btn-success';
+                ?>
                 <div class="d-flex justify-content-end">
-                    <button type="button" class="btn btn-primary-custom edit-btn-size" id="editContactBtn">Edit</button>
+                    <button type="button" class="btn <?php echo $btnClass; ?> edit-btn-size" id="editContactBtn"><?php echo $btnText; ?></button>
                 </div>
             </div>
 

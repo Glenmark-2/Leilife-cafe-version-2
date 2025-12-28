@@ -1,6 +1,7 @@
 <?php
 
-class Order {
+class Order
+{
     public $id;
     public $order_number;
     public $user_id;
@@ -14,17 +15,20 @@ class Order {
     public $delivery_notes;
     public $paymongo_checkout_session_id;
     public $paymongo_payment_intent_id;
+    public $contact_number;
     public $created_at;
     public $updated_at;
 
     // Optional: list of items
     public $items = [];
 
-    public function __construct($data = null) {
+    public function __construct($data = null)
+    {
         if ($data) {
             $this->id = $data['id'] ?? null;
             $this->order_number = $data['order_number'] ?? null;
             $this->user_id = $data['user_id'] ?? null;
+            $this->contact_number = $data['contact_number'] ?? null;
             $this->total_amount = $data['total_amount'] ?? 0.00;
             $this->delivery_fee = $data['delivery_fee'] ?? 0.00;
             $this->status = $data['status'] ?? 'pending';
