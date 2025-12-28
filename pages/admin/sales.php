@@ -5,7 +5,7 @@
             <span></span>
             <span></span>
         </button>
-        <p class="title">Products</p>
+        <p class="title">Sales Report</p>
     </div>
     <div>
         <button type="button" class="btn-primary-custom btns">Export CSV</button>
@@ -68,3 +68,12 @@
         </table>
     </div>
 </div>
+
+
+<div class="pagination-container" style="display: flex; justify-content: flex-end; align-items: center; margin-top: 15px; gap: 10px;">
+    <button id="prevBtn" class="btn-primary-custom" disabled>Previous</button>
+    <span id="pageInfo">Page 1 of 1</span>
+    <button id="nextBtn" class="btn-primary-custom" disabled>Next</button>
+</div>
+
+<script src="/Leilife_2nd/scripts/admin/sales.js"></script>

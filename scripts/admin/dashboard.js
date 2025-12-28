@@ -35,7 +35,7 @@ async function updateStatus(newStatus) {
     if (newStatus === 'picked_up' || newStatus === 'delivered') {
         // Show confirmation modal
         pendingStatusUpdate = newStatus;
-        const action = newStatus === 'picked_up' ? 'Pick Up' : 'Delivery';
+        const action = newStatus === 'picked_up' ? 'Picked Up' : 'Delivered';
         document.getElementById('confirmationMessage').innerText = `Are you sure you want to mark Order #${orderId} as ${action}? It will be removed from the active dashboard.`;
         statusModal.hide(); // Hide the first modal
         confirmationModal.show();

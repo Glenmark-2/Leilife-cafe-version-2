@@ -6,7 +6,9 @@
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
+    overflow-y: auto;
+    /* Removed max-height, using flexible height or min-height */
+    min-height: 400px;
     padding: 0;
 }
 
@@ -258,6 +260,15 @@ td {
 
 
 /* Pagination */
+.pagination-container {
+    display: flex;
+    justify-content: flex-end;
+    /* Right align standard */
+    align-items: center;
+    margin-top: 15px;
+    gap: 10px;
+}
+
 .pagination .page-link {
     color: #d0b28c;
     border-color: #eee;
