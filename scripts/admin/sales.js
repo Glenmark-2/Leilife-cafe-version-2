@@ -31,6 +31,29 @@ document.addEventListener('DOMContentLoaded', () => {
         sessionStorage.setItem('sales_filters', JSON.stringify(filters));
     }
 
+    // Export Excel Listener
+    const exportExcelBtn = Array.from(document.querySelectorAll('.btn-primary-custom.btns')).find(btn => btn.textContent === 'Export Excel');
+    if (exportExcelBtn) {
+        exportExcelBtn.addEventListener('click', () => {
+            const currentStatus = statusFilter.value;
+
+            if (currentStatus === 'Cancelled') {
+                alert('Action Denied: Cancelled orders are excluded from Sales Reports. Please select another status.');
+                return;
+            }
+
+            const params = new URLSearchParams({
+                status: currentStatus,
+                payment: paymentFilter.value,
+                fromDate: fromDate.value,
+                toDate: toDate.value
+            });
+
+            // Trigger download
+            window.location.href = '/Leilife_2nd/backend/api/admin/export_sales_excel.php?' + params.toString();
+        });
+    }
+
     // Export CSV Listener
     const exportCsvBtn = Array.from(document.querySelectorAll('.btn-primary-custom.btns')).find(btn => btn.textContent === 'Export CSV');
     if (exportCsvBtn) {
