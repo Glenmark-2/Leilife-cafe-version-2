@@ -9,23 +9,259 @@ const sections = {
 
 buttons.forEach(btn => {
     btn.addEventListener("click", () => {
-        buttons.forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-
-        // Hide all sections
-        Object.values(sections).forEach(secId => {
-            document.getElementById(secId).style.display = "none";
-        });
-
-        // Show the section corresponding to clicked button
-        const sectionId = sections[btn.textContent.trim()];
-        const section = document.getElementById(sectionId);
-        if (section) {
-            section.style.display = "flex";
-            // Trigger a resize event if showing address tab, though modal handles map size
-        }
+        activateTab(btn.textContent.trim());
     });
 });
+
+function activateTab(tabTitle) {
+    if (!tabTitle) return;
+
+    buttons.forEach(b => {
+        b.classList.toggle("active", b.textContent.trim() === tabTitle);
+    });
+
+    // Hide all sections
+    Object.values(sections).forEach(secId => {
+        const el = document.getElementById(secId);
+        if (el) el.style.display = "none";
+    });
+
+    // Show selected section
+    const sectionId = sections[tabTitle];
+    const section = document.getElementById(sectionId);
+    if (section) {
+        section.style.display = "flex";
+        if (sectionId === 'order_history') {
+            fetchOrderHistory();
+        }
+    }
+}
+
+// Initial Load - always default to first tab (Personal Info)
+document.addEventListener('DOMContentLoaded', () => {
+    if (buttons.length > 0) {
+        activateTab(buttons[0].textContent.trim());
+    }
+});
+
+// --- Order History Logic ---
+const orderHistoryContainer = document.getElementById('order-history-container');
+let ordersHistoryData = [];
+
+async function fetchOrderHistory() {
+    if (!orderHistoryContainer) return;
+
+    try {
+        const resp = await fetch('../backend/api/get_my_orders.php');
+        const data = await resp.json();
+
+        if (data.success) {
+            ordersHistoryData = data.orders;
+            renderOrderHistory(data.orders);
+        } else {
+            orderHistoryContainer.innerHTML = `<p class="text-center p-4">${data.message || 'No orders found.'}</p>`;
+        }
+    } catch (err) {
+        console.error("Order history fetch error:", err);
+        orderHistoryContainer.innerHTML = `<p class="text-center p-4 text-danger">Failed to load order history.</p>`;
+    }
+}
+
+function renderOrderHistory(orders) {
+    if (!orders || orders.length === 0) {
+        orderHistoryContainer.innerHTML = '<p class="text-center p-4">You haven\'t placed any orders yet.</p>';
+        return;
+    }
+
+    let html = '';
+    orders.forEach(order => {
+        const date = new Date(order.created_at).toLocaleDateString('en-US', {
+            year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+
+        const statusLabel = order.status.replace(/_/g, ' ').toUpperCase();
+        const statusClass = 'status-' + (order.status || 'pending').toLowerCase();
+
+        const itemsList = order.items.map(item => {
+            const isCancelled = item.status === 'cancelled';
+            const style = isCancelled ? 'style="text-decoration: line-through; color: #dc3545; opacity: 0.7;"' : '';
+            const statusText = isCancelled ? ' <small class="fw-bold" style="color: #dc3545;">(Cancelled)</small>' : '';
+            return `<li ${style}>${item.product_name} x ${item.quantity}${statusText}</li>`;
+        }).join('');
+
+        // Feedback section
+        let feedbackHtml = '';
+        if (order.feedback) {
+            feedbackHtml = `
+                <div class="mt-3 p-3 rounded" style="background: #f8f9fa; border-left: 4px solid #d0b28c; border: 1px solid #eee;">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span style="font-weight: bold; font-size: 0.9rem;">Your Review:</span>
+                        <div style="color: #ffc107; font-size: 1rem;">
+                            ${Array(5).fill(0).map((_, i) => `<i class="bi bi-star${i < order.feedback.rating ? '-fill' : ''}"></i>`).join('')}
+                        </div>
+                    </div>
+                    <p class="m-0 small text-muted" style="font-style: italic;">"${order.feedback.comment || 'No comment provided.'}"</p>
+                </div>
+            `;
+        } else if (['delivered', 'picked_up', 'completed'].includes(order.status)) {
+            feedbackHtml = `
+                <button type="button" class="btn btn-sm btn-outline-primary-custom mt-3 px-3" onclick="openFeedbackModal(${order.id})">
+                    Submit Feedback
+                </button>
+            `;
+        }
+
+        html += `
+            <div class="info" style="width: 100%; padding: 25px; background: #fff; border: 1px solid #eee; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); margin-bottom: 20px;">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <p class="label m-0" style="font-size: 1.2rem; display: block;">Order ID: <span style="font-weight: 800; color: #333;">${order.order_number || ('#' + order.id)}</span></p>
+                        <p class="text-muted small m-0">${date}</p>
+                    </div>
+                    <span class="order-status ${statusClass}" style="margin: 0; padding: 6px 14px; border-radius: 50px; font-size: 0.75rem;">${statusLabel}</span>
+                </div>
+                
+                <div class="py-3 border-top border-bottom">
+                    <p class="label mb-2" style="font-size: 0.95rem; font-weight: 700;">Items Ordered:</p>
+                    <ul style="margin: 0 0 0 15px; padding: 0; color: #555; list-style-type: square;">
+                        ${itemsList}
+                    </ul>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <p class="m-0" style="font-weight: 800; font-size: 1.2rem; color: #d0b28c;">₱${parseFloat(order.total_amount).toFixed(2)}</p>
+                    <div class="d-flex gap-2">
+                        ${['delivered', 'picked_up', 'completed'].includes(order.status.toLowerCase()) ? `
+                            <button type="button" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 px-3" onclick="downloadReceipt(${order.id})">
+                                <i class="bi bi-download"></i> Receipt
+                            </button>
+                        ` : ''}
+                        ${['delivered', 'picked_up', 'completed', 'cancelled'].includes(order.status.toLowerCase()) ? `
+                            <button type="button" class="btn btn-sm btn-primary-custom d-flex align-items-center gap-1 px-3" onclick='reorderItems(${order.id})'>
+                                <i class="bi bi-arrow-repeat"></i> Reorder
+                            </button>
+                        ` : `
+                            <button type="button" class="btn btn-sm btn-primary-custom d-flex align-items-center gap-1 px-3" onclick="window.location.href='index.php?page=order_tracking&order_id=${order.id}'">
+                                <i class="bi bi-geo-alt"></i> Track
+                            </button>
+                        `}
+                    </div>
+                </div>
+                ${feedbackHtml}
+            </div>
+        `;
+    });
+
+    orderHistoryContainer.innerHTML = html;
+}
+
+window.reorderItems = function (orderId) {
+    const order = ordersHistoryData.find(o => o.id == orderId);
+    if (!order) return;
+
+    if (confirm("Reordering will clear your current cart and replace it with these items. Continue?")) {
+        const newCart = order.items.map(item => {
+            console.log("Reordering item:", item);
+            return {
+                id: item.product_id,
+                name: item.product_name,
+                price: parseFloat(item.price),
+                qty: parseInt(item.quantity),
+                image: item.product_image || item.image_path || item.image || 'not_available.png'
+            };
+        });
+
+        localStorage.setItem('leilife_cart', JSON.stringify(newCart));
+        window.location.href = 'index.php?page=checkout';
+    }
+}
+
+window.downloadReceipt = function (orderId) {
+    window.open(`index.php?page=user-receipt&order_id=${orderId}`, '_blank');
+}
+
+// --- Feedback Logic ---
+const feedbackModal = document.getElementById('feedbackModal');
+const feedbackForm = document.getElementById('feedbackForm');
+const ratingInput = document.getElementById('ratingInput');
+const stars = document.querySelectorAll('.rating-stars .star');
+
+window.openFeedbackModal = function (orderId) {
+    document.getElementById('feedbackOrderId').value = orderId;
+    feedbackModal.style.display = 'flex';
+    resetStars();
+}
+
+window.closeFeedbackModal = function () {
+    feedbackModal.style.display = 'none';
+    feedbackForm.reset();
+}
+
+function resetStars() {
+    stars.forEach(s => s.style.color = '#ccc');
+    ratingInput.value = '';
+}
+
+stars.forEach(star => {
+    star.addEventListener('click', () => {
+        const val = parseInt(star.getAttribute('data-value'));
+        ratingInput.value = val;
+        stars.forEach((s, idx) => {
+            s.style.color = (idx < val) ? '#ffc107' : '#ccc';
+        });
+    });
+
+    star.addEventListener('mouseover', () => {
+        const val = parseInt(star.getAttribute('data-value'));
+        stars.forEach((s, idx) => {
+            if (idx < val) s.style.color = '#ffc107';
+        });
+    });
+
+    star.addEventListener('mouseout', () => {
+        const currentVal = parseInt(ratingInput.value) || 0;
+        stars.forEach((s, idx) => {
+            s.style.color = (idx < currentVal) ? '#ffc107' : '#ccc';
+        });
+    });
+});
+
+if (feedbackForm) {
+    feedbackForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const rating = ratingInput.value;
+        if (!rating) {
+            showToast("Please provide a rating.", "warning");
+            return;
+        }
+
+        const fd = {
+            order_id: document.getElementById('feedbackOrderId').value,
+            rating: rating,
+            comment: feedbackForm.querySelector('textarea[name="comment"]').value
+        };
+
+        try {
+            const resp = await fetch('../backend/api/submit_feedback.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(fd)
+            });
+            const result = await resp.json();
+
+            if (result.success) {
+                showToast("Feedback submitted! Thank you.", "success");
+                closeFeedbackModal();
+                fetchOrderHistory(); // Refresh list
+            } else {
+                showToast(result.message || "Failed to submit feedback", "error");
+            }
+        } catch (err) {
+            showToast("Network error", "error");
+        }
+    });
+}
 
 // Optional: activate the first tab on page load
 if (buttons.length > 0) buttons[0].click();
@@ -36,11 +272,11 @@ function showToast(message, type = "success", duration = 2500) {
         toast = document.createElement("div");
         toast.id = "toast-notif";
         toast.style.cssText = `
-                position: fixed; bottom: 20px; right: 20px;
-                padding: 12px 20px; border-radius: 8px;
-                color: white; font-size: 14px; opacity: 0;
-                transition: opacity 0.3s ease; z-index: 10000;
-            `;
+position: fixed; bottom: 20px; right: 20px;
+padding: 12px 20px; border-radius: 8px;
+color: white; font-size: 14px; opacity: 0;
+transition: opacity 0.3s ease; z-index: 10000;
+`;
         document.body.appendChild(toast);
     }
     toast.textContent = message;

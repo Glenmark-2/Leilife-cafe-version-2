@@ -85,7 +85,10 @@ class OrderRepository
 
     public function getOrderItems($orderId)
     {
-        $query = "SELECT * FROM " . $this->table_order_items . " WHERE order_id = :order_id";
+        $query = "SELECT oi.*, p.image_path as product_image 
+                  FROM " . $this->table_order_items . " oi
+                  LEFT JOIN products p ON oi.product_id = p.product_id
+                  WHERE oi.order_id = :order_id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':order_id', $orderId);
         $stmt->execute();
@@ -99,17 +102,34 @@ class OrderRepository
 
     public function findByUserId($userId)
     {
-        $query = "SELECT * FROM " . $this->table_orders . " WHERE user_id = :user_id ORDER BY created_at DESC";
+        $query = "SELECT o.*, 
+                         f.id as feedback_id, f.rating as feedback_rating, f.comment as feedback_comment
+                  FROM " . $this->table_orders . " o
+                  LEFT JOIN order_feedbacks f ON o.id = f.order_id
+                  WHERE o.user_id = :user_id 
+                  ORDER BY o.created_at DESC";
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':user_id', $userId);
         $stmt->execute();
 
         $orders = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            // Note: We are not fetching items for all orders here to avoid performance issues if not needed.
-            // If items are needed, we can call getOrderItems for each order or a separate join.
-            // For the list view, usually main order details are enough.
             $order = new Order($row);
+
+            // Fetch items for this order
+            $order->items = $this->getOrderItems($order->id);
+
+            // Add feedback info to the order object (dynamically)
+            $order->feedback = null;
+            if ($row['feedback_id']) {
+                $order->feedback = [
+                    'id' => $row['feedback_id'],
+                    'rating' => $row['feedback_rating'],
+                    'comment' => $row['feedback_comment']
+                ];
+            }
+
             $orders[] = $order;
         }
         return $orders;
