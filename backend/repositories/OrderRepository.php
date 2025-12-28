@@ -286,4 +286,187 @@ class OrderRepository
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return $row['total'];
     }
+
+    public function getExportSalesOrders($filters)
+    {
+        // Base filter: Only show finished orders (picked_up, delivered) 
+        // EXCLUDE 'cancelled' as per user request for Sales Report
+        $where = "o.status IN ('picked_up', 'delivered', 'completed')";
+        $params = [];
+
+        // Status Filter
+        if (!empty($filters['status']) && $filters['status'] !== 'All' && strtolower($filters['status']) !== 'cancelled') {
+            $where .= " AND o.status = :status";
+            $params[':status'] = strtolower($filters['status']);
+        }
+
+        // Payment Filter
+        if (!empty($filters['payment']) && $filters['payment'] !== 'All') {
+            if ($filters['payment'] === 'Gcash') {
+                $where .= " AND o.payment_method = :payment";
+                $params[':payment'] = 'gcash';
+            } elseif ($filters['payment'] === 'Cash') {
+                $where .= " AND o.payment_method = :payment";
+                $params[':payment'] = 'cod';
+            }
+        }
+
+        // Date Range Filter
+        if (!empty($filters['fromDate'])) {
+            $where .= " AND o.created_at >= :fromDate";
+            $params[':fromDate'] = $filters['fromDate'] . " 00:00:00";
+        }
+        if (!empty($filters['toDate'])) {
+            $where .= " AND o.created_at <= :toDate";
+            $params[':toDate'] = $filters['toDate'] . " 23:59:59";
+        }
+
+        $query = "SELECT o.*, u.first_name, u.last_name, u.email, u.phone_number 
+                  FROM " . $this->table_orders . " o 
+                  LEFT JOIN users u ON o.user_id = u.id 
+                  WHERE $where 
+                  ORDER BY o.created_at DESC";
+
+        $stmt = $this->conn->prepare($query);
+
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getDetailedSalesData($filters)
+    {
+        $where = "o.status IN ('picked_up', 'delivered', 'completed') AND oi.status != 'cancelled'";
+        $params = [];
+
+        if (!empty($filters['status']) && $filters['status'] !== 'All' && strtolower($filters['status']) !== 'cancelled') {
+            $where .= " AND o.status = :status";
+            $params[':status'] = strtolower($filters['status']);
+        }
+
+        if (!empty($filters['payment']) && $filters['payment'] !== 'All') {
+            $where .= " AND o.payment_method = :payment";
+            $params[':payment'] = ($filters['payment'] === 'Gcash') ? 'gcash' : 'cod';
+        }
+
+        if (!empty($filters['fromDate'])) {
+            $where .= " AND o.created_at >= :fromDate";
+            $params[':fromDate'] = $filters['fromDate'] . " 00:00:00";
+        }
+        if (!empty($filters['toDate'])) {
+            $where .= " AND o.created_at <= :toDate";
+            $params[':toDate'] = $filters['toDate'] . " 23:59:59";
+        }
+
+        $query = "SELECT 
+                    c.name as category_name,
+                    cp.name as parent_category_name,
+                    oi.product_name,
+                    oi.price,
+                    SUM(oi.quantity) as qty_sold,
+                    COUNT(DISTINCT oi.order_id) as orders_count,
+                    SUM(oi.subtotal) as total_revenue
+                  FROM " . $this->table_order_items . " oi
+                  JOIN " . $this->table_orders . " o ON oi.order_id = o.id
+                  JOIN products p ON oi.product_id = p.product_id
+                  JOIN categories c ON p.category_id = c.category_id
+                  LEFT JOIN categories cp ON c.parent_id = cp.category_id
+                  WHERE $where
+                  GROUP BY cp.name, c.name, oi.product_name, oi.price
+                  ORDER BY cp.name, c.name, total_revenue DESC";
+
+        $stmt = $this->conn->prepare($query);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getSalesStats($filters)
+    {
+        $where = "o.status IN ('picked_up', 'delivered', 'completed')";
+        $params = [];
+
+        if (!empty($filters['status']) && $filters['status'] !== 'All' && strtolower($filters['status']) !== 'cancelled') {
+            $where .= " AND o.status = :status";
+            $params[':status'] = strtolower($filters['status']);
+        }
+
+        if (!empty($filters['payment']) && $filters['payment'] !== 'All') {
+            $where .= " AND o.payment_method = :payment";
+            $params[':payment'] = ($filters['payment'] === 'Gcash') ? 'gcash' : 'cod';
+        }
+
+        if (!empty($filters['fromDate'])) {
+            $where .= " AND o.created_at >= :fromDate";
+            $params[':fromDate'] = $filters['fromDate'] . " 00:00:00";
+        }
+        if (!empty($filters['toDate'])) {
+            $where .= " AND o.created_at <= :toDate";
+            $params[':toDate'] = $filters['toDate'] . " 23:59:59";
+        }
+
+        $query = "SELECT 
+                    COUNT(o.id) as total_orders,
+                    SUM(o.total_amount) as total_revenue,
+                    SUM(o.delivery_fee) as total_delivery_fees
+                  FROM " . $this->table_orders . " o
+                  WHERE $where";
+
+        $stmt = $this->conn->prepare($query);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getTopSellingProducts($filters, $limit = 5)
+    {
+        $where = "o.status IN ('picked_up', 'delivered', 'completed') AND oi.status != 'cancelled'";
+        $params = [];
+
+        if (!empty($filters['status']) && $filters['status'] !== 'All' && strtolower($filters['status']) !== 'cancelled') {
+            $where .= " AND o.status = :status";
+            $params[':status'] = strtolower($filters['status']);
+        }
+
+        if (!empty($filters['payment']) && $filters['payment'] !== 'All') {
+            $where .= " AND o.payment_method = :payment";
+            $params[':payment'] = ($filters['payment'] === 'Gcash') ? 'gcash' : 'cod';
+        }
+
+        if (!empty($filters['fromDate'])) {
+            $where .= " AND o.created_at >= :fromDate";
+            $params[':fromDate'] = $filters['fromDate'] . " 00:00:00";
+        }
+        if (!empty($filters['toDate'])) {
+            $where .= " AND o.created_at <= :toDate";
+            $params[':toDate'] = $filters['toDate'] . " 23:59:59";
+        }
+
+        $query = "SELECT 
+                    oi.product_name,
+                    SUM(oi.quantity) as qty_sold,
+                    SUM(oi.subtotal) as total_revenue
+                  FROM " . $this->table_order_items . " oi
+                  JOIN " . $this->table_orders . " o ON oi.order_id = o.id
+                  WHERE $where
+                  GROUP BY oi.product_name
+                  ORDER BY total_revenue DESC
+                  LIMIT :limit";
+
+        $stmt = $this->conn->prepare($query);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
