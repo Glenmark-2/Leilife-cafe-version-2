@@ -321,7 +321,7 @@ class OrderRepository
             $params[':toDate'] = $filters['toDate'] . " 23:59:59";
         }
 
-        $query = "SELECT o.*, u.first_name, u.last_name 
+        $query = "SELECT o.*, u.first_name, u.last_name, u.email, u.phone_number 
                   FROM " . $this->table_orders . " o 
                   LEFT JOIN users u ON o.user_id = u.id 
                   WHERE $where 
