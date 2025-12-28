@@ -1,0 +1,57 @@
+<?php
+header("Access-Control-Allow-Origin: *");
+header("Content-Type: application/json; charset=UTF-8");
+header("Access-Control-Allow-Methods: POST");
+
+require_once __DIR__ . '/../config/Database.php';
+require_once __DIR__ . '/../repositories/FeedbackRepository.php';
+require_once __DIR__ . '/../repositories/OrderRepository.php';
+require_once __DIR__ . '/../helpers/SessionManager.php';
+
+SessionManager::startSession();
+
+if (!SessionManager::isLoggedIn()) {
+    http_response_code(401);
+    echo json_encode(["success" => false, "message" => "Unauthorized"]);
+    exit();
+}
+
+$userId = SessionManager::get('user_id');
+$data = json_decode(file_get_contents("php://input"));
+
+if (!empty($data->order_id) && !empty($data->rating)) {
+    try {
+        $database = new Database();
+        $db = $database->getConnection();
+
+        $orderRepo = new OrderRepository($db);
+        $order = $orderRepo->findById($data->order_id);
+
+        if (!$order || $order->user_id != $userId) {
+            http_response_code(403);
+            echo json_encode(["success" => false, "message" => "Forbidden"]);
+            exit();
+        }
+
+        $feedbackRepo = new FeedbackRepository($db);
+        $result = $feedbackRepo->create(
+            $data->order_id,
+            $userId,
+            $data->rating,
+            $data->comment ?? null
+        );
+
+        if ($result) {
+            echo json_encode(["success" => true, "message" => "Feedback submitted successfully"]);
+        } else {
+            http_response_code(500);
+            echo json_encode(["success" => false, "message" => "Failed to submit feedback"]);
+        }
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode(["success" => false, "message" => $e->getMessage()]);
+    }
+} else {
+    http_response_code(400);
+    echo json_encode(["success" => false, "message" => "Incomplete data"]);
+}

@@ -233,8 +233,8 @@ document.addEventListener('DOMContentLoaded', () => {
         cart.forEach(item => {
             subtotal += item.price * item.qty;
 
-            let imageSrc = item.image;
-            if (!imageSrc.startsWith('http') && !imageSrc.startsWith('/')) {
+            let imageSrc = item.image || 'not_available.png';
+            if (typeof imageSrc === 'string' && !imageSrc.startsWith('http') && !imageSrc.startsWith('/')) {
                 imageSrc = '/Leilife_2nd/public/assets/products/' + imageSrc;
             }
 

@@ -16,6 +16,7 @@ class Order
     public $paymongo_checkout_session_id;
     public $paymongo_payment_intent_id;
     public $contact_number;
+    public $feedback;
     public $created_at;
     public $updated_at;
 

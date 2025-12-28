@@ -1,6 +1,7 @@
 <?php
 
-class OrderItem {
+class OrderItem
+{
     public $id;
     public $order_id;
     public $product_id;
@@ -9,8 +10,10 @@ class OrderItem {
     public $quantity;
     public $subtotal;
     public $status;
+    public $product_image;
 
-    public function __construct($data = null) {
+    public function __construct($data = null)
+    {
         if ($data) {
             $this->id = $data['id'] ?? null;
             $this->order_id = $data['order_id'] ?? null;
@@ -20,6 +23,7 @@ class OrderItem {
             $this->quantity = $data['quantity'] ?? 0;
             $this->subtotal = $data['subtotal'] ?? 0.00;
             $this->status = $data['status'] ?? 'pending';
+            $this->product_image = $data['product_image'] ?? $data['image_path'] ?? null;
         }
     }
 }

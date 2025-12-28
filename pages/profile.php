@@ -28,36 +28,36 @@ if (!$user) {
         <button type="button" class="btn-primary-custom sideTabBtns">Settings</button>
     </div>
     <!-- personal info -->
-    <section class="tab" id="personal_info" style="display: none; ">
+    <section class="tab" id="personal_info" style="display: flex; ">
         <h3 class="tab-title">Personal Information</h3>
         <hr>
         <div style="overflow-y: auto;">
-    <form id="personal-info-form" action="../backend/api/update_user_personal_info.php" method="POST">
-            <div class="box-input">
-                <div class="info">
-                    <p class="label">First Name</p>
-                    <p class="display-value"><?php echo htmlspecialchars($user->first_name); ?></p>
-                    <input class="edit-input" type="text" name="first_name" value="<?php echo htmlspecialchars($user->first_name); ?>" style="display:none;">
-                </div>
+            <form id="personal-info-form" action="../backend/api/update_user_personal_info.php" method="POST">
+                <div class="box-input">
+                    <div class="info">
+                        <p class="label">First Name</p>
+                        <p class="display-value"><?php echo htmlspecialchars($user->first_name); ?></p>
+                        <input class="edit-input" type="text" name="first_name" value="<?php echo htmlspecialchars($user->first_name); ?>" style="display:none;">
+                    </div>
 
-                <div class="info">
-                    <p class="label">Last Name</p>
-                    <p class="display-value"><?php echo htmlspecialchars($user->last_name); ?></p>
-                    <input class="edit-input" type="text" name="last_name" value="<?php echo htmlspecialchars($user->last_name); ?>" style="display:none;">
-                </div>
+                    <div class="info">
+                        <p class="label">Last Name</p>
+                        <p class="display-value"><?php echo htmlspecialchars($user->last_name); ?></p>
+                        <input class="edit-input" type="text" name="last_name" value="<?php echo htmlspecialchars($user->last_name); ?>" style="display:none;">
+                    </div>
 
-                <div class="info">
-                    <p class="label">Phone Number</p>
-                    <p class="display-value"><?php echo htmlspecialchars($user->phone_number); ?></p>
-                    <input class="edit-input" type="tel" name="phone_number" value="<?php echo htmlspecialchars($user->phone_number); ?>" style="display:none;">
-                </div>
+                    <div class="info">
+                        <p class="label">Phone Number</p>
+                        <p class="display-value"><?php echo htmlspecialchars($user->phone_number); ?></p>
+                        <input class="edit-input" type="tel" name="phone_number" value="<?php echo htmlspecialchars($user->phone_number); ?>" style="display:none;">
+                    </div>
 
-                <div class="info">
-                    <p class="label">Email</p>
-                    <p class="display-value"><?php echo htmlspecialchars($user->email); ?></p>
-                    <input class="edit-input" type="text" name="email" value="<?php echo htmlspecialchars($user->email); ?>" style="display:none;">
+                    <div class="info">
+                        <p class="label">Email</p>
+                        <p class="display-value"><?php echo htmlspecialchars($user->email); ?></p>
+                        <input class="edit-input" type="text" name="email" value="<?php echo htmlspecialchars($user->email); ?>" style="display:none;">
+                    </div>
                 </div>
-            </div>
         </div>
 
         <div class="editDiv">
@@ -73,50 +73,50 @@ if (!$user) {
 
         <div style="overflow-y: auto;">
 
-        <?php if (!$user->street):?> 
-            <button type="button" class="btn-primary-custom" id="editAddressBtn">Add Address</button>
+            <?php if (!$user->street): ?>
+                <button type="button" class="btn-primary-custom" id="editAddressBtn">Add Address</button>
 
-        <?php else:?>
-            <div class="box-input">
-                <div class="info">
-                    <p class="label">Street</p>
-                    <p class="display-value"><?php echo htmlspecialchars($user->street ?? 'Not set'); ?></p>
-                    <input class="edit-input" type="text" name="street" value="<?php echo htmlspecialchars($user->street ?? ''); ?>" style="display:none;">
+            <?php else: ?>
+                <div class="box-input">
+                    <div class="info">
+                        <p class="label">Street</p>
+                        <p class="display-value"><?php echo htmlspecialchars($user->street ?? 'Not set'); ?></p>
+                        <input class="edit-input" type="text" name="street" value="<?php echo htmlspecialchars($user->street ?? ''); ?>" style="display:none;">
+                    </div>
+
+                    <div class="info">
+                        <p class="label">Barangay</p>
+                        <p class="display-value"><?php echo htmlspecialchars($user->barangay ?? 'Not set'); ?></p>
+                        <input class="edit-input" type="text" name="barangay" value="<?php echo htmlspecialchars($user->barangay ?? ''); ?>" style="display:none;">
+                    </div>
+
+                    <div class="info">
+                        <p class="label">City</p>
+                        <p class="display-value"><?php echo htmlspecialchars($user->city ?? 'Caloocan City'); ?></p>
+                        <input class="edit-input" type="tel" name="city" value="<?php echo htmlspecialchars($user->city ?? ''); ?>" style="display:none;">
+                    </div>
+
+                    <div class="info">
+                        <p class="label">Province</p>
+                        <p class="display-value"><?php echo htmlspecialchars($user->province ?? 'Metro Manila'); ?></p>
+                        <input class="edit-input" type="text" name="province" value="<?php echo htmlspecialchars($user->province ?? ''); ?>" style="display:none;">
+                    </div>
+
+                    <div class="info">
+                        <p class="label">Region</p>
+                        <p class="display-value"><?php echo htmlspecialchars($user->region ?? 'NCR'); ?></p>
+                        <input class="edit-input" type="text" name="region" value="<?php echo htmlspecialchars($user->region ?? ''); ?>" style="display:none;">
+                    </div>
                 </div>
 
-                <div class="info">
-                    <p class="label">Barangay</p>
-                    <p class="display-value"><?php echo htmlspecialchars($user->barangay ?? 'Not set'); ?></p>
-                    <input class="edit-input" type="text" name="barangay" value="<?php echo htmlspecialchars($user->barangay ?? ''); ?>" style="display:none;">
-                </div>
-
-                <div class="info">
-                    <p class="label">City</p>
-                    <p class="display-value"><?php echo htmlspecialchars($user->city ?? 'Caloocan City'); ?></p>
-                    <input class="edit-input" type="tel" name="city" value="<?php echo htmlspecialchars($user->city ?? ''); ?>" style="display:none;">
-                </div>
-
-                <div class="info">
-                    <p class="label">Province</p>
-                    <p class="display-value"><?php echo htmlspecialchars($user->province ?? 'Metro Manila'); ?></p>
-                    <input class="edit-input" type="text" name="province" value="<?php echo htmlspecialchars($user->province ?? ''); ?>" style="display:none;">
-                </div>
-
-                <div class="info">
-                    <p class="label">Region</p>
-                    <p class="display-value"><?php echo htmlspecialchars($user->region ?? 'NCR'); ?></p>
-                    <input class="edit-input" type="text" name="region" value="<?php echo htmlspecialchars($user->region ?? ''); ?>" style="display:none;">
-                </div>
-            </div>
-
-        <?php endif;?>
+            <?php endif; ?>
         </div>
 
-        <?php if ($user->street):?> 
-                <div class="editDiv">
-                    <button type="button" class="btn-primary-custom" id="editAddressBtn">Edit</button>
-                </div>
-        <?php endif;?>
+        <?php if ($user->street): ?>
+            <div class="editDiv">
+                <button type="button" class="btn-primary-custom" id="editAddressBtn">Edit</button>
+            </div>
+        <?php endif; ?>
     </section>
 
     <!-- favorties -->
@@ -129,25 +129,25 @@ if (!$user) {
             <div id="favorites-container" class="box-input" style="flex-direction: row; flex-wrap: wrap; gap: 20px;">
                 <!-- JS will populate this -->
             </div>
-            
-            <?php 
-                require_once __DIR__ . '/../backend/services/ProductService.php';
-                $productService = new ProductService();
-                $favorites = $productService->getUserFavorites($userId);
-                // Prepare data for JS
-                $jsFavorites = array_map(function($fav) {
-                    return [
-                        'id' => $fav['product_id'],
-                        'name' => $fav['product_name'],
-                        'price' => (float)$fav['price'],
-                        'image' => $fav['image_path']
-                    ];
-                }, $favorites);
+
+            <?php
+            require_once __DIR__ . '/../backend/services/ProductService.php';
+            $productService = new ProductService();
+            $favorites = $productService->getUserFavorites($userId);
+            // Prepare data for JS
+            $jsFavorites = array_map(function ($fav) {
+                return [
+                    'id' => $fav['product_id'],
+                    'name' => $fav['product_name'],
+                    'price' => (float)$fav['price'],
+                    'image' => $fav['image_path']
+                ];
+            }, $favorites);
             ?>
 
             <script>
                 const userFavorites = <?php echo json_encode($jsFavorites); ?>;
-                
+
                 // Duplicated from menu.php for consistency as requested
                 function createCardHtml(product) {
                     // Using "card-box" structure strictly as requested.
@@ -169,12 +169,12 @@ if (!$user) {
                 }
 
                 document.addEventListener('DOMContentLoaded', () => {
-                   const container = document.getElementById('favorites-container');
-                   if (userFavorites && userFavorites.length > 0) {
-                       container.innerHTML = userFavorites.map(product => createCardHtml(product)).join('');
-                   } else {
-                       container.innerHTML = '<p>No favorites yet.</p>';
-                   }
+                    const container = document.getElementById('favorites-container');
+                    if (userFavorites && userFavorites.length > 0) {
+                        container.innerHTML = userFavorites.map(product => createCardHtml(product)).join('');
+                    } else {
+                        container.innerHTML = '<p>No favorites yet.</p>';
+                    }
                 });
             </script>
         </div>
@@ -184,23 +184,26 @@ if (!$user) {
     <section class="tab" id="order_history" style="display: none;">
         <h3 class="tab-title">Order History</h3>
         <hr>
-        <div style="overflow-y: auto;">
-            <div class="box-input" style="flex-direction: column; gap: 15px;">
-                <?php include __DIR__ . "/../partials/order_history_card.php"; ?>
-                <?php include __DIR__ . "/../partials/order_history_card.php"; ?>
-                <?php include __DIR__ . "/../partials/order_history_card.php"; ?>
+        <div style="overflow-y: auto; max-height: 600px;">
+            <div id="order-history-container" class="box-input" style="flex-direction: column; gap: 15px;">
+                <!-- JS will populate this -->
+                <div class="text-center p-4 w-100">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- settings -->
-    <section class="tab" id="settings" style="display: flex;">
+    <section class="tab" id="settings" style="display: none;">
         <h3 class="tab-title">Settings</h3>
         <hr>
-        <?php if(!$user->password): ?>
-        <button type="button" class="btn-primary-custom changePass" id="setPassBtn" style="width: 300px;">Set password</button>
+        <?php if (!$user->password): ?>
+            <button type="button" class="btn-primary-custom changePass" id="setPassBtn" style="width: 300px;">Set password</button>
         <?php else: ?>
-        <button type="button" class="btn-primary-custom changePass" id="changePassBtn" style="width: 300px;">Change password</button>
+            <button type="button" class="btn-primary-custom changePass" id="changePassBtn" style="width: 300px;">Change password</button>
         <?php endif; ?>
     </section>
 </div>
@@ -211,43 +214,72 @@ if (!$user) {
 <div id="changePasswordModal" class="modal-overlay" style="display: none;">
     <div class="modal-content glass-effect" style="height: fit-content;">
         <h3 style="margin-bottom: 20px;">Change Password</h3>
-        <?php if(!$user->password): ?>
-        <form id="changePasswordForm">
-            <div class="form-group">
-                <label>New Password</label>
-                <input type="password" name="new_password" class="modal-input" placeholder="Enter new password" required>
-                <small id="password-strength" style="display:block; margin-top:5px; font-weight:bold;"></small>
-            </div>
-            <div class="form-group">
-                <label>Confirm New Password</label>
-                <input type="password" name="confirm_password" class="modal-input" placeholder="Confirm new password" required>
-            </div>
-            <div class="modal-actions">
-                <button type="button" id="closeChangePasswordModal" class="btn-secondary">Cancel</button>
-                <button type="submit" class="btn-primary-custom" id="changePasswordBtn">Change Password</button>
-            </div>
-        </form>
+        <?php if (!$user->password): ?>
+            <form id="changePasswordForm">
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" name="new_password" class="modal-input" placeholder="Enter new password" required>
+                    <small id="password-strength" style="display:block; margin-top:5px; font-weight:bold;"></small>
+                </div>
+                <div class="form-group">
+                    <label>Confirm New Password</label>
+                    <input type="password" name="confirm_password" class="modal-input" placeholder="Confirm new password" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="closeChangePasswordModal" class="btn-secondary">Cancel</button>
+                    <button type="submit" class="btn-primary-custom" id="changePasswordBtn">Change Password</button>
+                </div>
+            </form>
         <?php else: ?>
-        <form id="changePasswordForm">
-            <div class="form-group">
-                <label>Current Password</label>
-                <input type="password" name="current_password" class="modal-input" placeholder="Enter current password" required>
-            </div>
-            <div class="form-group">
-                <label>New Password</label>
-                <input type="password" name="new_password" class="modal-input" placeholder="Enter new password" required>
-                <small id="password-strength" style="display:block; margin-top:5px; font-weight:bold;"></small>
-            </div>
-            <div class="form-group">
-                <label>Confirm New Password</label>
-                <input type="password" name="confirm_password" class="modal-input" placeholder="Confirm new password" required>
-            </div>
-            <div class="modal-actions">
-                <button type="button" id="closeChangePasswordModal" class="btn-secondary">Cancel</button>
-                <button type="submit" class="btn-primary-custom" id="changePasswordBtn">Change Password</button>
-            </div>
-        </form>
+            <form id="changePasswordForm">
+                <div class="form-group">
+                    <label>Current Password</label>
+                    <input type="password" name="current_password" class="modal-input" placeholder="Enter current password" required>
+                </div>
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" name="new_password" class="modal-input" placeholder="Enter new password" required>
+                    <small id="password-strength" style="display:block; margin-top:5px; font-weight:bold;"></small>
+                </div>
+                <div class="form-group">
+                    <label>Confirm New Password</label>
+                    <input type="password" name="confirm_password" class="modal-input" placeholder="Confirm new password" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="closeChangePasswordModal" class="btn-secondary">Cancel</button>
+                    <button type="submit" class="btn-primary-custom" id="changePasswordBtn">Change Password</button>
+                </div>
+            </form>
         <?php endif; ?>
     </div>
 </div>
+<!-- Feedback Modal -->
+<div id="feedbackModal" class="modal-overlay" style="display: none; z-index: 2000;">
+    <div class="modal-content glass-effect" style="max-width: 450px; height: fit-content;">
+        <h3 style="margin-bottom: 20px;" id="feedbackModalTitle">Rate your Order</h3>
+        <form id="feedbackForm">
+            <input type="hidden" id="feedbackOrderId" name="order_id">
+            <div class="form-group mb-3">
+                <label class="mb-2">Rating</label>
+                <div class="rating-stars d-flex gap-2 justify-content-center mb-3" style="font-size: 2rem; color: #ccc; cursor: pointer;">
+                    <i class="bi bi-star-fill star" data-value="1"></i>
+                    <i class="bi bi-star-fill star" data-value="2"></i>
+                    <i class="bi bi-star-fill star" data-value="3"></i>
+                    <i class="bi bi-star-fill star" data-value="4"></i>
+                    <i class="bi bi-star-fill star" data-value="5"></i>
+                </div>
+                <input type="hidden" name="rating" id="ratingInput" required>
+            </div>
+            <div class="form-group mb-4">
+                <label class="mb-2">Your Feedback (Optional)</label>
+                <textarea name="comment" class="form-control" rows="3" placeholder="Tell us about your experience..." style="border-radius: 10px;"></textarea>
+            </div>
+            <div class="modal-actions d-flex gap-3">
+                <button type="button" onclick="closeFeedbackModal()" class="btn btn-secondary flex-fill" style="color: black;">Cancel</button>
+                <button type="submit" class="btn btn-primary-custom flex-fill">Submit Review</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script src="../scripts/users/profile.js"></script>
