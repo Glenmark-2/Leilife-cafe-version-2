@@ -6,24 +6,36 @@ const subtotalEl = document.getElementById('cart-subtotal');
 const totalEl = document.getElementById('cart-total');
 const deliveryFeeEl = document.getElementById('cart-delivery-fee');
 
-let isPickup = true; // default
+let isPickup = localStorage.getItem('leilife_delivery_choice') !== 'delivery'; // default to true unless explicitly delivery
+
+// Initialize UI based on saved preference
+if (statusText && icon) {
+    if (isPickup) {
+        statusText.textContent = "Pick up";
+        icon.src = "/Leilife_2nd/public/assets/walk.png";
+    } else {
+        statusText.textContent = "Delivery";
+        icon.src = "/Leilife_2nd/public/assets/motorbike.png";
+    }
+}
+
 // Cart Data
 let cart = JSON.parse(localStorage.getItem('leilife_cart')) || [];
 
 // --- Toggle Pickup/Delivery ---
 if (btn) {
     btn.addEventListener('click', () => {
+        isPickup = !isPickup;
+
         if (isPickup) {
-            // switch to delivery
-            statusText.textContent = "Delivery";
-            icon.src = "/Leilife_2nd/public/assets/motorbike.png";
-        } else {
-            // switch back to pickup
             statusText.textContent = "Pick up";
             icon.src = "/Leilife_2nd/public/assets/walk.png";
+        } else {
+            statusText.textContent = "Delivery";
+            icon.src = "/Leilife_2nd/public/assets/motorbike.png";
         }
 
-        isPickup = !isPickup;
+        localStorage.setItem('leilife_delivery_choice', isPickup ? 'pickup' : 'delivery');
         renderCart(); // Re-render to update totals if delivery fee changes
     });
 }
@@ -57,9 +69,6 @@ function renderCart() {
         stickyCount.textContent = cart.length;
         if (cart.length > 0) {
             stickyCart.classList.remove('d-none');
-            // Ensure d-sm-none is kept, simplified by just toggling d-none if screen size check handled by CSS classes
-            // But logic: if items > 0, shud be visible on mobile. The classes d-sm-none d-none means hidden everywhere initially.
-            // removing d-none makes it visible on mobile (as d-sm-none hides it on desk).
         } else {
             stickyCart.classList.add('d-none');
         }
@@ -81,86 +90,75 @@ function renderCart() {
             checkoutBtn.setAttribute('disabled', true);
             checkoutBtn.style.opacity = '0.6';
             checkoutBtn.style.cursor = 'not-allowed';
+        } else {
+            checkoutBtn.removeAttribute('disabled');
+            checkoutBtn.style.opacity = '1';
+            checkoutBtn.style.cursor = 'pointer';
         }
 
-        checkoutBtn.addEventListener('click', () => {
+        // Use a named function or check to avoid multiple listeners
+        checkoutBtn.onclick = () => {
             if (cart.length === 0) return;
             // Save state to localStorage for checkout page to pick up
             localStorage.setItem('leilife_delivery_choice', isPickup ? 'pickup' : 'delivery');
 
             // Redirect
             window.location.href = 'index.php?page=checkout';
-        });
+        };
     }
 
     // --- Smart Item Rendering ---
-    // Reuse existing DOM elements to avoid "vanishing" / focus loss
     const existingItems = Array.from(container.children);
 
-    // 1. Remove excess items
     while (existingItems.length > cart.length) {
         container.removeChild(container.lastChild);
         existingItems.pop();
     }
 
-    // 2. Update or Create items
     cart.forEach((item, index) => {
         let el = existingItems[index];
 
-        // Prepare Logic
         let imageSrc = item.image;
         if (!imageSrc.startsWith('http') && !imageSrc.startsWith('/')) {
             imageSrc = '/Leilife_2nd/public/assets/products/' + imageSrc;
         }
 
-        // Minus vs Trash Button
         const isTrash = item.qty === 1;
         const minusIcon = isTrash ? '<i class="bi bi-trash"></i>' : '-';
         const minusAction = isTrash ? `removeCartItem(${index})` : `updateCartQty(${index}, -1)`;
         const minusClass = isTrash ? 'btn-outline-danger' : 'btn-outline-secondary';
 
         if (!el) {
-            // Create New
             el = document.createElement('div');
             el.className = 'cart-item';
+            el.style.width = '100%';
+            el.style.display = 'flex';
+            el.style.justifyContent = 'space-between';
+            el.style.alignItems = 'center';
+            el.style.padding = '5px 0';
             el.innerHTML = getCartItemHTML(item, index, minusIcon, minusAction, minusClass);
             container.appendChild(el);
         } else {
-            // Update Existing (minimize reflows)
             const minusBtn = el.querySelector('.btn-minus');
             const plusBtn = el.querySelector('.btn-plus');
             const qtySpan = el.querySelector('.qty-span');
             const priceStrong = el.querySelector('.price-strong');
             const nameSpan = el.querySelector('.name-span');
 
-            // If structure is solid, update attributes. Otherwise fallback to full replace.
             if (minusBtn && plusBtn && qtySpan && priceStrong) {
-                // Update Minus Button
                 if (minusBtn.getAttribute('onclick') !== minusAction) {
                     minusBtn.setAttribute('onclick', minusAction);
                     minusBtn.innerHTML = minusIcon;
                     minusBtn.className = `btn btn-sm ${minusClass} py-0 px-2 btn-minus`;
-                } else {
-                    // Ensure index is updated even if action didn't change (e.g. deletion shifted index but action is same type)
-                    // But here action includes index, so it would have matched logic above.
                 }
-
-                // Update Plus Button Index
                 plusBtn.setAttribute('onclick', `updateCartQty(${index}, 1)`);
-
-                // Update Qty
                 if (qtySpan.textContent != item.qty) qtySpan.textContent = item.qty;
-
-                // Update Price
                 priceStrong.textContent = '₱' + (item.price * item.qty).toFixed(2);
-
-                // Optional: Update name if somehow position swapped with different product
                 if (nameSpan && nameSpan.textContent !== item.name) {
                     nameSpan.textContent = item.name;
                     nameSpan.title = item.name;
                 }
             } else {
-                // Structure mismatch, replace content
                 el.innerHTML = getCartItemHTML(item, index, minusIcon, minusAction, minusClass);
             }
         }
@@ -183,7 +181,6 @@ function getCartItemHTML(item, index, minusIcon, minusAction, minusClass) {
     `;
 }
 
-// Global functions for inline onclicks
 window.removeCartItem = function (index) {
     cart.splice(index, 1);
     saveCart();
@@ -200,15 +197,10 @@ window.updateCartQty = function (index, delta) {
 
 window.addToCart = function (product) {
     const qtyToAdd = product.qty ? parseInt(product.qty) : 1;
-
-    // Check if exists
     const existing = cart.find(item => item.id == product.id);
     if (existing) {
         existing.qty += qtyToAdd;
     } else {
-        // Sanitize Image Path: Store only filename if possible, or full path.
-        // The user said "make the product image to always include this... so i only need to save the image name"
-        // So we try to extract filename
         let imageToSave = product.image;
         if (imageToSave.includes('/')) {
             imageToSave = imageToSave.split('/').pop();
@@ -225,15 +217,11 @@ window.addToCart = function (product) {
     saveCart();
 }
 
-// --- Init ---
 document.addEventListener('DOMContentLoaded', () => {
     renderCart();
-
-    // Check for auto-open flag from redirect
     const shouldOpen = sessionStorage.getItem('trigger_cart_open');
     if (shouldOpen === 'true') {
         sessionStorage.removeItem('trigger_cart_open');
-        // Trigger the toggle function in header.js if available or manually toggle
         const cartModal = document.getElementById("cart-container");
         if (cartModal && cartModal.classList.contains('d-none')) {
             cartModal.classList.remove("d-none");

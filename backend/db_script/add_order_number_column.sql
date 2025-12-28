@@ -1,1 +1,2 @@
 ALTER TABLE orders ADD COLUMN order_number VARCHAR(64) UNIQUE DEFAULT NULL AFTER id;
+-- done nobi

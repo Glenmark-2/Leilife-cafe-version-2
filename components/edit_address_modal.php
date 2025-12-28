@@ -1,6 +1,9 @@
 <!-- LEAFLET CSS & JS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<!-- Address Modal CSS -->
+<link rel="stylesheet" href="/Leilife_2nd/css/users/components/edit_address_modal.css">
 
 <!-- EDITADDRESS MODAL -->
 <div id="addressModal" class="modal-overlay" style="display: none;">
@@ -12,7 +15,7 @@
                 <label>Street / House No.</label>
                 <input type="text" name="street" class="modal-input" placeholder="Enter street address" required>
             </div>
-            
+
             <div class="form-group">
                 <label>Region</label>
                 <select name="region" id="regionSelect" class="modal-input" required>
@@ -41,7 +44,7 @@
                     <option value="" disabled selected>Select Barangay</option>
                 </select>
             </div>
-            
+
             <div class="form-group">
                 <label>Pin Location</label>
                 <div id="map" style="height: 200px; width: 100%; border-radius: 8px;"></div>
@@ -57,3 +60,5 @@
         </form>
     </div>
 </div>
+
+<script src="/Leilife_2nd/scripts/users/components/address_modal.js"></script>
