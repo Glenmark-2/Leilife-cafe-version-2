@@ -32,4 +32,4 @@
 
 </div>
 
-<script src="../scripts/users/components/cart.js"></script>
+
