@@ -7,19 +7,18 @@ class OrderService
 {
     private $orderRepository;
     private $productRepository;
+    private $cartRepository;
 
-    public function __construct(OrderRepository $orderRepository, ProductRepository $productRepository)
+    public function __construct(OrderRepository $orderRepository, ProductRepository $productRepository, CartRepository $cartRepository)
     {
         $this->orderRepository = $orderRepository;
         $this->productRepository = $productRepository;
+        $this->cartRepository = $cartRepository;
     }
 
     public function placeOrder($userId, $data)
     {
-        // 1. Validate inputs
-        if (empty($data['items']) || !is_array($data['items'])) {
-            return ['success' => false, 'message' => 'No items in order.'];
-        }
+
 
         if (empty($data['payment_method'])) {
             return ['success' => false, 'message' => 'Payment method is required.'];
@@ -39,35 +38,44 @@ class OrderService
         $finalItems = [];
         $totalAmount = 0;
 
-        foreach ($data['items'] as $itemData) {
-            $product = $this->productRepository->findById($itemData['product_id']);
+        // Fetch Cart Items from DB to ensure source of truth
+        $cart = $this->cartRepository->getCartByUserId($userId);
+        $dbItems = $cart ? $this->cartRepository->getCartItems($cart->id) : [];
 
-            if (!$product) {
-                return ['success' => false, 'message' => 'Product not found: ID ' . $itemData['product_id']];
-            }
+        if (empty($dbItems)) {
+            // Fallback for logic consistency or if we want to allow direct data passing (e.g. 'buy now' without cart)
+            // But user requested "database as source of truth".
+            // If DB cart is empty, we should probably blocking the order or check if $data['items'] was passed as a "buy now" feature?
+            // For this request, we strictly use DB.
+            return ['success' => false, 'message' => 'Your cart is empty.'];
+        }
 
-            // Optional: Check availability
-            if (isset($product['is_available']) && !$product['is_available']) {
-                return ['success' => false, 'message' => 'Product is not available: ' . $product['name']];
-            }
+        foreach ($dbItems as $item) {
+             // CartItem object has product_id, quantity, etc.
+             // We need to fetch latest product price/availability to be safe
+             $product = $this->productRepository->findById($item->product_id);
 
-            // TODO: Handle sizes/flavors if applicable. For now assuming base price.
-            // If the item has a size/flavor price override, we need logic for that. 
-            // Assuming simple product for now based on 'price' in fetchById result.
+             if (!$product) {
+                 return ['success' => false, 'message' => 'Product not found: ID ' . $item->product_id];
+             }
 
-            $price = $product['price'];
-            $quantity = $itemData['quantity'];
-            $subtotal = $price * $quantity;
+             if (isset($product['is_available']) && !$product['is_available']) {
+                 return ['success' => false, 'message' => 'Product is not available: ' . $product['name']];
+             }
 
-            $totalAmount += $subtotal;
+             $price = $product['price'];
+             $quantity = $item->quantity;
+             $subtotal = $price * $quantity;
 
-            $finalItems[] = new OrderItem([
-                'product_id' => $product['product_id'],
-                'product_name' => $product['name'], // or product_name from query
-                'price' => $price,
-                'quantity' => $quantity,
-                'subtotal' => $subtotal
-            ]);
+             $totalAmount += $subtotal;
+
+             $finalItems[] = new OrderItem([
+                 'product_id' => $product['product_id'],
+                 'product_name' => $product['name'],
+                 'price' => $price,
+                 'quantity' => $quantity,
+                 'subtotal' => $subtotal
+             ]);
         }
 
         $deliveryFee = isset($data['delivery_fee']) ? floatval($data['delivery_fee']) : 0.00;
@@ -108,6 +116,12 @@ class OrderService
             foreach ($finalItems as $item) {
                 $item->order_id = $orderId;
                 $this->orderRepository->addOrderItem($item);
+            }
+
+            // Clear user's cart
+            $cart = $this->cartRepository->getCartByUserId($userId);
+            if ($cart) {
+                $this->cartRepository->clearCart($cart->id);
             }
 
             return ['success' => true, 'message' => 'Order placed successfully.', 'order_id' => $orderId];

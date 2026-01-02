@@ -116,5 +116,9 @@
           <?php include "login.php"; ?>
         </div>
 
+        <script>
+          window.isLoggedIn = <?php echo SessionManager::isLoggedIn() ? 'true' : 'false'; ?>;
+        </script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="../scripts/users/components/header.js"></script>
+        <script src="../scripts/users/components/cart.js"></script>

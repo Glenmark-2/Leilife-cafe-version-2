@@ -12,29 +12,50 @@ document.addEventListener('DOMContentLoaded', () => {
     const deliveryAddressInput = document.getElementById('deliveryAddress');
 
     // --- State ---
-    let cart = JSON.parse(localStorage.getItem('leilife_cart')) || [];
+    // --- State ---
+    let cart = [];
     let deliveryChoice = localStorage.getItem('leilife_delivery_choice') || 'pickup';
     let tempAddressData = null; // Store address before confirmation
 
-    // --- Empty Cart Check ---
-    if (cart.length === 0) {
-        const container = document.getElementById('checkout-items-container');
-        if (container) {
-            container.innerHTML = `
-                <div class="text-center py-4">
-                    <p class="mb-3">Your cart is empty. Redirecting to menu...</p>
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>
-            `;
-
-            setTimeout(() => {
-                window.location.href = 'index.php?page=menu';
-            }, 2000);
+    // Async Init
+    const initPage = async () => {
+        if (window.isLoggedIn) {
+            try {
+                const res = await fetch('/Leilife_2nd/backend/api/cart_actions.php?action=get_cart');
+                const data = await res.json();
+                if (data.success) {
+                    cart = data.cart || [];
+                }
+            } catch (e) {
+                console.error("Failed to fetch cart", e);
+            }
+        } else {
+            cart = JSON.parse(localStorage.getItem('leilife_cart')) || [];
         }
-        return;
-    }
+
+        // --- Empty Cart Check ---
+        if (cart.length === 0) {
+            const container = document.getElementById('checkout-items-container');
+            if (container) {
+                container.innerHTML = `
+                    <div class="text-center py-4">
+                        <p class="mb-3">Your cart is empty. Redirecting to menu...</p>
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                `;
+
+                setTimeout(() => {
+                    window.location.href = 'index.php?page=menu';
+                }, 2000);
+            }
+            return;
+        }
+
+        // Render Initial View
+        toggleDeliveryOptions(deliveryChoice);
+    };
 
     // --- Delivery Logic ---
     function toggleDeliveryOptions(choice) {
@@ -51,8 +72,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Init
-    toggleDeliveryOptions(deliveryChoice);
+    // Start Init
+    initPage();
+
 
     // Listeners
     pickupRadio.addEventListener('change', () => toggleDeliveryOptions('pickup'));

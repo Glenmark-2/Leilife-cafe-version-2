@@ -7,6 +7,7 @@ const totalEl = document.getElementById('cart-total');
 const deliveryFeeEl = document.getElementById('cart-delivery-fee');
 
 let isPickup = localStorage.getItem('leilife_delivery_choice') !== 'delivery'; // default to true unless explicitly delivery
+let cart = [];
 
 // Initialize UI based on saved preference
 if (statusText && icon) {
@@ -18,9 +19,6 @@ if (statusText && icon) {
         icon.src = "/Leilife_2nd/public/assets/motorbike.png";
     }
 }
-
-// Cart Data
-let cart = JSON.parse(localStorage.getItem('leilife_cart')) || [];
 
 // --- Toggle Pickup/Delivery ---
 if (btn) {
@@ -40,9 +38,94 @@ if (btn) {
     });
 }
 
+// --- API Helpers ---
+const API_URL = '/Leilife_2nd/backend/api/cart_actions.php';
+
+async function fetchCartAPI() {
+    try {
+        const response = await fetch(API_URL + '?action=get_cart');
+        const data = await response.json();
+        if (data.success) {
+            cart = data.cart || [];
+            renderCart();
+        }
+    } catch (error) {
+        console.error('Error fetching cart:', error);
+    }
+}
+
+async function addToCartAPI(productId, qty) {
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'add_item', product_id: productId, qty: qty })
+        });
+        const data = await response.json();
+        if (data.success) {
+            cart = data.cart || [];
+            renderCart();
+        }
+    } catch (error) {
+        console.error('Error adding item:', error);
+    }
+}
+
+async function updateQtyAPI(productId, qty) {
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'update_qty', product_id: productId, qty: qty })
+        });
+        const data = await response.json();
+        if (data.success) {
+            cart = data.cart || [];
+            renderCart();
+        }
+    } catch (error) {
+        console.error('Error updating qty:', error);
+    }
+}
+
+async function removeItemAPI(productId) {
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'remove_item', product_id: productId })
+        });
+        const data = await response.json();
+        if (data.success) {
+            cart = data.cart || [];
+            renderCart();
+        }
+    } catch (error) {
+        console.error('Error removing item:', error);
+    }
+}
+
+async function mergeCartAPI(localItems) {
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'merge_cart', items: localItems })
+        });
+        const data = await response.json();
+        if (data.success) {
+            cart = data.cart || [];
+            localStorage.removeItem('leilife_cart'); // Clear after merge
+            renderCart();
+        }
+    } catch (error) {
+        console.error('Error merging cart:', error);
+    }
+}
+
 // --- Cart Logic ---
 
-function saveCart() {
+function saveCartLocal() {
     localStorage.setItem('leilife_cart', JSON.stringify(cart));
     renderCart();
 }
@@ -96,10 +179,14 @@ function renderCart() {
             checkoutBtn.style.cursor = 'pointer';
         }
 
-        // Use a named function or check to avoid multiple listeners
         checkoutBtn.onclick = () => {
             if (cart.length === 0) return;
-            // Save state to localStorage for checkout page to pick up
+
+            // If logged in, cart is already in DB. If guest, cart is in localStorage.
+            // Checkout page retrieves from API if logged in?
+            // Actually, checkout page logic needs update too if we want it to read from DB for logged in users.
+            // For now, let's store state to localStorage anyway just for checkout page to read it easily? 
+            // OR checkout page should also be updated.
             localStorage.setItem('leilife_delivery_choice', isPickup ? 'pickup' : 'delivery');
 
             // Redirect
@@ -119,7 +206,7 @@ function renderCart() {
         let el = existingItems[index];
 
         let imageSrc = item.image;
-        if (!imageSrc.startsWith('http') && !imageSrc.startsWith('/')) {
+        if (imageSrc && !imageSrc.startsWith('http') && !imageSrc.startsWith('/')) {
             imageSrc = '/Leilife_2nd/public/assets/products/' + imageSrc;
         }
 
@@ -131,12 +218,9 @@ function renderCart() {
         if (!el) {
             el = document.createElement('div');
             el.className = 'cart-item';
-            el.style.width = '100%';
-            el.style.display = 'flex';
-            el.style.justifyContent = 'space-between';
-            el.style.alignItems = 'center';
-            el.style.padding = '5px 0';
-            el.innerHTML = getCartItemHTML(item, index, minusIcon, minusAction, minusClass);
+            // Removed inline styles (width, display, justifyContent, alignItems, padding)
+            // Relies on css/users/components/cart.css .cart-item
+            el.innerHTML = getCartItemHTML(item, index, minusIcon, minusAction, minusClass, imageSrc);
             container.appendChild(el);
         } else {
             const minusBtn = el.querySelector('.btn-minus');
@@ -159,13 +243,15 @@ function renderCart() {
                     nameSpan.title = item.name;
                 }
             } else {
-                el.innerHTML = getCartItemHTML(item, index, minusIcon, minusAction, minusClass);
+                el.innerHTML = getCartItemHTML(item, index, minusIcon, minusAction, minusClass, imageSrc); // Re-render if structure damaged
             }
         }
     });
 }
 
-function getCartItemHTML(item, index, minusIcon, minusAction, minusClass) {
+function getCartItemHTML(item, index, minusIcon, minusAction, minusClass, imageSrc) {
+    // Optionally include image if desired, but current design might not have it in the list view?
+    // The previous implementation was:
     return `
         <div style="display:flex; align-items:center; gap:12px; flex-grow: 1;">
             <div style="display: flex; align-items: center; gap: 8px;">
@@ -174,7 +260,7 @@ function getCartItemHTML(item, index, minusIcon, minusAction, minusClass) {
                 <button class="btn btn-sm btn-outline-secondary py-0 px-2 btn-plus" onclick="updateCartQty(${index}, 1)">+</button>
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
-                <span class="text-truncate name-span" style="max-width: 120px;" title="${item.name}">${item.name}</span>
+                <span class="text-truncate name-span" style="max-width: 140px;" title="${item.name}">${item.name}</span>
             </div>
         </div>
         <strong class="price-strong">₱${(item.price * item.qty).toFixed(2)}</strong>
@@ -182,43 +268,70 @@ function getCartItemHTML(item, index, minusIcon, minusAction, minusClass) {
 }
 
 window.removeCartItem = function (index) {
-    cart.splice(index, 1);
-    saveCart();
+    if (window.isLoggedIn) {
+        removeItemAPI(cart[index].id);
+    } else {
+        cart.splice(index, 1);
+        saveCartLocal();
+    }
 }
 
 window.updateCartQty = function (index, delta) {
-    if (cart[index].qty + delta <= 0) {
-        removeCartItem(index);
+    const newQty = cart[index].qty + delta;
+    if (window.isLoggedIn) {
+        updateQtyAPI(cart[index].id, newQty);
     } else {
-        cart[index].qty += delta;
-        saveCart();
+        if (newQty <= 0) {
+            removeCartItem(index);
+        } else {
+            cart[index].qty += delta;
+            saveCartLocal();
+        }
     }
 }
 
 window.addToCart = function (product) {
     const qtyToAdd = product.qty ? parseInt(product.qty) : 1;
-    const existing = cart.find(item => item.id == product.id);
-    if (existing) {
-        existing.qty += qtyToAdd;
-    } else {
-        let imageToSave = product.image;
-        if (imageToSave.includes('/')) {
-            imageToSave = imageToSave.split('/').pop();
-        }
 
-        cart.push({
-            id: product.id,
-            name: product.name,
-            price: parseFloat(product.price),
-            qty: qtyToAdd,
-            image: imageToSave
-        });
+    if (window.isLoggedIn) {
+        addToCartAPI(product.id, qtyToAdd);
+    } else {
+        const existing = cart.find(item => item.id == product.id);
+        if (existing) {
+            existing.qty += qtyToAdd;
+        } else {
+            let imageToSave = product.image;
+            if (imageToSave && imageToSave.includes('/')) {
+                imageToSave = imageToSave.split('/').pop();
+            }
+
+            cart.push({
+                id: product.id,
+                name: product.name,
+                price: parseFloat(product.price),
+                qty: qtyToAdd,
+                image: imageToSave
+            });
+        }
+        saveCartLocal();
     }
-    saveCart();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    renderCart();
+    // Initial Load
+    if (window.isLoggedIn) {
+        // Check for local cart merge
+        const localCart = JSON.parse(localStorage.getItem('leilife_cart')) || [];
+        if (localCart.length > 0) {
+            mergeCartAPI(localCart);
+        } else {
+            fetchCartAPI();
+        }
+    } else {
+        cart = JSON.parse(localStorage.getItem('leilife_cart')) || [];
+        renderCart();
+    }
+
     const shouldOpen = sessionStorage.getItem('trigger_cart_open');
     if (shouldOpen === 'true') {
         sessionStorage.removeItem('trigger_cart_open');

@@ -14,11 +14,14 @@ require_once __DIR__ . '/../controllers/OrderController.php';
 $database = new Database();
 $db = $database->getConnection();
 
+require_once __DIR__ . '/../repositories/CartRepository.php';
+
 // Instantiate Dependencies
 $orderRepo = new OrderRepository($db);
+$cartRepo = new CartRepository($db);
 $productRepo = new ProductRepository(); 
 
-$orderService = new OrderService($orderRepo, $productRepo);
+$orderService = new OrderService($orderRepo, $productRepo, $cartRepo);
 $orderController = new OrderController($orderService);
 
 // Route Request
