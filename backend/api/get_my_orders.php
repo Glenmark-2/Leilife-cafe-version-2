@@ -15,13 +15,15 @@ $database = new Database();
 $db = $database->getConnection();
 
 require_once __DIR__ . '/../repositories/CartRepository.php';
+require_once __DIR__ . '/../repositories/TransactionRepository.php';
 
 // Instantiate Dependencies
 $orderRepo = new OrderRepository($db);
 $cartRepo = new CartRepository($db);
+$transactionRepo = new TransactionRepository($db);
 $productRepo = new ProductRepository(); 
 
-$orderService = new OrderService($orderRepo, $productRepo, $cartRepo);
+$orderService = new OrderService($orderRepo, $productRepo, $cartRepo, $transactionRepo);
 $orderController = new OrderController($orderService);
 
 // Route Request

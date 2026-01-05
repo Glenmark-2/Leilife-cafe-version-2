@@ -363,7 +363,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     const result = await response.json();
                     if (response.ok && result.success) {
                         localStorage.removeItem('leilife_cart');
-                        window.location.href = 'index.php?page=order_tracking&order_id=' + result.order_id;
+
+                        if (result.checkout_url) {
+                            window.location.replace(result.checkout_url);
+                        } else {
+                            window.location.replace('index.php?page=order_tracking&order_id=' + result.order_id);
+                        }
                     } else {
                         alert('Failed to place order: ' + (result.message || 'Unknown error'));
                         placeOrderBtn.disabled = false;

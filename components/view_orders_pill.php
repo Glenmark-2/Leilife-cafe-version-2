@@ -192,6 +192,7 @@
     }
 </style>
 
+<script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const viewOrdersPill = document.getElementById('view-orders-pill');
@@ -201,13 +202,41 @@
 
         let activeOrders = [];
         let isLoading = false;
+        
+        // Pusher Initialization
+        initPusher();
 
-        // Check availability (Only on Menu Page)
-        const urlParams = new URLSearchParams(window.location.search);
-        // Only run logic on menu page
-        if (urlParams.get('page') === 'menu') {
-            checkOrdersVisibility();
+        function initPusher() {
+            if (typeof Pusher === 'undefined') return;
+            
+            // For the pill, we can't reliably assume pusherConfig is in window 
+            // if this component is loaded independently. 
+            // So we inject it here from PHP.
+            <?php
+            require_once __DIR__ . '/../backend/helpers/EnvLoader.php';
+            EnvLoader::load(__DIR__ . '/../.env');
+            $pk = getenv('PUSHER_KEY');
+            $pc = getenv('PUSHER_CLUSTER') ?: 'ap1';
+            ?>
+            
+            const pKey = '<?php echo $pk; ?>';
+            const pCluster = '<?php echo $pc; ?>';
+            const uId = window.userId || null;
+
+            if (!pKey || !uId) return;
+
+            const pusher = new Pusher(pKey, {
+                cluster: pCluster
+            });
+
+            const channel = pusher.subscribe('user-' + uId);
+            channel.bind('order-status-changed', function(data) {
+                checkOrdersVisibility();
+            });
         }
+
+        // Check availability on all pages
+        checkOrdersVisibility();
 
         viewOrdersPill.addEventListener('click', function() {
             if (activeOrders.length === 1) {
@@ -226,6 +255,8 @@
         });
 
         function checkOrdersVisibility() {
+            if (!window.isLoggedIn) return; // Don't fetch if not logged in
+            
             fetchOrders(true).then(() => {
                 if (activeOrders.length > 0) {
                     if (viewOrdersPill) {

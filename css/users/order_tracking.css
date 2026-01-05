@@ -127,6 +127,35 @@
     border-color: #f5c2c2 !important;
 }
 
+.order-items-list {
+    max-height: 280px;
+    overflow-y: auto;
+    padding-right: 8px;
+    margin-bottom: 15px;
+    scrollbar-width: thin;
+    scrollbar-color: #d0b28c #f8f9fa;
+}
+
+/* Custom Scrollbar */
+.order-items-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.order-items-list::-webkit-scrollbar-track {
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.order-items-list::-webkit-scrollbar-thumb {
+    background: #d0b28c;
+    border-radius: 10px;
+    transition: background 0.2s;
+}
+
+.order-items-list::-webkit-scrollbar-thumb:hover {
+    background: #b08d55;
+}
+
 .badge {
     display: inline-block;
     padding: 0.35em 0.65em;

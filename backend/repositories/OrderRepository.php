@@ -166,6 +166,15 @@ class OrderRepository
         return $stmt->execute();
     }
 
+    public function getOrderItemById($itemId)
+    {
+        $query = "SELECT * FROM " . $this->table_order_items . " WHERE id = :id LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $itemId);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function getOrderIdByItemId($itemId)
     {
         $query = "SELECT order_id FROM " . $this->table_order_items . " WHERE id = :id LIMIT 1";
@@ -468,5 +477,23 @@ class OrderRepository
         $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function updatePayMongoSource($orderId, $sourceId)
+    {
+        $query = "UPDATE " . $this->table_orders . " SET paymongo_payment_intent_id = :source_id WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':source_id', $sourceId);
+        $stmt->bindParam(':id', $orderId);
+        return $stmt->execute();
+    }
+
+    public function updatePaymentStatus($id, $paymentStatus)
+    {
+        $query = "UPDATE " . $this->table_orders . " SET payment_status = :payment_status WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':payment_status', $paymentStatus);
+        $stmt->bindParam(':id', $id);
+        return $stmt->execute();
     }
 }
