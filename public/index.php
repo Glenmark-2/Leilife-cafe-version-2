@@ -30,7 +30,12 @@ echo '<div id="pageContent">';
 include $target;
 echo '</div>';
 
-// Expose current page to JS
-echo '<script>window.currentPage = "' . htmlspecialchars($page) . '";</script>';
+// Expose current page and user info to JS
+echo '<script>';
+echo 'window.currentPage = "' . htmlspecialchars($page) . '";';
+if (SessionManager::isLoggedIn()) {
+    echo 'window.userId = "' . SessionManager::get('user_id') . '";';
+}
+echo '</script>';
 
 include __DIR__ . '/../components/footer.php';

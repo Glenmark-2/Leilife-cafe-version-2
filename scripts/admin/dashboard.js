@@ -3,11 +3,50 @@ let orderDetailsModal;
 let confirmationModal;
 let pendingStatusUpdate = null; // Store (status, orderId) to execute after confirmation
 
-document.addEventListener('DOMContentLoaded', function () {
+// Debounce function to limit how often a function is called
+function debounce(func, delay) {
+    let timeout;
+    return function (...args) {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), delay);
+    };
+}
+
+// Debounced version of fetchDashboardData
+const debouncedFetchDashboardData = debounce(fetchDashboardData, 500); // 500ms delay
+
+function initRealtime() {
+    if (!window.pusherConfig || !window.pusherConfig.key) {
+        console.warn('Pusher configuration missing. Real-time updates disabled.');
+        return;
+    }
+
+    const pusher = new Pusher(window.pusherConfig.key, {
+        cluster: window.pusherConfig.cluster
+    });
+
+    const channel = pusher.subscribe('admin-orders');
+
+    channel.bind('new-order', function (data) {
+        debouncedFetchDashboardData();
+    });
+
+    channel.bind('status-updated', function (data) {
+        debouncedFetchDashboardData();
+    });
+
+    channel.bind('item-updated', function (data) {
+        debouncedFetchDashboardData();
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initRealtime();
     statusModal = new bootstrap.Modal(document.getElementById('statusModal'));
     orderDetailsModal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
     confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
-    fetchDashboardData();
+    fetchDashboardData(); // Initial fetch
 
     // Add filter listener
     document.getElementById('sortOrders').addEventListener('change', function () {
@@ -31,12 +70,27 @@ document.addEventListener('DOMContentLoaded', function () {
 
 async function updateStatus(newStatus) {
     const orderId = document.getElementById('modalOrderId').value;
+    const orderNumber = document.getElementById('displayOrderId').innerText;
+    const triggerConfirm = ['picked_up', 'delivered', 'cancelled'].includes(newStatus);
 
-    if (newStatus === 'picked_up' || newStatus === 'delivered') {
+    if (triggerConfirm) {
         // Show confirmation modal
         pendingStatusUpdate = newStatus;
-        const action = newStatus === 'picked_up' ? 'Picked Up' : 'Delivered';
-        document.getElementById('confirmationMessage').innerText = `Are you sure you want to mark Order #${orderId} as ${action}? It will be removed from the active dashboard.`;
+        let action = '';
+        switch (newStatus) {
+            case 'picked_up': action = 'Picked Up'; break;
+            case 'delivered': action = 'Delivered'; break;
+            case 'cancelled': action = 'Cancelled'; break;
+        }
+
+        let warningText = `Are you sure you want to mark Order #${orderNumber} as ${action}?`;
+        if (newStatus === 'cancelled') {
+            warningText += " This will trigger a FULL refund if the order was paid via GCash/PayMongo.";
+        } else {
+            warningText += " It will be removed from the active dashboard.";
+        }
+
+        document.getElementById('confirmationMessage').innerText = warningText;
         statusModal.hide(); // Hide the first modal
         confirmationModal.show();
     } else {
@@ -121,6 +175,7 @@ function updateDashboardUI(data) {
         };
 
         const customerName = `${order.first_name || ''} ${order.last_name || ''}`.trim() || 'Guest';
+        const isCancelled = order.status === 'cancelled';
         const typeBadge = order.delivery_method === 'delivery' ? 'bg-secondary' : 'bg-info text-dark';
         const statusClass = `status-${order.status.toLowerCase()}`;
 
@@ -132,7 +187,9 @@ function updateDashboardUI(data) {
             <td>${customerName}</td>
             <td><span class="badge ${typeBadge}">${order.delivery_method}</span></td>
             <td>
-                <button class="status-badge ${statusClass} btn btn-sm" onclick="event.stopPropagation(); openStatusModal('${order.id}', '${order.status}', '${order.delivery_method}')">
+                <button class="status-badge ${statusClass} btn btn-sm" 
+                        ${isCancelled ? 'disabled style="opacity: 0.8; cursor: not-allowed;"' : ''} 
+                        onclick="event.stopPropagation(); openStatusModal('${order.id}', '${order.order_number}', '${order.status}', '${order.delivery_method}')">
                     ${capitalizeFirstLetter(order.status.replace(/_/g, ' '))}
                 </button>
             </td>
@@ -155,9 +212,9 @@ function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-function openStatusModal(orderId, currentStatus, deliveryMethod) {
+function openStatusModal(orderId, orderNumber, currentStatus, deliveryMethod) {
     document.getElementById('modalOrderId').value = orderId;
-    document.getElementById('displayOrderId').innerText = orderId;
+    document.getElementById('displayOrderId').innerText = orderNumber;
 
     const btnReady = document.getElementById('btnReadyForPickup');
     const btnDelivery = document.getElementById('btnOutForDelivery');
@@ -195,10 +252,11 @@ async function openOrderDetails(orderId) {
             const tableBody = document.getElementById('orderDetailsBody');
             tableBody.innerHTML = '';
 
-            const statuses = ['pending', 'preparing', 'ready_for_pickup', 'out_for_delivery', 'picked_up', 'delivered', 'cancelled', 'payment_failed'];
+            const statuses = ['pending', 'preparing', 'finished', 'cancelled'];
 
             data.items.forEach(item => {
                 const tr = document.createElement('tr');
+                const isCancelled = item.status === 'cancelled';
 
                 let statusOptions = '';
                 statuses.forEach(status => {
@@ -213,7 +271,9 @@ async function openOrderDetails(orderId) {
                     <td>${item.quantity}</td>
                     <td>₱${parseFloat(item.subtotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                     <td>
-                        <select class="form-select form-select-sm status-select" onchange="updateOrderItemStatus('${item.id}', this.value)">
+                        <select class="form-select form-select-sm status-select" 
+                                ${isCancelled ? 'disabled style="background-color: #f8f9fa; cursor: not-allowed;"' : ''} 
+                                onchange="updateOrderItemStatus('${item.id}', this.value, this)">
                             ${statusOptions}
                         </select>
                     </td>
@@ -231,7 +291,7 @@ async function openOrderDetails(orderId) {
     }
 }
 
-async function updateOrderItemStatus(itemId, newStatus) {
+async function updateOrderItemStatus(itemId, newStatus, element) {
     try {
         const response = await fetch('../backend/api/admin/update_order_item_status.php', {
             method: 'POST',
@@ -247,7 +307,11 @@ async function updateOrderItemStatus(itemId, newStatus) {
         const result = await response.json();
 
         if (result.status === 'success') {
-            // Optional: Show a toast or small notification
+            if (newStatus === 'cancelled') {
+                element.disabled = true;
+                element.style.backgroundColor = '#f8f9fa';
+                element.style.cursor = 'not-allowed';
+            }
         } else {
             alert('Failed to update item status: ' + result.message);
         }

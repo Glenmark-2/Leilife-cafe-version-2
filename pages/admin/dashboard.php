@@ -1,44 +1,17 @@
-<style>
-    .dashboard-wrapper {
-        display: flex;
-        flex-direction: column;
-        height: calc(100vh - 80px);
-        /* Adjust based on navbar/header */
-        margin-bottom: 20px;
-    }
-
-    .clickable-row {
-        cursor: pointer;
-        transition: background-color 0.2s;
-    }
-
-    .clickable-row:hover {
-        background-color: rgba(0, 0, 0, 0.05) !important;
-    }
-
-    .status-badge {
-        position: relative;
-        z-index: 2;
-    }
-
-    .dashboard-row {
-        flex: 1;
-        overflow-y: auto;
-        min-height: 0;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        margin-top: 15px;
-    }
-
-    .dashboard-table thead {
-        position: sticky;
-        top: 0;
-        background: white;
-        z-index: 10;
-        box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
-    }
-</style>
+<?php
+require_once __DIR__ . '/../../backend/helpers/EnvLoader.php';
+EnvLoader::load(__DIR__ . '/../../.env');
+$pusherKey = getenv('PUSHER_KEY');
+$pusherCluster = getenv('PUSHER_CLUSTER') ?: 'ap1';
+?>
+<script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+<script>
+    window.pusherConfig = {
+        key: '<?php echo $pusherKey; ?>',
+        cluster: '<?php echo $pusherCluster; ?>'
+    };
+</script>
+<link rel="stylesheet" href="/Leilife_2nd/css/admin/dashboard.css">
 <div class="dashboard-wrapper">
     <div class="title-content">
         <button class="hamburger" id="hamburger" onclick="toggleSidebar()">
@@ -166,14 +139,14 @@
                 <input type="hidden" id="modalOrderId">
                 <p>Updating status for Order #<span id="displayOrderId" class="fw-bold"></span></p>
 
-                <div class="d-grid gap-2">
-                    <button class="btn btn-outline-primary" onclick="updateStatus('pending')">Set to Pending</button>
-                    <button class="btn btn-outline-warning" onclick="updateStatus('preparing')">Set to Preparing</button>
-                    <button id="btnReadyForPickup" class="btn btn-outline-info" onclick="updateStatus('ready_for_pickup')">Set to Ready for Pickup</button>
-                    <button id="btnOutForDelivery" class="btn btn-outline-secondary" onclick="updateStatus('out_for_delivery')">Set to Out for Delivery</button>
-                    <button id="btnPickedUp" class="btn btn-outline-success" onclick="updateStatus('picked_up')">Set to Picked Up</button>
-                    <button id="btnDelivered" class="btn btn-outline-success" onclick="updateStatus('delivered')">Set to Delivered</button>
-                    <button class="btn btn-outline-danger" onclick="updateStatus('cancelled')">Set to Cancelled</button>
+                <div class="status-btn-grid">
+                    <button class="btn btn-outline-primary" onclick="updateStatus('pending')">Set Pending</button>
+                    <button class="btn btn-outline-warning" onclick="updateStatus('preparing')">Set Preparing</button>
+                    <button id="btnReadyForPickup" class="btn btn-outline-info" onclick="updateStatus('ready_for_pickup')">Set Ready</button>
+                    <button id="btnOutForDelivery" class="btn btn-outline-secondary" onclick="updateStatus('out_for_delivery')">Set Out</button>
+                    <button id="btnPickedUp" class="btn btn-outline-success" onclick="updateStatus('picked_up')">Set Picked Up</button>
+                    <button id="btnDelivered" class="btn btn-outline-success" onclick="updateStatus('delivered')">Set Delivered</button>
+                    <button class="btn btn-outline-danger w-100" style="grid-column: span 2;" onclick="updateStatus('cancelled')">Set Cancelled</button>
                 </div>
             </div>
         </div>

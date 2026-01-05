@@ -55,6 +55,34 @@ if ($order) {
     }
 }
 ?>
+<?php
+require_once __DIR__ . '/../backend/helpers/EnvLoader.php';
+EnvLoader::load(__DIR__ . '/../.env');
+$pusherKey = getenv('PUSHER_KEY');
+$pusherCluster = getenv('PUSHER_CLUSTER') ?: 'ap1';
+?>
+<script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const pusherKey = '<?php echo $pusherKey; ?>';
+        if (!pusherKey) return;
+
+        const pusher = new Pusher(pusherKey, {
+            cluster: '<?php echo $pusherCluster; ?>'
+        });
+
+        const orderId = '<?php echo $orderId; ?>';
+        const channel = pusher.subscribe('order-' + orderId);
+
+        channel.bind('status-updated', function(data) {
+            window.location.reload();
+        });
+
+        channel.bind('item-updated', function(data) {
+            window.location.reload();
+        });
+    });
+</script>
 
 <div class="container text-center mt-3">
 
@@ -193,7 +221,7 @@ if ($order) {
                 <p class="section-title mt-4 text-center">Order details</p>
 
                 <div class="ord-dtls">
-                    <?php foreach ($order->items as $item): ?>
+                    <div class="order-items-list">                    <?php foreach ($order->items as $item): ?>
                         <div class="detail-item mb-3 d-flex align-items-center gap-3">
                             <?php
                             $itemImg = $item->product_image ?: 'not_available.png';
@@ -218,6 +246,7 @@ if ($order) {
                             </p>
                         </div>
                     <?php endforeach; ?>
+                    </div>
 
                     <div class="border-top mt-3 pt-3">
                         <?php if ($order->delivery_fee > 0): ?>
@@ -238,7 +267,13 @@ if ($order) {
                     <?php if ($order->status == 'pending'): ?>
                         <button class="btn btn-outline-danger" id="cancelOrderBtn" onclick="cancelOrder(<?php echo $order->id; ?>)">Cancel Order</button>
                     <?php elseif ($order->status == 'cancelled'): ?>
-                        <a href="index.php?page=menu" class="btn btn-primary-custom">Go to Menu</a>
+                        <button onclick="location.replace('index.php?page=menu')" class="btn btn-primary-custom">Go to Menu</button>
+                        <script>
+                            // Replace current history entry so "back" doesn't return here if coming from menu
+                            if (window.history.replaceState) {
+                                window.history.replaceState(null, null, 'index.php?page=menu');
+                            }
+                        </script>
                     <?php else: ?>
                         <button class="btn btn-primary-custom" disabled>Cannot Cancel</button>
                     <?php endif; ?>
