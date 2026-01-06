@@ -137,7 +137,17 @@ $pusherCluster = getenv('PUSHER_CLUSTER') ?: 'ap1';
             </div>
             <div class="modal-body">
                 <input type="hidden" id="modalOrderId">
-                <p>Updating status for Order #<span id="displayOrderId" class="fw-bold"></span></p>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <p class="mb-0">Updating status for Order #<span id="displayOrderId" class="fw-bold"></span></p>
+                    <span id="displayPaymentStatus" class="badge rounded-pill"></span>
+                </div>
+
+                <div id="paymentActionSection" class="mb-3 d-none">
+                    <button class="btn btn-success w-100 fw-bold" onclick="markAsPaid()">
+                        <i class="bi bi-cash-stack me-1"></i> Mark as Paid
+                    </button>
+                    <hr>
+                </div>
 
                 <div class="status-btn-grid">
                     <button class="btn btn-outline-primary" onclick="updateStatus('pending')">Set Pending</button>

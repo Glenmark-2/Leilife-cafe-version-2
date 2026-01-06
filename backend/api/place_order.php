@@ -25,7 +25,7 @@ $transactionRepo = new TransactionRepository($db);
 // Let's check ProductRepository.php.
 // Checking file... It says: public function __construct() { $database = new Database(); $this->conn = $database->getConnection(); }
 // So it doesn't take $db in constructor.
-$productRepo = new ProductRepository(); 
+$productRepo = new ProductRepository($db);
 
 $orderService = new OrderService($orderRepo, $productRepo, $cartRepo, $transactionRepo);
 $orderController = new OrderController($orderService);

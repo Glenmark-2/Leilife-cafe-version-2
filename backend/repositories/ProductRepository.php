@@ -3,17 +3,24 @@
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../models/Product.php';
 
-class ProductRepository {
+class ProductRepository
+{
     private $conn;
     private $table_products = "products";
     private $table_categories = "categories";
 
-    public function __construct() {
-        $database = new Database();
-        $this->conn = $database->getConnection();
+    public function __construct($db = null)
+    {
+        if ($db) {
+            $this->conn = $db;
+        } else {
+            $database = new Database();
+            $this->conn = $database->getConnection();
+        }
     }
 
-    public function getFullMenuData() {
+    public function getFullMenuData()
+    {
         // Query to get plain list of all items with their hierarchy
         // Only fetching available items for now
         $query = "
@@ -38,16 +45,18 @@ class ProductRepository {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function findById($id) {
+    public function findById($id)
+    {
         $query = "SELECT * FROM " . $this->table_products . " WHERE product_id = :id LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id', $id);
         $stmt->execute();
-        
+
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function addFavorite($user_id, $product_id) {
+    public function addFavorite($user_id, $product_id)
+    {
         $query = "INSERT INTO favorites (user_id, product_id) VALUES (:user_id, :product_id)";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':user_id', $user_id);
@@ -56,11 +65,12 @@ class ProductRepository {
             return $stmt->execute();
         } catch (PDOException $e) {
             // Handle duplicate entry gracefully if needed, or let controller handle it
-            return false; 
+            return false;
         }
     }
 
-    public function removeFavorite($user_id, $product_id) {
+    public function removeFavorite($user_id, $product_id)
+    {
         $query = "DELETE FROM favorites WHERE user_id = :user_id AND product_id = :product_id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':user_id', $user_id);
@@ -68,7 +78,8 @@ class ProductRepository {
         return $stmt->execute();
     }
 
-    public function isFavorite($user_id, $product_id) {
+    public function isFavorite($user_id, $product_id)
+    {
         $query = "SELECT favorite_id FROM favorites WHERE user_id = :user_id AND product_id = :product_id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':user_id', $user_id);
@@ -77,7 +88,8 @@ class ProductRepository {
         return $stmt->rowCount() > 0;
     }
 
-    public function getFavoritesByUserId($user_id) {
+    public function getFavoritesByUserId($user_id)
+    {
         $query = "
             SELECT 
                 p.product_id,
@@ -95,7 +107,8 @@ class ProductRepository {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getAllProductsAdmin($filter = []) {
+    public function getAllProductsAdmin($filter = [])
+    {
         $query = "
             SELECT 
                 p.*, 
@@ -136,14 +149,16 @@ class ProductRepository {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getAllCategories() {
+    public function getAllCategories()
+    {
         $query = "SELECT * FROM " . $this->table_categories . " ORDER BY name ASC";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function updateArchivedStatus($productId, $isArchived) {
+    public function updateArchivedStatus($productId, $isArchived)
+    {
         $query = "UPDATE " . $this->table_products . " SET is_archived = :is_archived WHERE product_id = :id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':is_archived', $isArchived, PDO::PARAM_INT);
@@ -151,20 +166,21 @@ class ProductRepository {
         return $stmt->execute();
     }
 
-    public function updateProduct($id, $data) {
+    public function updateProduct($id, $data)
+    {
         $query = "UPDATE " . $this->table_products . " 
                   SET name = :name, 
                       description = :description, 
                       price = :price, 
                       category_id = :category_id, 
                       is_available = :is_available";
-        
+
         if (isset($data['image_path'])) {
             $query .= ", image_path = :image_path";
         }
-        
+
         $query .= " WHERE product_id = :id";
-        
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':name', $data['name']);
         $stmt->bindParam(':description', $data['description']);
@@ -172,19 +188,20 @@ class ProductRepository {
         $stmt->bindParam(':category_id', $data['category_id']);
         $stmt->bindParam(':is_available', $data['is_available']);
         $stmt->bindParam(':id', $id);
-        
+
         if (isset($data['image_path'])) {
             $stmt->bindParam(':image_path', $data['image_path']);
         }
-        
+
         return $stmt->execute();
     }
 
-    public function createProduct($data) {
+    public function createProduct($data)
+    {
         $query = "INSERT INTO " . $this->table_products . " 
                   (name, description, price, category_id, image_path, is_available) 
                   VALUES (:name, :description, :price, :category_id, :image_path, :is_available)";
-        
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':name', $data['name']);
         $stmt->bindParam(':description', $data['description']);
@@ -192,7 +209,7 @@ class ProductRepository {
         $stmt->bindParam(':category_id', $data['category_id']);
         $stmt->bindParam(':image_path', $data['image_path']);
         $stmt->bindParam(':is_available', $data['is_available']);
-        
+
         if ($stmt->execute()) {
             return $this->conn->lastInsertId();
         }

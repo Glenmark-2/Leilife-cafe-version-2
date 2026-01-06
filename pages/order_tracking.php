@@ -93,6 +93,85 @@ $pusherCluster = getenv('PUSHER_CLUSTER') ?: 'ap1';
 
         <p class="order-number">Your Order #<?php echo htmlspecialchars($order->order_number ?? $order->id); ?></p>
 
+        <?php if ($order->status === 'pending' && $isPickup && $order->payment_status === 'unpaid'):
+            // Duration settings
+            $timeoutSeconds = 20; // TESTING: 20 seconds. Change to 1800 for 30 minutes (production).
+
+            // Calculate remaining time
+            $createdAtTs = strtotime($order->created_at);
+            $remaining = $timeoutSeconds - (time() - $createdAtTs);
+        ?>
+            <?php if ($remaining > 0): ?>
+                <div id="pickup-timer-container" class="alert alert-warning py-2 mb-3 mx-auto" style="max-width: 400px; border-radius: 12px; border: 1px solid #ffeeba;">
+                    <div class="d-flex align-items-center justify-content-center gap-2">
+                        <i class="bi bi-clock-history fs-5"></i>
+                        <span>Please pay at the counter within:</span>
+                        <span id="pickup-timer" class="fw-bold fs-5 text-danger" style="min-width: 60px;">--:--</span>
+                    </div>
+                </div>
+                <script>
+                    (function() {
+                        let timeLeft = <?php echo (int)$remaining; ?>;
+                        const timerEl = document.getElementById('pickup-timer');
+                        const orderId = <?php echo $order->id; ?>;
+
+                        function updateDisplay() {
+                            const minutes = Math.floor(timeLeft / 60);
+                            const seconds = timeLeft % 60;
+                            timerEl.innerText = String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
+                        }
+
+                        function tick() {
+                            if (timeLeft <= 0) {
+                                timerEl.innerText = "00:00";
+                                clearInterval(timerInterval);
+                                autoCancel();
+                                return;
+                            }
+                            timeLeft--;
+                            updateDisplay();
+                        }
+
+                        function autoCancel() {
+                            // Call the existing cancelOrder logic but without confirmation
+                            fetch('/Leilife_2nd/backend/api/cancel_order.php', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        order_id: orderId
+                                    })
+                                })
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        window.location.reload();
+                                    }
+                                })
+                                .catch(err => console.error("Auto-cancel failed:", err));
+                        }
+
+                        updateDisplay();
+                        const timerInterval = setInterval(tick, 1000);
+                    })();
+                </script>
+            <?php else: ?>
+                <!-- Already expired, trigger cancel immediately -->
+                <script>
+                    fetch('/Leilife_2nd/backend/api/cancel_order.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            order_id: <?php echo $order->id; ?>
+                        })
+                    }).then(() => window.location.reload());
+                </script>
+            <?php endif; ?>
+        <?php endif; ?>
+
         <!-- PROGRESS STEPS -->
         <?php if ($currentStep > 0): ?>
             <div class="progress-steps d-flex justify-content-between mt-4">
@@ -131,11 +210,11 @@ $pusherCluster = getenv('PUSHER_CLUSTER') ?: 'ap1';
                         if ($currentStep == 4) {
                             echo $isPickup ? 'Pick up successful' : 'Delivery successful';
                         } else {
-                            echo $isPickup ? 'Estimated pickup time' : 'Estimated time of delivery';
+                            echo $isPickup ? 'Pick up your order now' : 'Estimated time of delivery';
                         }
                         ?>
                     </p>
-                    <p class="eta"><?php echo ($currentStep == 4) ? 'Order Completed' : '30 - 45 mins'; ?></p>
+                    <p class="eta"><?php echo ($currentStep == 4) ? 'Order Completed' : ''; ?></p>
 
                     <div class="product-img-wrapper">
                         <?php if ($currentStep == 4): ?>
@@ -173,6 +252,11 @@ $pusherCluster = getenv('PUSHER_CLUSTER') ?: 'ap1';
                             }
                             ?>
                         </span>
+                        <?php if ($order->payment_status === 'paid'): ?>
+                            <span class="badge bg-success rounded-pill ms-2" style="font-size: 0.7rem;">
+                                <i class="bi bi-check-circle-fill me-1"></i> Paid
+                            </span>
+                        <?php endif; ?>
                     </div>
 
                     <!-- Contact Number -->
@@ -221,31 +305,31 @@ $pusherCluster = getenv('PUSHER_CLUSTER') ?: 'ap1';
                 <p class="section-title mt-4 text-center">Order details</p>
 
                 <div class="ord-dtls">
-                    <div class="order-items-list">                    <?php foreach ($order->items as $item): ?>
-                        <div class="detail-item mb-3 d-flex align-items-center gap-3">
-                            <?php
-                            $itemImg = $item->product_image ?: 'not_available.png';
-                            if (!str_starts_with($itemImg, 'http') && !str_starts_with($itemImg, '/')) {
-                                $itemImg = '/Leilife_2nd/public/assets/products/' . $itemImg;
-                            }
-                            ?>
-                            <img src="<?php echo htmlspecialchars($itemImg); ?>" class="rounded" style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #eee; <?php echo ($item->status == 'cancelled') ? 'filter: grayscale(1); opacity: 0.6;' : ''; ?>">
+                    <div class="order-items-list"> <?php foreach ($order->items as $item): ?>
+                            <div class="detail-item mb-3 d-flex align-items-center gap-3">
+                                <?php
+                                                        $itemImg = $item->product_image ?: 'not_available.png';
+                                                        if (!str_starts_with($itemImg, 'http') && !str_starts_with($itemImg, '/')) {
+                                                            $itemImg = '/Leilife_2nd/public/assets/products/' . $itemImg;
+                                                        }
+                                ?>
+                                <img src="<?php echo htmlspecialchars($itemImg); ?>" class="rounded" style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #eee; <?php echo ($item->status == 'cancelled') ? 'filter: grayscale(1); opacity: 0.6;' : ''; ?>">
 
-                            <div class="flex-grow-1">
-                                <p class="mb-0 fw-bold" style="<?php echo ($item->status == 'cancelled') ? 'text-decoration: line-through; color: #999;' : ''; ?>">
-                                    <?php echo htmlspecialchars($item->product_name); ?>
+                                <div class="flex-grow-1">
+                                    <p class="mb-0 fw-bold" style="<?php echo ($item->status == 'cancelled') ? 'text-decoration: line-through; color: #999;' : ''; ?>">
+                                        <?php echo htmlspecialchars($item->product_name); ?>
+                                    </p>
+                                    <p class="small text-muted mb-0">₱<?php echo number_format($item->price, 2); ?> × <?php echo $item->quantity; ?></p>
+                                    <?php if ($item->status == 'cancelled'): ?>
+                                        <span class="badge bg-danger-subtle text-danger border-danger-subtle border px-2 py-1" style="font-size: 0.7rem;">Cancelled</span>
+                                    <?php endif; ?>
+                                </div>
+
+                                <p class="fw-bold mb-0" style="<?php echo ($item->status == 'cancelled') ? 'text-decoration: line-through; color: #999;' : ''; ?>">
+                                    ₱<?php echo number_format($item->subtotal, 2); ?>
                                 </p>
-                                <p class="small text-muted mb-0">₱<?php echo number_format($item->price, 2); ?> × <?php echo $item->quantity; ?></p>
-                                <?php if ($item->status == 'cancelled'): ?>
-                                    <span class="badge bg-danger-subtle text-danger border-danger-subtle border px-2 py-1" style="font-size: 0.7rem;">Cancelled</span>
-                                <?php endif; ?>
                             </div>
-
-                            <p class="fw-bold mb-0" style="<?php echo ($item->status == 'cancelled') ? 'text-decoration: line-through; color: #999;' : ''; ?>">
-                                ₱<?php echo number_format($item->subtotal, 2); ?>
-                            </p>
-                        </div>
-                    <?php endforeach; ?>
+                        <?php endforeach; ?>
                     </div>
 
                     <div class="border-top mt-3 pt-3">

@@ -35,12 +35,22 @@ function activateTab(tabTitle) {
             fetchOrderHistory();
         }
     }
+
+    // Persist active tab
+    localStorage.setItem('leilife_profile_active_tab', tabTitle);
 }
 
-// Initial Load - always default to first tab (Personal Info)
+// Initial Load
 document.addEventListener('DOMContentLoaded', () => {
     if (buttons.length > 0) {
-        activateTab(buttons[0].textContent.trim());
+        const savedTab = localStorage.getItem('leilife_profile_active_tab');
+        const defaultTab = buttons[0].textContent.trim();
+
+        if (savedTab && sections[savedTab]) {
+            activateTab(savedTab);
+        } else {
+            activateTab(defaultTab);
+        }
     }
 });
 
@@ -263,8 +273,8 @@ if (feedbackForm) {
     });
 }
 
-// Optional: activate the first tab on page load
-if (buttons.length > 0) buttons[0].click();
+// Optional: activate the first tab on page load - Removed redundant call as it's handled in DOMContentLoaded
+// if (buttons.length > 0) buttons[0].click();
 
 function showToast(message, type = "success", duration = 2500) {
     let toast = document.getElementById("toast-notif");

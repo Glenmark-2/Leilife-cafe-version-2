@@ -189,7 +189,7 @@ function updateDashboardUI(data) {
             <td>
                 <button class="status-badge ${statusClass} btn btn-sm" 
                         ${isCancelled ? 'disabled style="opacity: 0.8; cursor: not-allowed;"' : ''} 
-                        onclick="event.stopPropagation(); openStatusModal('${order.id}', '${order.order_number}', '${order.status}', '${order.delivery_method}')">
+                        onclick="event.stopPropagation(); openStatusModal('${order.id}', '${order.order_number}', '${order.status}', '${order.delivery_method}', '${order.payment_status}')">
                     ${capitalizeFirstLetter(order.status.replace(/_/g, ' '))}
                 </button>
             </td>
@@ -212,9 +212,23 @@ function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-function openStatusModal(orderId, orderNumber, currentStatus, deliveryMethod) {
+function openStatusModal(orderId, orderNumber, currentStatus, deliveryMethod, paymentStatus) {
     document.getElementById('modalOrderId').value = orderId;
     document.getElementById('displayOrderId').innerText = orderNumber;
+
+    // Update payment status badge
+    const psBadge = document.getElementById('displayPaymentStatus');
+    psBadge.innerText = (paymentStatus || 'unpaid').toUpperCase();
+    psBadge.className = `badge rounded-pill ${paymentStatus === 'paid' ? 'bg-success' : 'bg-danger'}`;
+
+    // Show/Hide "Mark as Paid" button
+    // Only show if it's a Pickup order AND it's currently Unpaid
+    const paymentAction = document.getElementById('paymentActionSection');
+    if (deliveryMethod === 'pickup' && paymentStatus !== 'paid') {
+        paymentAction.classList.remove('d-none');
+    } else {
+        paymentAction.classList.add('d-none');
+    }
 
     const btnReady = document.getElementById('btnReadyForPickup');
     const btnDelivery = document.getElementById('btnOutForDelivery');
@@ -321,3 +335,26 @@ async function updateOrderItemStatus(itemId, newStatus, element) {
     }
 }
 
+async function markAsPaid() {
+    const orderId = document.getElementById('modalOrderId').value;
+    if (!confirm("Confirm payment received? This will stop the customer's timer.")) return;
+
+    try {
+        const response = await fetch('../backend/api/admin/mark_order_paid.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId: orderId })
+        });
+
+        const result = await response.json();
+        if (result.status === 'success') {
+            statusModal.hide();
+            fetchDashboardData();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error marking as paid:', error);
+        alert('An error occurred.');
+    }
+}
