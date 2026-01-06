@@ -476,6 +476,10 @@ class OrderService
                 }
             }
 
+            // Trigger Real-time Events
+            RealtimeService::trigger('order-' . $orderId, 'item-updated', ['itemId' => $itemId, 'status' => 'cancelled']);
+            RealtimeService::trigger('admin-orders', 'item-updated', ['orderId' => $orderId]);
+
             // 3. Check if all items are now cancelled. If so, cancel the whole order.
             $allItems = $this->orderRepository->getOrderItems($orderId);
             $allCancelled = true;
@@ -488,6 +492,11 @@ class OrderService
 
             if ($allCancelled) {
                 $this->orderRepository->updateStatus($orderId, 'cancelled');
+                // Trigger full order cancellation events
+                RealtimeService::trigger('order-' . $orderId, 'status-updated', ['status' => 'cancelled']);
+                RealtimeService::trigger('admin-orders', 'status-updated', ['orderId' => $orderId, 'status' => 'cancelled']);
+                RealtimeService::trigger('user-' . $order->user_id, 'order-status-changed', ['orderId' => $orderId, 'status' => 'cancelled']);
+
                 // If the order was paid or already partially refunded, it's now fully refunded
                 if ($order->payment_status === 'paid' || $order->payment_status === 'partially_refunded') {
                     $this->orderRepository->updatePaymentStatus($orderId, 'refunded');
