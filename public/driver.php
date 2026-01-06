@@ -30,7 +30,17 @@ echo '<div id="pageContent">';
 include $target;
 echo '</div>';
 
-// Expose current page to JS
-echo '<script>window.currentPage = "' . htmlspecialchars($page) . '";</script>';
+// Expose current page and Pusher config to JS
+echo '<script>
+    window.currentPage = "' . htmlspecialchars($page) . '";
+    window.pusherConfig = {
+        key: "' . getenv('PUSHER_KEY') . '",
+        cluster: "' . getenv('PUSHER_CLUSTER') . '"
+    };
+</script>';
+
+// Include Pusher library + Realtime script
+echo '<script src="https://js.pusher.com/8.0.1/pusher.min.js"></script>';
+echo '<script src="../scripts/driver/realtime.js"></script>';
 
 include __DIR__ . '/../components/driver/navigation.php';

@@ -1,7 +1,25 @@
 <?php
 // pages/driver/profile.php
-$driverName = "Jericho";
-$driverEmail = "driver@leilife.com";
+require_once __DIR__ . '/../../backend/helpers/SessionManager.php';
+require_once __DIR__ . '/../../backend/config/Database.php';
+
+$driverId = SessionManager::get('driver_id') ?? 1;
+$driverName = SessionManager::get('user_name') ?? "Jericho Driver";
+$driverEmail = SessionManager::get('user_email') ?? "driver@leilife.com";
+
+$db = (new Database())->getConnection();
+
+// Fetch Trips Count (Total Delivered)
+$stmt = $db->prepare("SELECT COUNT(*) FROM orders WHERE assigned_driver_id = :driver_id AND status = 'delivered'");
+$stmt->execute(['driver_id' => $driverId]);
+$totalTrips = $stmt->fetchColumn();
+
+// Fetch Start Year (from staffs table)
+$stmt = $db->prepare("SELECT created_at FROM staffs s JOIN drivers d ON s.staff_id = d.staff_id WHERE d.driver_id = :driver_id");
+$stmt->execute(['driver_id' => $driverId]);
+$createdAt = $stmt->fetchColumn();
+$yearsActive = floor((time() - strtotime($createdAt)) / (365 * 24 * 60 * 60));
+if ($yearsActive < 1) $yearsActive = "< 1";
 ?>
 <div class="container-fluid pb-5">
     
@@ -16,36 +34,25 @@ $driverEmail = "driver@leilife.com";
         
         <div class="d-flex justify-content-center gap-5 border-top pt-3">
             <div class="text-center">
-                <span class="d-block fw-bold fs-5 text-dark">4.9</span>
-                <span class="small text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Rating</span>
-            </div>
-            <div class="text-center">
-                <span class="d-block fw-bold fs-5 text-dark">1.2k</span>
+                <span class="d-block fw-bold fs-5 text-dark"><?php echo $totalTrips; ?></span>
                 <span class="small text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Trips</span>
             </div>
             <div class="text-center">
-                <span class="d-block fw-bold fs-5 text-dark">2</span>
-                <span class="small text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Years</span>
+                <span class="d-block fw-bold fs-5 text-dark"><?php echo $yearsActive; ?></span>
+                <span class="small text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Years Active</span>
             </div>
         </div>
     </div>
 
     <!-- Settings Groups -->
     <div class="mb-4">
-        <h6 class="text-muted fw-bold small ms-2 mb-2 text-uppercase">Account</h6>
+        <h6 class="text-muted fw-bold small ms-2 mb-2 text-uppercase">Account Settings</h6>
         <div class="list-group rounded-4 shadow-sm border-0 overflow-hidden">
             <a href="#" class="list-group-item list-group-item-action p-3 border-0 border-bottom d-flex align-items-center">
                 <div class="bg-light rounded-2 d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px;">
                     <i class="ph-fill ph-user-gear text-secondary fs-5"></i>
                 </div>
                 <span class="fw-medium text-dark flex-grow-1">Account Information</span>
-                <i class="ph ph-caret-right text-muted"></i>
-            </a>
-            <a href="#" class="list-group-item list-group-item-action p-3 border-0 border-bottom d-flex align-items-center">
-                <div class="bg-light rounded-2 d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px;">
-                    <i class="ph-fill ph-bank text-secondary fs-5"></i>
-                </div>
-                <span class="fw-medium text-dark flex-grow-1">Payment Details</span>
                 <i class="ph ph-caret-right text-muted"></i>
             </a>
             <a href="#" class="list-group-item list-group-item-action p-3 border-0 d-flex align-items-center">
@@ -58,29 +65,10 @@ $driverEmail = "driver@leilife.com";
         </div>
     </div>
 
-    <div class="mb-4">
-        <h6 class="text-muted fw-bold small ms-2 mb-2 text-uppercase">Support</h6>
-        <div class="list-group rounded-4 shadow-sm border-0 overflow-hidden">
-             <a href="#" class="list-group-item list-group-item-action p-3 border-0 border-bottom d-flex align-items-center">
-                <div class="bg-light rounded-2 d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px;">
-                    <i class="ph-fill ph-question text-secondary fs-5"></i>
-                </div>
-                <span class="fw-medium text-dark flex-grow-1">Help Center</span>
-                <i class="ph ph-caret-right text-muted"></i>
-            </a>
-             <a href="#" class="list-group-item list-group-item-action p-3 border-0 d-flex align-items-center">
-                <div class="bg-light rounded-2 d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px;">
-                    <i class="ph-fill ph-shield-check text-secondary fs-5"></i>
-                </div>
-                <span class="fw-medium text-dark flex-grow-1">Terms & Privacy</span>
-                <i class="ph ph-caret-right text-muted"></i>
-            </a>
-        </div>
-    </div>
-
     <form method="POST" action="../backend/auth/driver_logout.php">
         <button type="submit" class="btn btn-danger bg-opacity-10 text-danger border-0 w-100 py-3 rounded-4 fw-bold d-flex align-items-center justify-content-center gap-2">
             <i class="ph-bold ph-sign-out"></i> Log Out
         </button>
     </form>
 </div>
+

@@ -1,29 +1,21 @@
 <?php
 // pages/driver/available_orders.php
+require_once __DIR__ . '/../../backend/config/Database.php';
 
-// Mock Data for a single store dispatch system
-$availableOrders = [
-    [
-        'order_no' => '#ORD-001',
-        'customer_name' => 'Maria Santos',
-        'customer_address' => 'Unit 402, High Street South, BGC',
-        'distance' => '2.5 km',
-        'est_time' => '15 mins',
-        'payment_method' => 'COD',
-        'total_amount' => '450.00',
-        'items_count' => 2
-    ],
-    [
-        'order_no' => '#ORD-005',
-        'customer_name' => 'John Doe',
-        'customer_address' => '123 Mahogany Place, Taguig',
-        'distance' => '5.2 km',
-        'est_time' => '30 mins',
-        'payment_method' => 'Paid (Gcash)',
-        'total_amount' => '1,200.00',
-        'items_count' => 8
-    ]
-];
+$db = (new Database())->getConnection();
+
+// Fetch orders that are 'out_for_delivery' (dispatched from kitchen) and NO assigned_driver_id
+$query = "SELECT o.*, CONCAT(u.first_name, ' ', u.last_name) as customer_name 
+          FROM orders o 
+          LEFT JOIN users u ON o.user_id = u.id 
+          WHERE o.delivery_method = 'delivery' 
+          AND o.status = 'out_for_delivery' 
+          AND o.assigned_driver_id IS NULL 
+          ORDER BY o.created_at ASC";
+
+$stmt = $db->prepare($query);
+$stmt->execute();
+$availableOrders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <div class="container-fluid pb-5">
     <div class="mb-4 pt-2">
@@ -45,37 +37,36 @@ $availableOrders = [
             <?php foreach ($availableOrders as $order): ?>
                 <div class="card border-0 shadow-sm rounded-4">
                     <div class="card-header bg-white border-0 pt-3 px-3 d-flex justify-content-between align-items-center">
-                        <span class="badge bg-light text-dark border fw-medium"><?php echo htmlspecialchars($order['order_no']); ?></span>
-                        <span class="fw-bold text-primary">₱<?php echo htmlspecialchars($order['total_amount']); ?></span>
+                        <span class="badge bg-light text-dark border fw-medium"><?php echo htmlspecialchars($order['order_number'] ?? '#'.$order['id']); ?></span>
+                        <span class="fw-bold text-primary">₱<?php echo number_format($order['total_amount'], 2); ?></span>
                     </div>
                     <div class="card-body px-3 pb-3 pt-1">
                         <div class="mb-3">
-                            <h3 class="h6 fw-bold mb-0 text-dark"><?php echo htmlspecialchars($order['customer_name']); ?></h3>
+                            <h3 class="h6 fw-bold mb-0 text-dark"><?php echo htmlspecialchars($order['customer_name'] ?? 'Guest'); ?></h3>
                             <div class="d-flex align-items-start gap-2 mt-1">
                                 <i class="ph-fill ph-map-pin text-danger mt-1"></i>
-                                <p class="small text-muted mb-0 lh-sm"><?php echo htmlspecialchars($order['customer_address']); ?></p>
+                                <p class="small text-muted mb-0 lh-sm"><?php echo htmlspecialchars($order['delivery_address']); ?></p>
                             </div>
                         </div>
                         
                         <div class="row g-2 mb-3 bg-light rounded-3 p-2 mx-0">
-                            <div class="col-4 text-center border-end">
-                                <div class="small text-muted" style="font-size: 0.7rem;">DISTANCE</div>
-                                <div class="fw-bold fs-6 text-dark"><?php echo htmlspecialchars($order['distance']); ?></div>
-                            </div>
-                            <div class="col-4 text-center border-end">
-                                <div class="small text-muted" style="font-size: 0.7rem;">EST. TIME</div>
-                                <div class="fw-bold fs-6 text-dark"><?php echo htmlspecialchars($order['est_time']); ?></div>
-                            </div>
-                            <div class="col-4 text-center">
+                            <div class="col-6 text-center border-end">
                                 <div class="small text-muted" style="font-size: 0.7rem;">PAYMENT</div>
-                                <div class="fw-bold fs-6 text-dark"><?php echo htmlspecialchars($order['payment_method']); ?></div>
+                                <div class="fw-bold fs-6 text-dark"><?php echo strtoupper($order['payment_method']); ?></div>
+                            </div>
+                            <div class="col-6 text-center">
+                                <div class="small text-muted" style="font-size: 0.7rem;">ITEMS</div>
+                                <div class="fw-bold fs-6 text-dark"><?php echo htmlspecialchars($order['status']); ?></div>
                             </div>
                         </div>
 
                         <div class="d-flex gap-2">
-                            <button class="btn btn-primary w-100 py-2 fw-bold text-white shadow-sm shimmer-effect">
-                                Accept Delivery
-                            </button>
+                            <form action="../backend/api/driver_accept_order.php" method="POST" class="w-100">
+                                <input type="hidden" name="order_id" value="<?php echo $order['id']; ?>">
+                                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold text-white shadow-sm shimmer-effect">
+                                    Accept Delivery
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -96,3 +87,4 @@ $availableOrders = [
     animation: shimmer 3s infinite;
 }
 </style>
+
