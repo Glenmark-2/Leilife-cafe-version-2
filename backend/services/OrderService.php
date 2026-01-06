@@ -56,31 +56,31 @@ class OrderService
         }
 
         foreach ($dbItems as $item) {
-             // CartItem object has product_id, quantity, etc.
-             // We need to fetch latest product price/availability to be safe
-             $product = $this->productRepository->findById($item->product_id);
+            // CartItem object has product_id, quantity, etc.
+            // We need to fetch latest product price/availability to be safe
+            $product = $this->productRepository->findById($item->product_id);
 
-             if (!$product) {
-                 return ['success' => false, 'message' => 'Product not found: ID ' . $item->product_id];
-             }
+            if (!$product) {
+                return ['success' => false, 'message' => 'Product not found: ID ' . $item->product_id];
+            }
 
-             if (isset($product['is_available']) && !$product['is_available']) {
-                 return ['success' => false, 'message' => 'Product is not available: ' . $product['name']];
-             }
+            if (isset($product['is_available']) && !$product['is_available']) {
+                return ['success' => false, 'message' => 'Product is not available: ' . $product['name']];
+            }
 
-             $price = $product['price'];
-             $quantity = $item->quantity;
-             $subtotal = $price * $quantity;
+            $price = $product['price'];
+            $quantity = $item->quantity;
+            $subtotal = $price * $quantity;
 
-             $totalAmount += $subtotal;
+            $totalAmount += $subtotal;
 
-             $finalItems[] = new OrderItem([
-                 'product_id' => $product['product_id'],
-                 'product_name' => $product['name'],
-                 'price' => $price,
-                 'quantity' => $quantity,
-                 'subtotal' => $subtotal
-             ]);
+            $finalItems[] = new OrderItem([
+                'product_id' => $product['product_id'],
+                'product_name' => $product['name'],
+                'price' => $price,
+                'quantity' => $quantity,
+                'subtotal' => $subtotal
+            ]);
         }
 
         $deliveryFee = isset($data['delivery_fee']) ? floatval($data['delivery_fee']) : 0.00;
@@ -134,14 +134,14 @@ class OrderService
             if ($order->payment_method === 'gcash' || $order->payment_method === 'grab_pay') {
                 $payMongo = new PayMongoService();
                 $amountInCentavos = (int) ($totalAmount * 100);
-                
+
                 // Construct Redirect URLs
                 // Assuming running on localhost/Leilife_2nd
                 $baseUrl = "http://" . $_SERVER['HTTP_HOST'] . "/Leilife_2nd";
                 $successUrl = $baseUrl . "/backend/api/paymongo_callback.php?status=success&order_id=" . $orderId;
                 $failedUrl = $baseUrl . "/backend/api/paymongo_callback.php?status=failed&order_id=" . $orderId;
 
-                $sourceResult = $payMongo->createSource($amountInCentavos, 'PHP', $order->payment_method, $successUrl, $failedUrl, [
+                $sourceResult = $payMongo->createSource($amountInCentavos, $successUrl, $failedUrl, 'PHP', $order->payment_method, [
                     'order_id' => $orderId
                 ]);
 
@@ -159,12 +159,12 @@ class OrderService
                     // Since I cannot edit Repository in the same tool call easily without context, I will Assume I can add it or doing it here.
                     // Actually, I can't access $this->orderRepository->conn directly if it's private.
                     // I will add a text task to update OrderRepository.
-                    
+
                     // Ideally: $this->orderRepository->updatePayMongoId($orderId, $sourceId);
                     // But I haven't written that yet. 
                     // I will define it as a requirement.
                     // Workaround: I'll use the existing generic 'updateStatus' if I could, but I can't.
-                    
+
                     // I will ADD the method to OrderRepository next.
                     // So I'll call it here assuming it exists.
                     $this->orderRepository->updatePayMongoSource($orderId, $sourceId);
@@ -182,8 +182,8 @@ class OrderService
                     ]);
 
                     return [
-                        'success' => true, 
-                        'message' => 'Redirecting to payment...', 
+                        'success' => true,
+                        'message' => 'Redirecting to payment...',
                         'order_id' => $orderId,
                         'checkout_url' => $checkoutUrl,
                         'payment_method' => $order->payment_method
@@ -192,7 +192,7 @@ class OrderService
                     // PayMongo Creation Failed
                     // Cancel the order?
                     $this->orderRepository->updateStatus($orderId, 'cancelled');
-                    
+
                     // Log Failure
                     $this->transactionRepository->create([
                         'order_id' => $orderId,
@@ -289,7 +289,7 @@ class OrderService
     {
         // 1. Check if user is admin (Actually, this service might be called by an admin controller)
         // For now, let's assume the controller handles auth.
-        
+
         $order = $this->orderRepository->findById($orderId);
         if (!$order) {
             return ['success' => false, 'message' => 'Order not found.'];
@@ -315,7 +315,7 @@ class OrderService
 
         if ($order->payment_method === 'gcash' || $order->payment_method === 'grab_pay') {
             $payMongo = new PayMongoService();
-            
+
             // Calculate refund amount: 
             // If the order was partially refunded, we need to know how much is LEFT to refund.
             // For a 'full' refund request, we want to refund the entire REMAINING balance.
@@ -328,30 +328,30 @@ class OrderService
                     if ($tx['transaction_type'] === 'refund') $totalRefunded += (float) $tx['amount'];
                 }
             }
-            
+
             // Round to 2 decimal places to avoid float precision issues
             $totalPaid = round($totalPaid, 2);
             $totalRefunded = round($totalRefunded, 2);
             $remainingBalance = round($totalPaid - $totalRefunded, 2);
-            
+
             error_log("Refund Calc for Order #$orderId: Paid=$totalPaid, Refunded=$totalRefunded, Remaining=$remainingBalance");
 
             if ($remainingBalance <= 0) {
-                 // If already fully refunded, just ensure the statuses are correct
-                 $this->orderRepository->updateStatus($orderId, 'cancelled');
-                 $this->orderRepository->updatePaymentStatus($orderId, 'refunded');
-                 return ['success' => true, 'message' => 'Order was already fully refunded. Status updated.'];
+                // If already fully refunded, just ensure the statuses are correct
+                $this->orderRepository->updateStatus($orderId, 'cancelled');
+                $this->orderRepository->updatePaymentStatus($orderId, 'refunded');
+                return ['success' => true, 'message' => 'Order was already fully refunded. Status updated.'];
             }
 
             $amountInCentavos = (int) round($remainingBalance * 100);
-            
+
             $refundResult = $payMongo->createRefund($paymentId, $amountInCentavos, $reason);
 
             if ($refundResult['success']) {
                 $this->orderRepository->updateStatus($orderId, 'cancelled');
                 $this->orderRepository->updatePaymentStatus($orderId, 'refunded');
                 $this->orderRepository->updateItemsStatusByOrderId($orderId, 'cancelled');
-                
+
                 // Update Log
                 $this->transactionRepository->create([
                     'order_id' => $orderId,
@@ -370,20 +370,20 @@ class OrderService
             }
         } else {
             // COD Refund (Manual/Cash)
-        $this->orderRepository->updateStatus($orderId, 'cancelled');
-        $this->orderRepository->updatePaymentStatus($orderId, 'refunded');
-        $this->orderRepository->updateItemsStatusByOrderId($orderId, 'cancelled');
+            $this->orderRepository->updateStatus($orderId, 'cancelled');
+            $this->orderRepository->updatePaymentStatus($orderId, 'refunded');
+            $this->orderRepository->updateItemsStatusByOrderId($orderId, 'cancelled');
 
-        $this->transactionRepository->create([
-            'order_id' => $orderId,
-            'transaction_type' => 'refund',
-            'transaction_reference' => 'MANUAL-' . $orderId,
-            'amount' => $order->total_amount,
-            'status' => 'success',
-            'description' => 'Manual refund processed for COD. Reason: ' . $reason,
-            'payment_method' => $order->payment_method,
-            'raw_response' => null
-        ]);
+            $this->transactionRepository->create([
+                'order_id' => $orderId,
+                'transaction_type' => 'refund',
+                'transaction_reference' => 'MANUAL-' . $orderId,
+                'amount' => $order->total_amount,
+                'status' => 'success',
+                'description' => 'Manual refund processed for COD. Reason: ' . $reason,
+                'payment_method' => $order->payment_method,
+                'raw_response' => null
+            ]);
             RealtimeService::trigger('order-' . $orderId, 'status-updated', ['status' => 'cancelled']);
             RealtimeService::trigger('admin-orders', 'status-updated', ['orderId' => $orderId, 'status' => 'cancelled']);
             RealtimeService::trigger('user-' . $userId, 'order-status-changed', ['orderId' => $orderId, 'status' => 'cancelled']);
@@ -401,7 +401,7 @@ class OrderService
 
         $orderId = $item['order_id'];
         $order = $this->orderRepository->findById($orderId);
-        
+
         if (!$order) {
             return ['success' => false, 'message' => 'Order not found.'];
         }
@@ -418,10 +418,10 @@ class OrderService
 
         // 1. Mark Item as Cancelled
         if ($this->orderRepository->updateOrderItemStatus($itemId, 'cancelled')) {
-            
+
             // 2. If Order was PAID, handle partial refund
             if ($order->payment_status === 'paid' || $order->payment_status === 'partially_refunded') {
-                
+
                 // Find original payment ID
                 $transactions = $this->transactionRepository->findByOrderId($orderId);
                 $paymentId = null;
@@ -444,7 +444,7 @@ class OrderService
 
                     if ($refundResult['success']) {
                         $this->orderRepository->updatePaymentStatus($orderId, 'partially_refunded');
-                        
+
                         $this->transactionRepository->create([
                             'order_id' => $orderId,
                             'transaction_type' => 'refund',

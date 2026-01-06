@@ -10,7 +10,7 @@ class PayMongoService
         // Load keys from environment variables or config
         // Assuming they are available via getenv or $_ENV
         $this->secretKey = $_ENV['PAYMONGO_SECRET_KEY'] ?? getenv('PAYMONGO_SECRET_KEY');
-        
+
         if (!$this->secretKey) {
             // Fallback for dev/testing if not in env, remove in production
             // Ideally, throw error or log warning
@@ -21,7 +21,7 @@ class PayMongoService
     private function request($method, $endpoint, $data = [])
     {
         $url = $this->baseUrl . $endpoint;
-        
+
         $headers = [
             'Authorization: Basic ' . base64_encode($this->secretKey . ':'),
             'Content-Type: application/json',
@@ -53,7 +53,7 @@ class PayMongoService
             return ['success' => true, 'data' => $decoded['data'] ?? $decoded];
         } else {
             return [
-                'success' => false, 
+                'success' => false,
                 'error' => $decoded['errors'][0]['detail'] ?? 'Unknown error from PayMongo',
                 'http_code' => $httpCode,
                 'response' => $decoded
@@ -61,7 +61,7 @@ class PayMongoService
         }
     }
 
-    public function createSource($amount, $currency = 'PHP', $type = 'gcash', $redirectSuccess, $redirectFailed, $metadata = [])
+    public function createSource($amount, $redirectSuccess, $redirectFailed, $currency = 'PHP', $type = 'gcash', $metadata = [])
     {
         // Amount inside PayMongo is in centavos
         $payload = [
@@ -126,9 +126,10 @@ class PayMongoService
     {
         return $this->request('GET', '/payments/' . $id);
     }
-    
+
     // Simple logger
-    public function log($db, $orderId, $action, $payload, $response) {
+    public function log($db, $orderId, $action, $payload, $response)
+    {
         try {
             $stmt = $db->prepare("INSERT INTO paymongo_logs (order_id, action, payload, response) VALUES (:order_id, :action, :payload, :response)");
             $stmt->execute([
