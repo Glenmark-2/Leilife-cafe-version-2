@@ -33,15 +33,31 @@ if (!empty($data->order_id) && !empty($data->rating)) {
             exit();
         }
 
+        $sentiment = null;
+        if (!empty($data->comment)) {
+            require_once __DIR__ . '/../services/SentimentService.php';
+            $sentimentService = new SentimentService();
+            $sentiment = $sentimentService->analyze($data->comment);
+        }
+
         $feedbackRepo = new FeedbackRepository($db);
         $result = $feedbackRepo->create(
             $data->order_id,
             $userId,
             $data->rating,
-            $data->comment ?? null
+            $data->comment ?? null,
+            $sentiment
         );
 
         if ($result) {
+            // REAL-TIME: Notify Admin Analytics
+            require_once __DIR__ . '/../services/RealtimeService.php';
+            RealtimeService::trigger('admin-analytics', 'feedback-submitted', [
+                'order_id' => $data->order_id,
+                'rating' => $data->rating,
+                'sentiment' => $sentiment
+            ]);
+
             echo json_encode(["success" => true, "message" => "Feedback submitted successfully"]);
         } else {
             http_response_code(500);

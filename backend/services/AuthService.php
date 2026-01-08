@@ -113,12 +113,11 @@ class AuthService {
     }
 
     // Implement the login logic
-    public function login($email, $password) {
-        // Ensure SessionManager is loaded. It's better to require it at top of file, 
-        // but for now we will assume it is available or we add require_once here if needed.
+    public function login($identifier, $password) {
+        // Ensure SessionManager is loaded.
         require_once __DIR__ . '/../helpers/SessionManager.php';
 
-        $user = $this->userRepository->findByEmail($email);
+        $user = $this->userRepository->findByEmail($identifier);
 
         if ($user && password_verify($password, $user->password)) {
             // Remove password from returned object for security
@@ -127,13 +126,13 @@ class AuthService {
             // Start Session and save User Data
             SessionManager::set('user_id', $user->id);
             SessionManager::set('user_role', $user->role);
-            SessionManager::set('user_name', $user->first_name . ' ' . $user->last_name);
+            SessionManager::set('user_name', trim($user->first_name . ' ' . ($user->last_name ?? '')));
             SessionManager::set('user_email', $user->email);
 
             return ['success' => true, 'user' => $user];
         }
 
-        return ['success' => false, 'message' => 'Invalid email or password.'];
+        return ['success' => false, 'message' => 'Invalid email/username or password.'];
     }
 
     public function loginWithGoogle($idToken) {

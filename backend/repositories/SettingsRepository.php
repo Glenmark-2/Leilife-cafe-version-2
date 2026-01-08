@@ -6,15 +6,19 @@ class SettingsRepository
     private $conn;
     private $table = "site_settings";
 
-    public function __construct()
+    public function __construct($db = null)
     {
-        $database = new Database();
-        $this->conn = $database->getConnection();
-        $this->ensureTableExists();
+        if ($db) {
+            $this->conn = $db;
+        } else {
+            $database = new Database();
+            $this->conn = $database->getConnection();
+        }
     }
 
     private function ensureTableExists()
     {
+        if (!$this->conn) return;
         $query = "SHOW TABLES LIKE '" . $this->table . "'";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
@@ -50,6 +54,7 @@ class SettingsRepository
 
     public function getSettings()
     {
+        if (!$this->conn) return null;
         $query = "SELECT * FROM " . $this->table . " WHERE id = 1";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();

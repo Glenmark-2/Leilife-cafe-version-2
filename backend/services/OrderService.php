@@ -5,6 +5,7 @@ require_once __DIR__ . '/../repositories/ProductRepository.php';
 require_once __DIR__ . '/../repositories/TransactionRepository.php';
 require_once __DIR__ . '/PayMongoService.php';
 require_once __DIR__ . '/RealtimeService.php';
+require_once __DIR__ . '/../helpers/UrlHelper.php';
 
 class OrderService
 {
@@ -137,9 +138,9 @@ class OrderService
 
                 // Construct Redirect URLs
                 // Assuming running on localhost/Leilife_2nd
-                $baseUrl = "http://" . $_SERVER['HTTP_HOST'] . "/Leilife_2nd";
-                $successUrl = $baseUrl . "/backend/api/paymongo_callback.php?status=success&order_id=" . $orderId;
-                $failedUrl = $baseUrl . "/backend/api/paymongo_callback.php?status=failed&order_id=" . $orderId;
+                // Construct Redirect URLs dynamically
+                $successUrl = UrlHelper::getFullUrl("/backend/api/paymongo_callback.php?status=success&order_id=" . $orderId);
+                $failedUrl = UrlHelper::getFullUrl("/backend/api/paymongo_callback.php?status=failed&order_id=" . $orderId);
 
                 $sourceResult = $payMongo->createSource($amountInCentavos, $successUrl, $failedUrl, 'PHP', $order->payment_method, [
                     'order_id' => $orderId

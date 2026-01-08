@@ -9,19 +9,21 @@ class FeedbackRepository
         $this->conn = $db;
     }
 
-    public function create($orderId, $userId, $rating, $comment)
+    public function create($orderId, $userId, $rating, $comment, $sentiment = null)
     {
-        $query = "INSERT INTO order_feedbacks (order_id, user_id, rating, comment) 
-                  VALUES (:order_id, :user_id, :rating, :comment)
-                  ON DUPLICATE KEY UPDATE rating = :rating2, comment = :comment2";
+        $query = "INSERT INTO order_feedbacks (order_id, user_id, rating, comment, sentiment) 
+                  VALUES (:order_id, :user_id, :rating, :comment, :sentiment)
+                  ON DUPLICATE KEY UPDATE rating = :rating2, comment = :comment2, sentiment = :sentiment2";
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':order_id', $orderId);
         $stmt->bindParam(':user_id', $userId);
         $stmt->bindParam(':rating', $rating);
         $stmt->bindParam(':comment', $comment);
+        $stmt->bindParam(':sentiment', $sentiment);
         $stmt->bindParam(':rating2', $rating);
         $stmt->bindParam(':comment2', $comment);
+        $stmt->bindParam(':sentiment2', $sentiment);
 
         return $stmt->execute();
     }

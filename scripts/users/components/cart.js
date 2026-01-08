@@ -13,10 +13,10 @@ let cart = [];
 if (statusText && icon) {
     if (isPickup) {
         statusText.textContent = "Pick up";
-        icon.src = "/Leilife_2nd/public/assets/walk.png";
+        icon.src = (window.BASE_URL || "/Leilife_2nd") + "/public/assets/walk.png";
     } else {
         statusText.textContent = "Delivery";
-        icon.src = "/Leilife_2nd/public/assets/motorbike.png";
+        icon.src = (window.BASE_URL || "/Leilife_2nd") + "/public/assets/motorbike.png";
     }
 }
 
@@ -27,10 +27,10 @@ if (btn) {
 
         if (isPickup) {
             statusText.textContent = "Pick up";
-            icon.src = "/Leilife_2nd/public/assets/walk.png";
+            icon.src = (window.BASE_URL || "/Leilife_2nd") + "/public/assets/walk.png";
         } else {
             statusText.textContent = "Delivery";
-            icon.src = "/Leilife_2nd/public/assets/motorbike.png";
+            icon.src = (window.BASE_URL || "/Leilife_2nd") + "/public/assets/motorbike.png";
         }
 
         localStorage.setItem('leilife_delivery_choice', isPickup ? 'pickup' : 'delivery');
@@ -39,7 +39,7 @@ if (btn) {
 }
 
 // --- API Helpers ---
-const API_URL = '/Leilife_2nd/backend/api/cart_actions.php';
+const API_URL = (window.BASE_URL || '/Leilife_2nd') + '/backend/api/cart_actions.php';
 
 async function fetchCartAPI() {
     try {
@@ -207,7 +207,7 @@ function renderCart() {
 
         let imageSrc = item.image;
         if (imageSrc && !imageSrc.startsWith('http') && !imageSrc.startsWith('/')) {
-            imageSrc = '/Leilife_2nd/public/assets/products/' + imageSrc;
+            imageSrc = (window.BASE_URL || '/Leilife_2nd') + '/public/assets/products/' + imageSrc;
         }
 
         const isTrash = item.qty === 1;

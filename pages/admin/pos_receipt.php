@@ -17,7 +17,7 @@ try {
     $db = $database->getConnection();
 
     $orderRepo = new OrderRepository($db);
-    $settingsRepo = new SettingsRepository(); // It handles its own connection
+    $settingsRepo = new SettingsRepository($db);
 
     $order = $orderRepo->findById($order_id);
     if (!$order) {

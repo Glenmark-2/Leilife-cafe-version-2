@@ -12,7 +12,7 @@ date_default_timezone_set('Asia/Manila');
 $database = new Database();
 $db = $database->getConnection();
 $orderRepo = new OrderRepository($db);
-$settingsRepo = new SettingsRepository();
+$settingsRepo = new SettingsRepository($db);
 $settings = $settingsRepo->getSettings();
 
 // Get filters from GET request

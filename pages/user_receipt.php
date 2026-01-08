@@ -25,7 +25,7 @@ if (!$orderId) {
 $db = (new Database())->getConnection();
 $orderRepo = new OrderRepository($db);
 $userRepo = new UserRepository($db);
-$settingsRepo = new SettingsRepository();
+$settingsRepo = new SettingsRepository($db);
 
 $order = $orderRepo->findById($orderId);
 if (!$order || $order->user_id != $userId) {

@@ -2,6 +2,7 @@
 // pages/driver/profile.php
 require_once __DIR__ . '/../../backend/helpers/SessionManager.php';
 require_once __DIR__ . '/../../backend/config/Database.php';
+require_once __DIR__ . '/../../backend/helpers/UrlHelper.php';
 
 $driverId = SessionManager::get('driver_id') ?? 1;
 $driverName = SessionManager::get('user_name') ?? "Jericho Driver";
@@ -65,7 +66,7 @@ if ($yearsActive < 1) $yearsActive = "< 1";
         </div>
     </div>
 
-    <form method="POST" action="../backend/auth/driver_logout.php">
+    <form method="POST" action="<?php echo UrlHelper::getFullUrl('/backend/api/logout_user.php'); ?>">
         <button type="submit" class="btn btn-danger bg-opacity-10 text-danger border-0 w-100 py-3 rounded-4 fw-bold d-flex align-items-center justify-content-center gap-2">
             <i class="ph-bold ph-sign-out"></i> Log Out
         </button>

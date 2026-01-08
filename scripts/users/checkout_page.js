@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const initPage = async () => {
         if (window.isLoggedIn) {
             try {
-                const res = await fetch('/Leilife_2nd/backend/api/cart_actions.php?action=get_cart');
+                const res = await fetch((window.BASE_URL || '/Leilife_2nd') + '/backend/api/cart_actions.php?action=get_cart');
                 const data = await res.json();
                 if (data.success) {
                     cart = data.cart || [];
@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
         confirmSaveBtn.addEventListener('click', async () => {
             if (tempAddressData) {
                 try {
-                    const response = await fetch('/Leilife_2nd/backend/api/update_address.php', {
+                    const response = await fetch((window.BASE_URL || '/Leilife_2nd') + '/backend/api/update_address.php', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -257,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let imageSrc = item.image || 'not_available.png';
             if (typeof imageSrc === 'string' && !imageSrc.startsWith('http') && !imageSrc.startsWith('/')) {
-                imageSrc = '/Leilife_2nd/public/assets/products/' + imageSrc;
+                imageSrc = (window.BASE_URL || '/Leilife_2nd') + '/public/assets/products/' + imageSrc;
             }
 
             const html = `
@@ -350,7 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                const response = await fetch('/Leilife_2nd/backend/api/place_order.php', {
+                const response = await fetch((window.BASE_URL || '/Leilife_2nd') + '/backend/api/place_order.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

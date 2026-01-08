@@ -12,8 +12,8 @@
             <form id="loginForm">
 
               <div class="mb-3">
-                <label for="login" class="form-label">Email <span style="color: red;">*</span></label>
-                <input type="email" id="login_email" name="login" class="inputs" placeholder="Enter your email" required>
+                <label for="login" class="form-label">Email or Username <span style="color: red;">*</span></label>
+                <input type="text" id="login_email" name="login" class="inputs" placeholder="Enter your email or username" required>
               </div>
 
               <div class="mb-3">
