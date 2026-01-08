@@ -18,6 +18,7 @@
 
       <!-- Your CSS -->
       <?php
+      require_once __DIR__ . '/../backend/helpers/UrlHelper.php';
       $page_styles = include __DIR__ . '/../backend/config/styles_config.php';
       if (isset($page_styles[$page])) {
         foreach ($page_styles[$page] as $css_file) {
@@ -34,7 +35,7 @@
         <div class="container-fluid mx-3 mx-sm-5">
           <!-- Logo -->
           <a class="navbar-brand d-flex align-items-center" href="?page=home">
-            <img class="logo" src="/Leilife_2nd/public/assets/leilife.png" alt="Leilife logo">
+            <img class="logo" src="<?php echo UrlHelper::getFullUrl('/public/assets/leilife.png'); ?>" alt="Leilife logo">
           </a>
 
           <!-- Hamburger toggle button -->
@@ -55,7 +56,7 @@
               if (SessionManager::isLoggedIn()): 
               ?>
                                 <a class="btn btn-text" href="index.php?page=profile">Profile</a>
-                  <a class="btn btn-text" href="/Leilife_2nd/backend/api/logout_user.php">Logout</a>
+                  <a class="btn btn-text" href="<?php echo UrlHelper::getFullUrl('/backend/api/logout_user.php'); ?>">Logout</a>
               <?php else: ?>
                   <a class="btn btn-text" href="#" id="webLogin">Login</a>
                   <a class="btn btn-text" href="index.php?page=sign_up">Sign up</a>
@@ -83,7 +84,7 @@
           <hr style="width: 80%; border-top: 1px solid #cccccc; margin: 0.5rem auto;">
           <?php if (SessionManager::isLoggedIn()): ?>
               <a class="btn btn-text" href="index.php?page=profile">Profile</a>
-              <a class="btn btn-text" href="/Leilife_2nd/backend/api/logout_user.php">Logout</a>
+              <a class="btn btn-text" href="<?php echo UrlHelper::getFullUrl('/backend/api/logout_user.php'); ?>">Logout</a>
           <?php else: ?>
               <a class="btn btn-text" href="#" id="mobileLogin">Login</a>
               <a class="btn btn-text" href="index.php?page=sign_up">Sign up</a>
@@ -118,6 +119,7 @@
 
         <script>
           window.isLoggedIn = <?php echo SessionManager::isLoggedIn() ? 'true' : 'false'; ?>;
+          window.BASE_URL = "<?php echo UrlHelper::getBaseUrl(); ?>";
         </script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="../scripts/users/components/header.js"></script>

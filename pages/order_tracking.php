@@ -12,7 +12,7 @@ try {
     $database = new Database();
     $db = $database->getConnection();
 
-    $settingsRepo = new SettingsRepository();
+    $settingsRepo = new SettingsRepository($db);
     $settings = $settingsRepo->getSettings();
 
     if ($orderId) {
@@ -25,7 +25,8 @@ try {
     } else {
         $error = "No order ID specified.";
     }
-} catch (Exception $e) {
+} catch (Throwable $e) {
+    error_log("Tracking Page Error: " . $e->getMessage());
     $error = "Error loading tracking data.";
 }
 

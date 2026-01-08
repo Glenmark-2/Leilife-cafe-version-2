@@ -9,6 +9,7 @@ require_once __DIR__ . '/../repositories/OrderRepository.php';
 require_once __DIR__ . '/../repositories/TransactionRepository.php';
 require_once __DIR__ . '/../repositories/CartRepository.php';
 require_once __DIR__ . '/../services/PayMongoService.php';
+require_once __DIR__ . '/../helpers/UrlHelper.php';
 
 // Instantiate DB
 $database = new Database();
@@ -33,9 +34,9 @@ if (!$order) {
     die("Order not found.");
 }
 
-// Ensure we are redirecting to frontend
-$frontendUrl = "/Leilife_2nd/public/index.php?page=order_tracking&order_id=" . $orderId;
-$cartUrl = "/Leilife_2nd/public/index.php?page=checkout&error=payment_failed";
+// Ensure we are redirecting to frontend dynamically
+$frontendUrl = UrlHelper::getFullUrl("/public/index.php?page=order_tracking&order_id=" . $orderId);
+$cartUrl = UrlHelper::getFullUrl("/public/index.php?page=checkout&error=payment_failed");
 
 if ($status === 'failed') {
     // Payment failed or cancelled by user

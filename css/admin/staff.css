@@ -163,10 +163,46 @@ tr:hover {
     background-color: #f8f9fa;
     border-bottom: 1px solid #eee;
     border-radius: 12px 12px 0 0;
+    flex-shrink: 0; /* Keep header fixed */
 }
 
 .modal-footer {
     border-top: 1px solid #eee;
+    flex-shrink: 0; /* Keep footer fixed */
+}
+
+/* Fix for Modal Scrolling and Viewport Layout */
+body.modal-open #pageContent {
+    overflow: hidden !important; /* Prevent page content scrolling behind modal */
+}
+
+.modal {
+    background-color: rgba(0, 0, 0, 0.4); /* Darker backdrop to hide 'UI underneath' */
+}
+
+.modal-dialog {
+    margin: 1.75rem auto;
+    max-height: calc(100% - 3.5rem);
+}
+
+.modal-content {
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.modal-body {
+    padding: 25px;
+    overflow-y: auto; /* Explicitly ensure scrolling */
+    flex-grow: 1; /* Allow body to take available space */
+}
+
+/* Ensure form doesn't break flex layout for scrollable modal */
+#staffForm {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
 }
 
 /* Responsive */

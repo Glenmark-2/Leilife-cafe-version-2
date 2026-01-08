@@ -62,8 +62,8 @@ $archivedStaff = $staffService->getArchivedStaffs();
 
 <!-- add staff modal -->
 <div class="modal fade" id="addStaffModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addStaffModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content shadow-lg border-0">
             <form id="staffForm" novalidate data-mode="add">
                 <input type="hidden" id="staff_id" name="staff_id">
                 <div class="modal-header">

@@ -50,18 +50,53 @@ class UserRepository {
         return false;
     }
 
-    // Implement this method to find a user by email
-    public function findByEmail($email) {
-        $query = "SELECT * FROM users WHERE email = :email LIMIT 1";
+    /**
+     * Find a user by email or username across multiple tables (users, admins, drivers)
+     */
+    public function findByEmail($identifier) {
+        // We use a UNION to search across all potential user tables.
+        // For admins/drivers, we join with staffs to get names.
+        $query = "
+            SELECT id, email, password, role, first_name, last_name FROM (
+                SELECT id, 
+                       email COLLATE utf8mb4_unicode_ci as email, 
+                       CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci as username, 
+                       password COLLATE utf8mb4_unicode_ci as password, 
+                       role COLLATE utf8mb4_unicode_ci as role, 
+                       first_name COLLATE utf8mb4_unicode_ci as first_name, 
+                       last_name COLLATE utf8mb4_unicode_ci as last_name 
+                FROM users
+                UNION ALL
+                SELECT a.staff_id as id, 
+                       a.email COLLATE utf8mb4_unicode_ci, 
+                       a.username COLLATE utf8mb4_unicode_ci, 
+                       a.password COLLATE utf8mb4_unicode_ci, 
+                       'admin' COLLATE utf8mb4_unicode_ci as role, 
+                       s.full_name COLLATE utf8mb4_unicode_ci as first_name, 
+                       '' COLLATE utf8mb4_unicode_ci as last_name 
+                FROM admins a JOIN staffs s ON a.staff_id = s.staff_id
+                UNION ALL
+                SELECT d.staff_id as id, 
+                       d.email COLLATE utf8mb4_unicode_ci, 
+                       d.username COLLATE utf8mb4_unicode_ci, 
+                       d.password COLLATE utf8mb4_unicode_ci, 
+                       'driver' COLLATE utf8mb4_unicode_ci as role, 
+                       s.full_name COLLATE utf8mb4_unicode_ci as first_name, 
+                       '' COLLATE utf8mb4_unicode_ci as last_name 
+                FROM drivers d JOIN staffs s ON d.staff_id = s.staff_id
+            ) AS all_users 
+            WHERE email = :identifier OR username = :identifier 
+            LIMIT 1";
+
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":email", $email);
+        $stmt->bindParam(":identifier", $identifier);
         $stmt->execute();
 
         if ($stmt->rowCount() > 0) {
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             return new User($row);
         }
-        return null; // Return null if user not found
+        return null;
     }
     public function updatePassword($userId, $newHash) {
         $query = "UPDATE users SET password = :password WHERE id = :id";

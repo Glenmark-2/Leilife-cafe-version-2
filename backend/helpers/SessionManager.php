@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/UrlHelper.php';
 
 class SessionManager {
     public static function startSession() {
@@ -53,7 +54,7 @@ class SessionManager {
                  echo json_encode(['success' => false, 'message' => 'Unauthorized']);
                  exit;
             } else {
-                 header("Location: index.php?page=home&login=true"); 
+                 header("Location: " . UrlHelper::getFullUrl('/public/index.php?page=home&login=true')); 
                  exit;
             }
         }
@@ -62,7 +63,7 @@ class SessionManager {
     // Check if user is already logged in (for login/signup pages)
     public static function requireGuest() {
         if (self::isLoggedIn()) {
-            header("Location: index.php?page=home");
+            header("Location: " . UrlHelper::getFullUrl('/public/index.php?page=home'));
             exit;
         }
     }

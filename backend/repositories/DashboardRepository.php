@@ -27,10 +27,11 @@ class DashboardRepository
             'delivered' => 0,
             'delivered_today' => 0,
             'picked_up_today' => 0,
-            'cancelled' => 0
+            'cancelled' => 0,
+            'cancelled_today' => 0
         ];
 
-        // Counts by status
+        // Counts by status (Overall)
         $query = "SELECT status, COUNT(*) as count FROM orders GROUP BY status";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
@@ -55,6 +56,17 @@ class DashboardRepository
         $stmtPickedUpToday->execute();
         $rowPickedUpToday = $stmtPickedUpToday->fetch(PDO::FETCH_ASSOC);
         $stats['picked_up_today'] = (int)$rowPickedUpToday['count'];
+
+        // Cancelled Today specifically
+        $queryCancelledToday = "SELECT COUNT(*) as count FROM orders WHERE status = 'cancelled' AND DATE(updated_at) = CURDATE()";
+        $stmtCancelledToday = $this->conn->prepare($queryCancelledToday);
+        $stmtCancelledToday->execute();
+        $rowCancelledToday = $stmtCancelledToday->fetch(PDO::FETCH_ASSOC);
+        $stats['cancelled_today'] = (int)$rowCancelledToday['count'];
+        
+        // Update the main 'cancelled' stat to use the today count if that's what's expected for the dashboard UI
+        // or just keep both and let the frontend decide. To be safe based on your request:
+        $stats['cancelled'] = $stats['cancelled_today'];
 
         return $stats;
     }

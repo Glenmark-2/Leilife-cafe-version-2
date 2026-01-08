@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../helpers/SessionManager.php';
+require_once __DIR__ . '/../helpers/UrlHelper.php';
 
 function requireLogin($page, $required_role = null) {
     // Pages that require authentication (example list for customers)
@@ -24,11 +25,11 @@ function requireLogin($page, $required_role = null) {
         if ($user_role !== $required_role) {
             // Wrong role? kick them out to their correct home or generic home
             if ($user_role === 'admin') {
-                 header("Location: admin.php");
+                 header("Location: " . UrlHelper::getFullUrl('/public/admin.php'));
             } elseif ($user_role === 'driver') {
-                 header("Location: driver.php");
+                 header("Location: " . UrlHelper::getFullUrl('/public/driver.php'));
             } else {
-                 header("Location: index.php");
+                 header("Location: " . UrlHelper::getFullUrl('/public/index.php'));
             }
             exit;
         }
