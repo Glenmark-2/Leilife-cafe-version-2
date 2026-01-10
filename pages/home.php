@@ -4,64 +4,87 @@
     <div class="banner-text">
         <h1>Welcome to Leilife Cafe</h1>
         <p>Your perfect spot for coffee and meals</p>
-        <button class="btn-primary-custom">Order Now</button>
+        <button class="btn-primary-custom" onclick="window.location.href='index.php?page=menu'">Order Now</button>
     </div>
 </div>
 <div class="container first-section mt-5">
-    <h4 class="fw-bold">Hey there!</h4>
-    <p>Unwind with the comforting taste of Leilife Café and Resto!</p>
+    <h4 class="fw-bold mb-4">Our Favorites</h4>
+    <p class="mb-5">Experience the best of Leilife with our customer-loved signature dishes and drinks.</p>
 
-    <div class="row mt-5 gy-5 gx-4 justify-content-center">
+    <div class="row gy-5 gx-4 justify-content-center">
         <?php
-        // Card 1
-        $title = "Kape Masarap";
-        $price = 100;
-        $size = "1 x 250 ml";
-        $image = UrlHelper::getBaseUrl() . "/public/assets/image 39.png";
-        $description = "Masarap kape.";
-        $isActive = false;
-        include __DIR__ . "/../partials/card.php";
-        ?>
+        require_once __DIR__ . '/../backend/services/ProductService.php';
+        $productService = new ProductService();
+        
+        // Fetch valid products (not archived)
+        $allProducts = $productService->getAllProductsAdmin(['is_archived' => 0]);
+        
+        // Shuffle to get random "Favorites" each load, or you could pick specific IDs
+        if (!empty($allProducts)) {
+            shuffle($allProducts);
+            $featuredProducts = array_slice($allProducts, 0, 3);
+        } else {
+            $featuredProducts = [];
+        }
 
-        <?php
-        // Card 2
-        $title = "Iced Latte";
-        $price = 120;
-        $size = "1 x 300 ml";
-        $image = UrlHelper::getBaseUrl() . "/public/assets/image 39.png";
-        $description = "Chill vibes only.";
-        $isActive = false; // Example: this one is 'selected'
-        include __DIR__ . "/../partials/card.php";
-        ?>
+        foreach ($featuredProducts as $index => $product) {
+            $title = $product['name'];
+            $price = $product['price'];
+            $id = $product['product_id'];
+            // Using category name as "Size" placeholder since size isn't in DB, or empty string
+            $size = $product['category_name'] ?? ''; 
+            
+            // Check if image is a full URL or relative path
+            $img = $product['image_path'];
+            if ($img && strpos($img, 'http') !== 0) {
+                 // dynamic path handling
+                 $image = UrlHelper::getBaseUrl() . "/public/assets/products/" . $img;
+            } else {
+                 $image = $img ?: UrlHelper::getBaseUrl() . "/public/assets/products/not_available.png";
+            }
 
-        <?php
-        // Card 3
-        $title = "Caramel Macchiato";
-        $price = 140;
-        $size = "1 x 300 ml";
-        $image = UrlHelper::getBaseUrl() . "/public/assets/image 39.png";
-        $description = "Sweet and bold.";
-        $isActive = false;
-        include __DIR__ . "/../partials/card.php";
-        ?>
+            $description = $product['description'];
+            
+            // LOGIC FOR IS_ACTIVE: Highlight the 2nd card (index 1) to make it stand out
+            // This answers "how should i use it" -> use it to highlight a specific item
+            $isActive = false; // Hover effect takes over now 
 
+            include __DIR__ . "/../partials/card.php";
+        }
+
+        if (empty($featuredProducts)) {
+            echo '<p class="text-center">No featured products available at the moment.</p>';
+        }
+        ?>
     </div>
     <div>
 
     </div>
 </div>
 
-<div class="container-lg second-section mt-4 mb-5 custom-w-75 bg-light">
+<div class="container-lg second-section mt-4 mb-5 custom-w-75 bg-light rounded-4 overflow-hidden shadow-sm p-0">
     <div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel">
-        <div class="carousel-inner">
+        <div class="carousel-inner" style="max-height: 400px;">
             <div class="carousel-item active">
-                <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/image 39.png" class="justify-content-center" alt="...">
+                <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/products/lasagna_supreme.jpg" class="d-block w-100" style="object-fit: cover; height: 400px;" alt="Lasagna Supreme">
+                <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded">
+                    <h5>Lasagna Supreme</h5>
+                    <p>Layers of pasta, meat sauce, and cheese.</p>
+                </div>
             </div>
             <div class="carousel-item">
-                <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/image 39.png" class="justify-content-center" alt="...">
+                <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/products/matcha_latte.jpg" class="d-block w-100" style="object-fit: cover; height: 400px;" alt="Matcha Latte">
+                <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded">
+                    <h5>Matcha Latte</h5>
+                    <p>Premium green tea milk for a refreshing sip.</p>
+                </div>
             </div>
             <div class="carousel-item">
-                <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/image 39.png" class="justify-content-center" alt="...">
+                <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/products/chicken_teriyaki_bowl.jpg" class="d-block w-100" style="object-fit: cover; height: 400px;" alt="Chicken Teriyaki">
+                <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded">
+                    <h5>Chicken Teriyaki</h5>
+                    <p>Sweet and savory grilled chicken perfection.</p>
+                </div>
             </div>
         </div>
         <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleAutoplaying"
@@ -232,6 +255,19 @@
             </form>
         </div>
     </div>
+
+<!-- Custom Cart Notification Modal -->
+<div id="cart-notification" class="cart-notification-overlay">
+    <div class="cart-notification-modal">
+        <div style="text-align: center;">
+             <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/leilife.png" alt="Leilife" class="mb-2" style="width: 50px; height: auto;">
+             <h5 class="fw-bold mb-2" style="color: #5a4b40;">Great Choice!</h5>
+        </div>
+        <p id="cart-notification-message" class="mb-0 text-center" style="color: #6c757d; font-size: 0.95rem;">Item added to your cart.</p>
+    </div>
+</div>
+
+
 </div>
 
 <script src="../scripts/users/home.js"></script>
