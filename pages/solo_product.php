@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../backend/services/ProductService.php';
+require_once __DIR__ . '/../backend/helpers/UrlHelper.php';
 
 $productService = new ProductService();
 $product = null;
@@ -23,8 +24,8 @@ if (!$product || $product['is_archived'] == 1) {
                 <img src="<?php 
                     $img = !empty($product['image_path']) ? $product['image_path'] : '';
                     echo (!empty($img) && !str_starts_with($img, 'http') && !str_starts_with($img, '/'))
-                        ? '/Leilife_2nd/public/assets/products/' . trim($img)
-                        : (!empty($img) ? $img : '/Leilife_2nd/public/assets/products/not_available.png'); // Fallback if needed
+                        ? UrlHelper::getBaseUrl() . '/public/assets/products/' . trim($img)
+                        : (!empty($img) ? $img : UrlHelper::getBaseUrl() . '/public/assets/products/not_available.png');
                 ?>" 
                      alt="<?php echo htmlspecialchars($product['name']); ?>" 
                      class="product-img">
@@ -71,7 +72,7 @@ if (!$product || $product['is_archived'] == 1) {
 </div>
 <?php } ?>
 
-<script src="/Leilife_2nd/scripts/users/solo_product.js"></script>
+<script src="<?= UrlHelper::getBaseUrl() ?>/scripts/users/solo_product.js"></script>
 <script>
     // Favorite Button Toggle (Visual only for now)
     const userId = <?= $_SESSION['user_id'] ?? 'null' ?>;
@@ -83,7 +84,7 @@ if (!$product || $product['is_archived'] == 1) {
             if(!userId){ alert('Please log in to add favorites'); return; }
             this.classList.toggle('active');
             try{
-                    const resp = await fetch('../backend/api/add_favorite.php',{
+                    const resp = await fetch(`${window.BASE_URL}/backend/api/add_favorite.php`,{
                         method:'POST',
                         headers:{'Content-Type':'application/x-www-form-urlencoded'},
                         body:`user_id=${userId}&product_id=<?= $product['product_id'] ?>`

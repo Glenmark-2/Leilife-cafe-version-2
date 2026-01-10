@@ -23,10 +23,10 @@ try {
         }
     }
 
-    // Convert booleans from string "true"/"false" if sent that way
-    if (isset($data['is_store_open'])) $data['is_store_open'] = $data['is_store_open'] === 'true' || $data['is_store_open'] === '1';
-    if (isset($data['enable_cod'])) $data['enable_cod'] = $data['enable_cod'] === 'true' || $data['enable_cod'] === '1';
-    if (isset($data['enable_gcash'])) $data['enable_gcash'] = $data['enable_gcash'] === 'true' || $data['enable_gcash'] === '1';
+    // Convert booleans to Integers (1 or 0) for Database
+    $data['is_store_open'] = isset($data['is_store_open']) && ($data['is_store_open'] === 'true' || $data['is_store_open'] === '1' || $data['is_store_open'] === 1) ? 1 : 0;
+    $data['enable_cod'] = isset($data['enable_cod']) && ($data['enable_cod'] === 'true' || $data['enable_cod'] === '1' || $data['enable_cod'] === 1) ? 1 : 0;
+    $data['enable_gcash'] = isset($data['enable_gcash']) && ($data['enable_gcash'] === 'true' || $data['enable_gcash'] === '1' || $data['enable_gcash'] === 1) ? 1 : 0;
 
     $success = $repo->updateSettings($data);
 

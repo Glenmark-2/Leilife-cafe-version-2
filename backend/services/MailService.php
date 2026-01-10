@@ -48,7 +48,8 @@ class MailService {
             $mail->isHTML(true);                                  
             $mail->Subject = 'Verify your Leilife Account';
             
-            $verifyLink = "http://localhost/Leilife_2nd/public/index.php?page=verify&token=" . $token;
+            require_once __DIR__ . '/../helpers/UrlHelper.php';
+            $verifyLink = UrlHelper::getFullUrl("public/index.php?page=verify&token=" . $token);
             
             $body = "
                 <h1>Welcome to Leilife!</h1>

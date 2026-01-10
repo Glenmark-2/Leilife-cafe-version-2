@@ -55,13 +55,16 @@ class CartController {
         if ($cart && !empty($cart->items)) {
             foreach ($cart->items as $item) {
                 // Map to frontend expected structure
-                $formattedItems[] = [
-                    'id' => $item->product_id, // Frontend uses 'id' as product_id
+                $itemData = [
+                    'id' => $item->product_id,
                     'name' => $item->product_name,
                     'price' => (float)$item->product_price,
                     'qty' => (int)$item->quantity,
                     'image' => $item->product_image
                 ];
+                // Debug log
+                // error_log("CartItem: " . json_encode($itemData));
+                $formattedItems[] = $itemData;
             }
         }
 

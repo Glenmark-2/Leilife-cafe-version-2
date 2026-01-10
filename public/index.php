@@ -1,4 +1,9 @@
 <?php
+// Enable error display temporarily for debugging
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
+
 // public/index.php
 
 // 1) Determine requested page

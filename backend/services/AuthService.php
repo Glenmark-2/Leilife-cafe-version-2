@@ -136,8 +136,17 @@ class AuthService {
     }
 
     public function loginWithGoogle($idToken) {
+        if (!class_exists('Google_Client')) {
+             return ['success' => false, 'message' => 'Google Login library not installed on server.'];
+        }
+
         // Initialize Google Client
-        $client = new Google_Client(['client_id' => getenv('GOOGLE_CLIENT_ID')]);
+        $clientId = getenv('GOOGLE_CLIENT_ID');
+        if (!$clientId) {
+            return ['success' => false, 'message' => 'GOOGLE_CLIENT_ID not configured on server.'];
+        }
+
+        $client = new Google_Client(['client_id' => $clientId]);
 
         try {
             $payload = $client->verifyIdToken($idToken);

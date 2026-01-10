@@ -28,6 +28,16 @@ document.addEventListener("DOMContentLoaded", function () {
       loadGoogleScript();
       loginModal.show();
     });
+
+    // Check for login=true in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('login') === 'true') {
+      loadGoogleScript();
+      loginModal.show();
+      // Clean URL
+      const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?page=home";
+      window.history.replaceState({ path: newUrl }, '', newUrl);
+    }
   }
 
   // --- Cart Modal ---

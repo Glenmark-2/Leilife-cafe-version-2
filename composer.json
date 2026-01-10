@@ -1,6 +1,0 @@
-{
-    "require": {
-        "google/apiclient": "^2.18",
-        "pusher/pusher-php-server": "^7.2"
-    }
-}

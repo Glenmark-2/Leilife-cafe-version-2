@@ -1,110 +1,262 @@
 <?php
-// Headers
+// PayMongo Webhook Handler
+// This receives webhook events from PayMongo (source.chargeable, payment.paid, etc.)
+
 header("Content-Type: application/json; charset=UTF-8");
 
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../repositories/OrderRepository.php';
 require_once __DIR__ . '/../repositories/TransactionRepository.php';
-require_once __DIR__ . '/../repositories/CartRepository.php';
 require_once __DIR__ . '/../services/PayMongoService.php';
+require_once __DIR__ . '/../helpers/EnvLoader.php';
 
-// Instantiate dependencies
-$database = new Database();
-$db = $database->getConnection();
-$orderRepo = new OrderRepository($db);
-$transactionRepo = new TransactionRepository($db);
-$cartRepo = new CartRepository($db);
-$payMongo = new PayMongoService();
+// Load environment
+EnvLoader::load(__DIR__ . '/../../.env');
 
-// Retrieve Webhook Secret from ENV
-$webhookSecret = $_ENV['PAYMONGO_WEBHOOK_SECRET'] ?? getenv('PAYMONGO_WEBHOOK_SECRET');
+// Get webhook secret
+$webhookSecret = getenv('PAYMONGO_WEBHOOK_SECRET');
 
-if (!$webhookSecret) {
-    // If not set, we can't verify. For safety in production, we should abort.
-    // However, for initial setup, we might log it.
-    error_log("PayMongo Webhook Secret is missing!");
+// Get raw POST body
+$payload = file_get_contents('php://input');
+$headers = getallheaders();
+
+// Verify webhook signature
+$signature = $headers['Paymongo-Signature'] ?? '';
+
+if (!$signature || !$webhookSecret) {
+    http_response_code(401);
+    echo json_encode(['error' => 'Unauthorized']);
+    exit;
 }
 
-// Get the payload and signature header
-$payload = file_get_contents('php://input');
-$signatureHeader = $_SERVER['HTTP_PAYMONGO_SIGNATURE'] ?? '';
+// Verify signature (PayMongo uses timestamp + payload)
+// Format: t=timestamp,s1=signature
+$signatureParts = [];
+foreach (explode(',', $signature) as $part) {
+    list($key, $value) = explode('=', $part, 2);
+    $signatureParts[$key] = $value;
+}
 
-// Verify Signature (Recommended for Production)
-if ($webhookSecret && !$payMongo->verifyWebhookSignature($payload, $signatureHeader, $webhookSecret)) {
+$timestamp = $signatureParts['t'] ?? '';
+$providedSignature = $signatureParts['s1'] ?? '';
+
+// Create expected signature
+$signedPayload = $timestamp . '.' . $payload;
+$expectedSignature = hash_hmac('sha256', $signedPayload, $webhookSecret);
+
+// Compare signatures
+if (!hash_equals($expectedSignature, $providedSignature)) {
     http_response_code(401);
+    error_log("PayMongo Webhook: Invalid signature");
     echo json_encode(['error' => 'Invalid signature']);
     exit;
 }
 
-$data = json_decode($payload, true);
-$event = $data['data']['attributes']['type'] ?? '';
-$resourceData = $data['data']['attributes']['data'] ?? [];
+// Parse webhook data
+$event = json_decode($payload, true);
 
-error_log("PayMongo Webhook Received: " . $event);
-
-switch ($event) {
-    case 'source.chargeable':
-        $sourceId = $resourceData['id'];
-        $amount = $resourceData['attributes']['amount'];
-        $metadata = $resourceData['attributes']['metadata'] ?? [];
-        $orderId = $metadata['order_id'] ?? null;
-
-        if ($orderId) {
-            $order = $orderRepo->findById($orderId);
-            if ($order && $order->payment_status === 'unpaid') {
-                // Charge the source
-                $description = "Payment for Order #" . $order->order_number . " (Webhook)";
-                $paymentResult = $payMongo->createPayment($sourceId, $amount, 'PHP', $description, ['order_id' => $orderId]);
-
-                if ($paymentResult['success']) {
-                    // Update Order
-                    $orderRepo->updatePaymentStatus($orderId, 'paid');
-                    $orderRepo->updateStatus($orderId, 'pending'); // Or 'preparing'
-                    $orderRepo->updateItemsStatusByOrderId($orderId, 'pending');
-
-                    // Log Success
-                    $transactionRepo->create([
-                        'order_id' => $orderId,
-                        'transaction_type' => 'payment',
-                        'transaction_reference' => $paymentResult['data']['id'],
-                        'amount' => $amount / 100,
-                        'status' => 'success',
-                        'description' => 'Payment successfully charged via Webhook.',
-                        'payment_method' => $order->payment_method,
-                        'raw_response' => $paymentResult
-                    ]);
-
-                    // Clear Cart
-                    $cart = $cartRepo->getCartByUserId($order->user_id);
-                    if ($cart) {
-                        $cartRepo->clearCart($cart->id);
-                    }
-                } else {
-                    // Log Failure
-                    $transactionRepo->create([
-                        'order_id' => $orderId,
-                        'transaction_type' => 'payment',
-                        'transaction_reference' => $sourceId,
-                        'amount' => $amount / 100,
-                        'status' => 'failed',
-                        'description' => 'Failed to charge source via Webhook: ' . ($paymentResult['error'] ?? ''),
-                        'payment_method' => $order->payment_method,
-                        'raw_response' => $paymentResult
-                    ]);
-                }
-            }
-        }
-        break;
-
-    case 'payment.paid':
-        // Optional: Update status if not already updated
-        $sourceData = $resourceData['attributes']['source'] ?? [];
-        $metadata = $resourceData['attributes']['metadata'] ?? []; // Payments also have metadata if we pass it
-        // Note: When creating payment from source, PayMongo doesn't automatically copy source metadata to payment metadata
-        // unless we specify it in createPayment.
-        break;
+if (!$event) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Invalid JSON']);
+    exit;
 }
 
-// Always return 200 to PayMongo
+// Log webhook event
+error_log("PayMongo Webhook Event: " . ($event['data']['attributes']['type'] ?? 'unknown'));
+
+// Initialize services
+$database = new Database();
+$db = $database->getConnection();
+$orderRepo = new OrderRepository($db);
+$transactionRepo = new TransactionRepository($db);
+$payMongo = new PayMongoService();
+
+// Get event type
+$eventType = $event['data']['attributes']['type'] ?? '';
+$eventData = $event['data']['attributes']['data'] ?? [];
+
+// Handle different event types
+switch ($eventType) {
+    case 'source.chargeable':
+        handleSourceChargeable($eventData, $orderRepo, $transactionRepo, $payMongo, $db);
+        break;
+    
+    case 'payment.paid':
+        handlePaymentPaid($eventData, $orderRepo, $transactionRepo);
+        break;
+    
+    case 'payment.failed':
+        handlePaymentFailed($eventData, $orderRepo, $transactionRepo);
+        break;
+    
+    case 'source.cancelled':
+        handleSourceCancelled($eventData, $orderRepo, $transactionRepo);
+        break;
+    
+    default:
+        error_log("PayMongo Webhook: Unhandled event type: " . $eventType);
+}
+
+// Return success response
 http_response_code(200);
-echo json_encode(['status' => 'ok']);
+echo json_encode(['success' => true]);
+exit;
+
+// ============================================================================
+// Event Handlers
+// ============================================================================
+
+function handleSourceChargeable($data, $orderRepo, $transactionRepo, $payMongo, $db) {
+    $sourceId = $data['id'] ?? null;
+    $amount = $data['attributes']['amount'] ?? 0;
+    
+    if (!$sourceId) {
+        error_log("PayMongo Webhook: Missing source ID");
+        return;
+    }
+    
+    // Find order by source ID
+    $query = "SELECT * FROM orders WHERE paymongo_payment_intent_id = :source_id LIMIT 1";
+    $stmt = $db->prepare($query);
+    $stmt->execute([':source_id' => $sourceId]);
+    $order = $stmt->fetch(PDO::FETCH_OBJ);
+    
+    if (!$order) {
+        error_log("PayMongo Webhook: Order not found for source: " . $sourceId);
+        return;
+    }
+    
+    // Check if already paid
+    if ($order->payment_status === 'paid') {
+        error_log("PayMongo Webhook: Order already paid: " . $order->id);
+        return;
+    }
+    
+    // Create payment
+    $description = "Payment for Order #" . $order->order_number;
+    $paymentResult = $payMongo->createPayment($sourceId, $amount, 'PHP', $description, ['order_id' => $order->id]);
+    
+    if ($paymentResult['success']) {
+        // Update order status
+        $updateQuery = "UPDATE orders SET payment_status = 'paid', status = 'pending' WHERE id = :id";
+        $stmt = $db->prepare($updateQuery);
+        $stmt->execute([':id' => $order->id]);
+        
+        // Update order items
+        $orderRepo->updateItemsStatusByOrderId($order->id, 'pending');
+        
+        // Log transaction
+        $transactionRepo->create([
+            'order_id' => $order->id,
+            'transaction_type' => 'payment',
+            'transaction_reference' => $paymentResult['data']['id'] ?? $sourceId,
+            'amount' => $order->total_amount,
+            'status' => 'success',
+            'description' => 'Payment created via webhook (source.chargeable)',
+            'payment_method' => $order->payment_method,
+            'raw_response' => $paymentResult
+        ]);
+        
+        error_log("PayMongo Webhook: Payment successful for order: " . $order->id);
+    } else {
+        error_log("PayMongo Webhook: Payment creation failed: " . print_r($paymentResult, true));
+        
+        // Log failed transaction
+        $transactionRepo->create([
+            'order_id' => $order->id,
+            'transaction_type' => 'payment',
+            'transaction_reference' => $sourceId,
+            'amount' => $order->total_amount,
+            'status' => 'failed',
+            'description' => 'Payment creation failed via webhook',
+            'payment_method' => $order->payment_method,
+            'raw_response' => $paymentResult
+        ]);
+    }
+}
+
+function handlePaymentPaid($data, $orderRepo, $transactionRepo) {
+    $paymentId = $data['id'] ?? null;
+    $metadata = $data['attributes']['metadata'] ?? [];
+    $orderId = $metadata['order_id'] ?? null;
+    
+    if (!$orderId) {
+        error_log("PayMongo Webhook: Missing order_id in payment.paid metadata");
+        return;
+    }
+    
+    $order = $orderRepo->findById($orderId);
+    if (!$order) {
+        error_log("PayMongo Webhook: Order not found: " . $orderId);
+        return;
+    }
+    
+    // Ensure payment status is updated
+    if ($order->payment_status !== 'paid') {
+        $orderRepo->updatePaymentStatus($orderId, 'paid');
+        error_log("PayMongo Webhook: Payment confirmed for order: " . $orderId);
+    }
+}
+
+function handlePaymentFailed($data, $orderRepo, $transactionRepo) {
+    $paymentId = $data['id'] ?? null;
+    $metadata = $data['attributes']['metadata'] ?? [];
+    $orderId = $metadata['order_id'] ?? null;
+    
+    if (!$orderId) {
+        error_log("PayMongo Webhook: Missing order_id in payment.failed metadata");
+        return;
+    }
+    
+    $order = $orderRepo->findById($orderId);
+    if (!$order) {
+        error_log("PayMongo Webhook: Order not found: " . $orderId);
+        return;
+    }
+    
+    // Update order status to cancelled
+    $orderRepo->updateStatus($orderId, 'cancelled');
+    $orderRepo->updateItemsStatusByOrderId($orderId, 'cancelled');
+    
+    // Log failed transaction
+    $transactionRepo->create([
+        'order_id' => $orderId,
+        'transaction_type' => 'payment',
+        'transaction_reference' => $paymentId,
+        'amount' => $order->total_amount,
+        'status' => 'failed',
+        'description' => 'Payment failed via webhook',
+        'payment_method' => $order->payment_method,
+        'raw_response' => $data
+    ]);
+    
+    error_log("PayMongo Webhook: Payment failed for order: " . $orderId);
+}
+
+function handleSourceCancelled($data, $orderRepo, $transactionRepo) {
+    $sourceId = $data['id'] ?? null;
+    
+    if (!$sourceId) {
+        error_log("PayMongo Webhook: Missing source ID in source.cancelled");
+        return;
+    }
+    
+    // Find order by source ID
+    $database = new Database();
+    $db = $database->getConnection();
+    $query = "SELECT * FROM orders WHERE paymongo_payment_intent_id = :source_id LIMIT 1";
+    $stmt = $db->prepare($query);
+    $stmt->execute([':source_id' => $sourceId]);
+    $order = $stmt->fetch(PDO::FETCH_OBJ);
+    
+    if (!$order) {
+        error_log("PayMongo Webhook: Order not found for cancelled source: " . $sourceId);
+        return;
+    }
+    
+    // Update order status
+    $orderRepo->updateStatus($order->id, 'cancelled');
+    $orderRepo->updateItemsStatusByOrderId($order->id, 'cancelled');
+    
+    error_log("PayMongo Webhook: Source cancelled for order: " . $order->id);
+}

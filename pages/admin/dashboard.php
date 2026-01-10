@@ -4,14 +4,16 @@ EnvLoader::load(__DIR__ . '/../../.env');
 $pusherKey = getenv('PUSHER_KEY');
 $pusherCluster = getenv('PUSHER_CLUSTER') ?: 'ap1';
 ?>
+<?php require_once __DIR__ . '/../../backend/helpers/UrlHelper.php'; ?>
 <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 <script>
     window.pusherConfig = {
         key: '<?php echo $pusherKey; ?>',
         cluster: '<?php echo $pusherCluster; ?>'
     };
+    window.BASE_URL = "<?php echo UrlHelper::getBaseUrl(); ?>";
 </script>
-<link rel="stylesheet" href="/Leilife_2nd/css/admin/dashboard.css">
+<link rel="stylesheet" href="<?= UrlHelper::getBaseUrl() ?>/css/admin/dashboard.css">
 <div class="dashboard-wrapper">
     <div class="title-content">
         <button class="hamburger" id="hamburger" onclick="toggleSidebar()">
@@ -224,4 +226,4 @@ $pusherCluster = getenv('PUSHER_CLUSTER') ?: 'ap1';
     </div>
 </div>
 
-<script src="/Leilife_2nd/scripts/admin/dashboard.js"></script>
+<script src="<?= UrlHelper::getBaseUrl() ?>/scripts/admin/dashboard.js"></script>

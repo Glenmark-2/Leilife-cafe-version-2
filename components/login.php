@@ -4,7 +4,7 @@
             <button class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="logo">
-            <img src="../public/assets/leilife.png" alt="Logo">
+            <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/leilife.png" alt="Logo">
           </div>
 
           <h5>Welcome back!</h3>
@@ -51,7 +51,7 @@
                 function handleGoogleCredentialResponse(response) {
                     console.log("Google Token:", response.credential);
                     
-                    fetch('../backend/api/google_login.php', {
+                    fetch(`${window.BASE_URL}/backend/api/google_login.php`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ token: response.credential })
@@ -84,7 +84,7 @@
               <p>By continuing, you agree to our updated Terms & Conditions and Privacy Policy.</p>
             </div>
             <div id="signup">
-              <p>Don't have an account? <a href="/Leilife_2nd/public/index.php?page=sign_up">Sign up</a></p>
+              <p>Don't have an account? <a href="<?= UrlHelper::getBaseUrl() ?>/public/index.php?page=sign_up">Sign up</a></p>
             </div>
 
 

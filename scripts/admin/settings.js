@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // --- Fetch Settings ---
     async function fetchSettings() {
         try {
-            const response = await fetch('/Leilife_2nd/backend/api/admin/get_settings.php');
+            const response = await fetch(`${window.BASE_URL}/backend/api/admin/get_settings.php`);
             const result = await response.json();
 
             if (result.success) {
