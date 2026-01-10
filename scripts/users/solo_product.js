@@ -63,6 +63,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.addToCart(product);
             } else {
                 console.error("addToCart function not found. Ensure cart.js is loaded.");
+                alert("System Error: Cart functionality is not loaded. Please refresh the page.");
+                return;
                 // Fallback: manually push if cart.js failed (redundancy)
                 let cart = JSON.parse(localStorage.getItem('leilife_cart')) || [];
 

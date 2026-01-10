@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Leilife Driver</title>
+    <title><?= isset($page) ? ucwords(str_replace('_', ' ', $page)) . ' | ' : '' ?>Driver - Leilife</title>
+    <link rel="icon" type="image/png" href="<?= UrlHelper::getBaseUrl() ?>/public/assets/Mask%20group.png">
     
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,6 +22,7 @@
     <link rel="stylesheet" href="../css/driver/driver_shell.css">
     
     <?php
+    require_once __DIR__ . '/../../backend/helpers/UrlHelper.php';
     // Optional: Load page specific styles
     if (isset($pageStyles)) {
         foreach ($pageStyles as $style) {
@@ -28,6 +30,9 @@
         }
     }
     ?>
+    <script>
+        window.BASE_URL = "<?php echo UrlHelper::getBaseUrl(); ?>";
+    </script>
 </head>
 <body>
 

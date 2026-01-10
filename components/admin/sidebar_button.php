@@ -22,8 +22,9 @@ function sidebarButton($imagePath, $title, $page)
     if (strpos($page, 'page=') !== false) {
         $parts = explode('page=', $page);
         $targetPage = $parts[1];
-    } else if ($page === '#' || $page === '') {
-        $targetPage = 'none';
+    } else {
+        // If it's a direct link like logout_user.php or #, it shouldn't be active unless explicitly handled
+        $targetPage = 'none__'; 
     }
 
     $activeClass = ($currentPage === $targetPage) ? 'active' : '';

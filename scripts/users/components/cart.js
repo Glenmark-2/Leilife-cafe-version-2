@@ -13,10 +13,10 @@ let cart = [];
 if (statusText && icon) {
     if (isPickup) {
         statusText.textContent = "Pick up";
-        icon.src = (window.BASE_URL || "/Leilife_2nd") + "/public/assets/walk.png";
+        icon.src = (window.BASE_URL) + "/public/assets/walk.png";
     } else {
         statusText.textContent = "Delivery";
-        icon.src = (window.BASE_URL || "/Leilife_2nd") + "/public/assets/motorbike.png";
+        icon.src = (window.BASE_URL) + "/public/assets/motorbike.png";
     }
 }
 
@@ -27,10 +27,10 @@ if (btn) {
 
         if (isPickup) {
             statusText.textContent = "Pick up";
-            icon.src = (window.BASE_URL || "/Leilife_2nd") + "/public/assets/walk.png";
+            icon.src = (window.BASE_URL) + "/public/assets/walk.png";
         } else {
             statusText.textContent = "Delivery";
-            icon.src = (window.BASE_URL || "/Leilife_2nd") + "/public/assets/motorbike.png";
+            icon.src = (window.BASE_URL) + "/public/assets/motorbike.png";
         }
 
         localStorage.setItem('leilife_delivery_choice', isPickup ? 'pickup' : 'delivery');
@@ -39,7 +39,7 @@ if (btn) {
 }
 
 // --- API Helpers ---
-const API_URL = (window.BASE_URL || '/Leilife_2nd') + '/backend/api/cart_actions.php';
+const API_URL = (window.BASE_URL) + '/backend/api/cart_actions.php';
 
 async function fetchCartAPI() {
     try {
@@ -182,11 +182,12 @@ function renderCart() {
         checkoutBtn.onclick = () => {
             if (cart.length === 0) return;
 
+            if (window.isStoreOpen === false) {
+                alert("Sorry, the store is currently closed. We are not accepting orders at the moment.");
+                return;
+            }
+
             // If logged in, cart is already in DB. If guest, cart is in localStorage.
-            // Checkout page retrieves from API if logged in?
-            // Actually, checkout page logic needs update too if we want it to read from DB for logged in users.
-            // For now, let's store state to localStorage anyway just for checkout page to read it easily? 
-            // OR checkout page should also be updated.
             localStorage.setItem('leilife_delivery_choice', isPickup ? 'pickup' : 'delivery');
 
             // Redirect
@@ -207,7 +208,7 @@ function renderCart() {
 
         let imageSrc = item.image;
         if (imageSrc && !imageSrc.startsWith('http') && !imageSrc.startsWith('/')) {
-            imageSrc = (window.BASE_URL || '/Leilife_2nd') + '/public/assets/products/' + imageSrc;
+            imageSrc = (window.BASE_URL) + '/public/assets/products/' + imageSrc;
         }
 
         const isTrash = item.qty === 1;

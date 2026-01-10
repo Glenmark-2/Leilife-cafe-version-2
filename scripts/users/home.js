@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     sendBtn.disabled = true;
                     sendBtn.innerText = 'Sending...';
 
-                    const response = await fetch('/Leilife_2nd/backend/api/contact/send_message.php', {
+                    const response = await fetch(`${window.BASE_URL}/backend/api/contact/send_message.php`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'

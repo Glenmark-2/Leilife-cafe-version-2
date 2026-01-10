@@ -14,14 +14,18 @@ class SettingsRepository
             $database = new Database();
             $this->conn = $database->getConnection();
         }
+        $this->ensureTableExists();
     }
 
     private function ensureTableExists()
     {
         if (!$this->conn) return;
+
+        // Check if table exists
         $query = "SHOW TABLES LIKE '" . $this->table . "'";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
+
         if ($stmt->rowCount() == 0) {
             $sql = "CREATE TABLE IF NOT EXISTS site_settings (
                 id INT PRIMARY KEY DEFAULT 1,
@@ -49,6 +53,25 @@ class SettingsRepository
             INSERT IGNORE INTO site_settings (id, store_name, physical_address) 
             VALUES (1, 'Leilife Cafe & Resto', '123 Coffee Street, Caloocan City');";
             $this->conn->exec($sql);
+        } else {
+            // Table exists, check for missing columns (Migration)
+            $this->checkAndAddColumn('receipt_footer', 'TEXT');
+            $this->checkAndAddColumn('paymongo_public_key', 'VARCHAR(255)');
+            $this->checkAndAddColumn('paymongo_secret_key', 'VARCHAR(255)');
+        }
+    }
+
+    private function checkAndAddColumn($columnName, $type) {
+        try {
+            $query = "SHOW COLUMNS FROM " . $this->table . " LIKE '" . $columnName . "'";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute();
+            if ($stmt->rowCount() == 0) {
+                $sql = "ALTER TABLE " . $this->table . " ADD COLUMN " . $columnName . " " . $type;
+                $this->conn->exec($sql);
+            }
+        } catch (PDOException $e) {
+            // Check if error is because column exists (race condition)
         }
     }
 

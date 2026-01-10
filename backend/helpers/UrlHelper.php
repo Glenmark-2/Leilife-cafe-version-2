@@ -9,7 +9,14 @@ class UrlHelper
     public static function getBaseUrl()
     {
         // 1. Detect Protocol
-        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+        $protocol = 'http://';
+        if (
+            (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
+            $_SERVER['SERVER_PORT'] == 443 ||
+            (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+        ) {
+            $protocol = 'https://';
+        }
 
         // 2. Detect Host
         $host = $_SERVER['HTTP_HOST'];
@@ -29,9 +36,15 @@ class UrlHelper
                 break;
             }
         }
+
+        // If no target folders found, we might be at root but with a filename (e.g. /index.php)
+        // If basePath ends in .php, strip the filename
+        if (substr($basePath, -4) === '.php') {
+            $basePath = dirname($basePath);
+        }
         
         // Handle case where it might be in root (e.g. /index.php)
-        if ($basePath === '/' || $basePath === '\\') {
+        if ($basePath === '/' || $basePath === '\\' || $basePath === '.') {
             $basePath = '';
         }
 

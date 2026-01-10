@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const row = document.createElement('tr');
 
             const imageFilename = (product.image_path && product.image_path.trim() !== '') ? product.image_path.trim().replace(/\s+/g, '_') : 'not_available.png';
-            const imagePath = `assets/products/${imageFilename}`;
+            const imagePath = `${window.BASE_URL}/public/assets/products/${imageFilename}`;
 
             const statusClass = product.is_available == 1 ? 'status-available' : 'status-unavailable';
             const statusText = product.is_available == 1 ? 'Available' : 'Unavailable';
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
             row.innerHTML = `
                 <td class="nameCol">
                     <div class="prodNameDiv">
-                        <img src="${imagePath}" alt="${product.name}" class="productPhoto" onerror="this.src='assets/leilife.png'">
+                        <img src="${imagePath}" alt="${product.name}" class="productPhoto" onerror="this.src='${window.BASE_URL}/public/assets/leilife.png'">
                         <div>
                             <p class="prodName">${product.name} ${product.is_archived == 1 ? '<span class="badge bg-secondary">Archived</span>' : ''}</p>
                             <p class="prodDescription">${product.description || 'No description available.'}</p>
@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!confirm(confirmMsg)) return;
 
         try {
-            const response = await fetch('../backend/api/admin/archive_product.php', {
+            const response = await fetch(`${window.BASE_URL}/backend/api/admin/archive_product.php`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -203,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
         editForm.reset();
         editForm.classList.remove('was-validated');
         document.getElementById('edit-product-id').value = '';
-        document.getElementById('edit-img-preview').src = 'assets/products/not_available.png';
+        document.getElementById('edit-img-preview').src = `${window.BASE_URL}/public/assets/products/not_available.png`;
 
         // Update Modal UI
         modalTitle.innerText = 'Add New Product';
@@ -231,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Populate Image Preview
         const preview = document.getElementById('edit-img-preview');
         const filename = (product.image_path && product.image_path.trim() !== '') ? product.image_path.trim().replace(/\s+/g, '_') : 'not_available.png';
-        preview.src = `assets/products/${filename}`;
+        preview.src = `${window.BASE_URL}/public/assets/products/${filename}`;
 
         // Reset file input
         document.getElementById('edit-image').value = '';
@@ -283,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
             saveProductBtn.disabled = true;
             saveProductBtn.innerText = 'Saving...';
 
-            const endpoint = isEdit ? '../backend/api/admin/update_product.php' : '../backend/api/admin/add_product.php';
+            const endpoint = isEdit ? `${window.BASE_URL}/backend/api/admin/update_product.php` : `${window.BASE_URL}/backend/api/admin/add_product.php`;
             const response = await fetch(endpoint, {
                 method: 'POST',
                 body: formData // Body is now FormData

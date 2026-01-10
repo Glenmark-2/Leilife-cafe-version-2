@@ -210,4 +210,4 @@
     </div>
 </div>
 
-<script src="/Leilife_2nd/scripts/users/checkout_page.js"></script>
+<script src="<?php echo UrlHelper::getBaseUrl(); ?>/scripts/users/checkout_page.js?v=<?php echo time(); ?>"></script>

@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../backend/config/Database.php';
 require_once __DIR__ . '/../backend/repositories/OrderRepository.php';
 require_once __DIR__ . '/../backend/repositories/SettingsRepository.php';
+require_once __DIR__ . '/../backend/helpers/UrlHelper.php';
 
 $orderId = $_GET['order_id'] ?? null;
 $order = null;
@@ -135,7 +136,7 @@ $pusherCluster = getenv('PUSHER_CLUSTER') ?: 'ap1';
 
                         function autoCancel() {
                             // Call the existing cancelOrder logic but without confirmation
-                            fetch('/Leilife_2nd/backend/api/cancel_order.php', {
+                            fetch(`${window.BASE_URL}/backend/api/cancel_order.php`, {
                                     method: 'POST',
                                     headers: {
                                         'Content-Type': 'application/json'
@@ -160,7 +161,7 @@ $pusherCluster = getenv('PUSHER_CLUSTER') ?: 'ap1';
             <?php else: ?>
                 <!-- Already expired, trigger cancel immediately -->
                 <script>
-                    fetch('/Leilife_2nd/backend/api/cancel_order.php', {
+                    fetch(`${window.BASE_URL}/backend/api/cancel_order.php`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -219,18 +220,18 @@ $pusherCluster = getenv('PUSHER_CLUSTER') ?: 'ap1';
 
                     <div class="product-img-wrapper">
                         <?php if ($currentStep == 4): ?>
-                            <img src="/Leilife_2nd/public/assets/success-order.png" alt="Success" class="product-img">
+                            <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/success-order.png" alt="Success" class="product-img">
                         <?php elseif ($isPickup): ?>
-                            <img src="/Leilife_2nd/public/assets/walk.png" alt="Pickup" class="product-img">
+                            <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/walk.png" alt="Pickup" class="product-img">
                         <?php else: ?>
-                            <img src="/Leilife_2nd/public/assets/motorbike.png" alt="Motorbike" class="product-img">
+                            <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/motorbike.png" alt="Motorbike" class="product-img">
                         <?php endif; ?>
                     </div>
                 <?php else: ?>
                     <p class="eta-title text-danger">Your order has been cancelled</p>
 
                     <div class="product-img-wrapper">
-                        <img src="/Leilife_2nd/public/assets/cancel-order.png" alt="Cancelled" class="product-img">
+                        <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/cancel-order.png" alt="Cancelled" class="product-img">
                     </div>
                 <?php endif; ?>
             </div>
@@ -243,7 +244,7 @@ $pusherCluster = getenv('PUSHER_CLUSTER') ?: 'ap1';
                 <div class="dev-details">
                     <!-- Customer/Shop Name -->
                     <div class="detail-item mb-3">
-                        <img src="/Leilife_2nd/public/assets/leilife-logo.png" class="icon" style="width: 20px; height: 20px;">
+                        <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/leilife-logo.png" class="icon" style="width: 20px; height: 20px;">
                         <span class="fw-bold">
                             <?php
                             if ($isPickup) {
@@ -262,7 +263,7 @@ $pusherCluster = getenv('PUSHER_CLUSTER') ?: 'ap1';
 
                     <!-- Contact Number -->
                     <div class="detail-item mb-3">
-                        <img src="/Leilife_2nd/public/assets/white-call.png" class="icon" style="width: 20px; height: 20px; filter: invert(0.5);">
+                        <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/white-call.png" class="icon" style="width: 20px; height: 20px; filter: invert(0.5);">
                         <span>
                             <?php
                             if ($isPickup) {
@@ -276,7 +277,7 @@ $pusherCluster = getenv('PUSHER_CLUSTER') ?: 'ap1';
 
                     <!-- Address -->
                     <div class="detail-item mb-3">
-                        <img src="/Leilife_2nd/public/assets/pin.png" class="icon" style="width: 20px; height: 20px;">
+                        <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/pin.png" class="icon" style="width: 20px; height: 20px;">
                         <span>
                             <?php
                             if ($isPickup) {
@@ -290,7 +291,7 @@ $pusherCluster = getenv('PUSHER_CLUSTER') ?: 'ap1';
 
                     <!-- Payment Method -->
                     <div class="detail-item">
-                        <img src="/Leilife_2nd/public/assets/credit-card.png" class="icon" style="width: 20px; height: 20px;">
+                        <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/credit-card.png" class="icon" style="width: 20px; height: 20px;">
                         <span>
                             <?php
                             if ($order->payment_method === 'cod') {
@@ -311,7 +312,7 @@ $pusherCluster = getenv('PUSHER_CLUSTER') ?: 'ap1';
                                 <?php
                                                         $itemImg = $item->product_image ?: 'not_available.png';
                                                         if (!str_starts_with($itemImg, 'http') && !str_starts_with($itemImg, '/')) {
-                                                            $itemImg = '/Leilife_2nd/public/assets/products/' . $itemImg;
+                                                            $itemImg = UrlHelper::getBaseUrl() . '/public/assets/products/' . $itemImg;
                                                         }
                                 ?>
                                 <img src="<?php echo htmlspecialchars($itemImg); ?>" class="rounded" style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #eee; <?php echo ($item->status == 'cancelled') ? 'filter: grayscale(1); opacity: 0.6;' : ''; ?>">
@@ -375,7 +376,7 @@ $pusherCluster = getenv('PUSHER_CLUSTER') ?: 'ap1';
                         btn.disabled = true;
                         btn.innerText = "Cancelling...";
 
-                        fetch('/Leilife_2nd/backend/api/cancel_order.php', {
+                        fetch(`${window.BASE_URL}/backend/api/cancel_order.php`, {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'

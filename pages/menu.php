@@ -59,7 +59,7 @@ $firstCategory = array_key_first($menuData);
         return `
             <div class="col">
                 <div class="card-box" onclick="window.location.href='index.php?page=solo_product&id=${product.id}'" style="cursor: pointer;">
-                    <img class="product-image" src="${(product.image && typeof product.image === 'string' && product.image.trim() !== '' ? ((!product.image.startsWith('http') && !product.image.startsWith('/')) ? '/Leilife_2nd/public/assets/products/' + product.image.trim() : product.image) : '/Leilife_2nd/public/assets/products/not_available.png')}" alt="${product.name}">
+                    <img class="product-image" src="${(product.image && typeof product.image === 'string' && product.image.trim() !== '' ? ((!product.image.startsWith('http') && !product.image.startsWith('/')) ? (window.BASE_URL ? window.BASE_URL : '/Leilife_2nd') + '/public/assets/products/' + product.image.trim() : product.image) : (window.BASE_URL ? window.BASE_URL : '/Leilife_2nd') + '/public/assets/products/not_available.png')}" alt="${product.name}">
                     <div style="padding: 8px;">
                         <p class="mb-1 text-truncate" title="${product.name}">${product.name}</p>
                         <div id="price-div">

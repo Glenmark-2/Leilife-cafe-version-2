@@ -4,7 +4,8 @@
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Leilife Cafe & Resto</title>
+      <title><?= isset($page) ? ucwords(str_replace('_', ' ', $page)) . ' | ' : '' ?>Leilife Cafe & Resto</title>
+      <link rel="icon" type="image/png" href="<?= UrlHelper::getBaseUrl() ?>/public/assets/Mask%20group.png">
 
       <!-- Bootstrap CSS (latest CDN) -->
       <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
@@ -120,6 +121,16 @@
         <script>
           window.isLoggedIn = <?php echo SessionManager::isLoggedIn() ? 'true' : 'false'; ?>;
           window.BASE_URL = "<?php echo UrlHelper::getBaseUrl(); ?>";
+          <?php 
+              require_once __DIR__ . '/../backend/repositories/SettingsRepository.php';
+              // We need a DB connection here or reuse if available. Header is usually top level.
+              // Let's create one responsibly.
+              $db_header = new Database();
+              $settingsRepo_header = new SettingsRepository($db_header->getConnection());
+              $settings_header = $settingsRepo_header->getSettings();
+              $isStoreOpen = $settings_header['is_store_open'] ?? 1;
+          ?>
+          window.isStoreOpen = <?php echo $isStoreOpen ? 'true' : 'false'; ?>;
         </script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="../scripts/users/components/header.js"></script>

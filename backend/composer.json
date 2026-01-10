@@ -1,6 +1,7 @@
 {
     "require": {
         "phpmailer/phpmailer": "^7.0",
-        "google/apiclient": "^2.18"
+        "google/apiclient": "^2.18",
+        "pusher/pusher-php-server": "^7.2"
     }
 }

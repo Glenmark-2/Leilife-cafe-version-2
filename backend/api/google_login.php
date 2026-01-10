@@ -21,9 +21,17 @@ $authService = new AuthService($userRepository);
 // Get POST data
 $data = json_decode(file_get_contents("php://input"));
 
-if (!empty($data->token)) {
-    $result = $authService->loginWithGoogle($data->token);
-    echo json_encode($result);
-} else {
-    echo json_encode(['success' => false, 'message' => 'No token provided.']);
+try {
+    if (!empty($data->token)) {
+        $result = $authService->loginWithGoogle($data->token);
+        echo json_encode($result);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'No token provided.']);
+    }
+} catch (Throwable $e) {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false, 
+        'message' => 'Server Error: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine()
+    ]);
 }

@@ -103,7 +103,7 @@ async function executeStatusUpdate(newStatus) {
     const orderId = document.getElementById('modalOrderId').value;
 
     try {
-        const response = await fetch('../backend/api/admin/update_order_status.php', {
+        const response = await fetch(`${window.BASE_URL}/backend/api/admin/update_order_status.php`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -131,7 +131,7 @@ async function executeStatusUpdate(newStatus) {
 async function fetchDashboardData() {
     try {
         const filter = document.getElementById('sortOrders').value;
-        const response = await fetch(`../backend/api/admin/get_dashboard_data.php?filter=${filter}`);
+        const response = await fetch(`${window.BASE_URL}/backend/api/admin/get_dashboard_data.php?filter=${filter}`);
         const result = await response.json();
 
         if (result.status === 'success') {
@@ -197,7 +197,7 @@ function updateDashboardUI(data) {
             <td>${dateTime}</td>
             <td class="text-center">
                 <button class="dlBtn" onclick="event.stopPropagation(); downloadReceipt(${order.id})">
-                    <img src="../public/assets/downloads.png" alt="Download" class="dlButton" style="width: 20px; height: 20px;">
+                    <img src="${window.BASE_URL}/public/assets/downloads.png" alt="Download" class="dlButton" style="width: 20px; height: 20px;">
                 </button>
             </td>
         `;
@@ -206,7 +206,7 @@ function updateDashboardUI(data) {
 }
 
 function downloadReceipt(orderId) {
-    window.open(`../pages/admin/pos_receipt.php?order_id=${orderId}`, '_blank');
+    window.open(`${window.BASE_URL}/pages/admin/pos_receipt.php?order_id=${orderId}`, '_blank');
 }
 function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -254,7 +254,7 @@ function openStatusModal(orderId, orderNumber, currentStatus, deliveryMethod, pa
 
 async function openOrderDetails(orderId) {
     try {
-        const response = await fetch(`../backend/api/admin/get_order_details.php?orderId=${orderId}`);
+        const response = await fetch(`${window.BASE_URL}/backend/api/admin/get_order_details.php?orderId=${orderId}`);
         const result = await response.json();
 
         if (result.status === 'success') {
@@ -307,7 +307,7 @@ async function openOrderDetails(orderId) {
 
 async function updateOrderItemStatus(itemId, newStatus, element) {
     try {
-        const response = await fetch('../backend/api/admin/update_order_item_status.php', {
+        const response = await fetch(`${window.BASE_URL}/backend/api/admin/update_order_item_status.php`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -340,7 +340,7 @@ async function markAsPaid() {
     if (!confirm("Confirm payment received? This will stop the customer's timer.")) return;
 
     try {
-        const response = await fetch('../backend/api/admin/mark_order_paid.php', {
+        const response = await fetch(`${window.BASE_URL}/backend/api/admin/mark_order_paid.php`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ orderId: orderId })

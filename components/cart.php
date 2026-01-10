@@ -1,6 +1,7 @@
+<?php require_once __DIR__ . '/../backend/helpers/UrlHelper.php'; ?>
 <div class="cart-modal mobile-cart d-flex flex-column align-items-center">
     <div class="pickup-box">
-        <img src="/Leilife_2nd/public/assets/walk.png" width="24" id="dev-icon" />
+        <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/walk.png" width="24" id="dev-icon" />
         <span style="flex-grow:1; font-size:16px;" id="dev-status">Pick up</span>
         <button class="btn btn-primary-custom-cart">Change</button>
     </div>

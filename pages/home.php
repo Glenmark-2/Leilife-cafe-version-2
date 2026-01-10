@@ -1,5 +1,6 @@
+<?php require_once __DIR__ . '/../backend/helpers/UrlHelper.php'; ?>
 <div class="banner-container">
-    <img src="/Leilife_2nd/public/assets/image 37.png" alt="Homepage Banner" class="darken-img">
+    <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/image 37.png" alt="Homepage Banner" class="darken-img">
     <div class="banner-text">
         <h1>Welcome to Leilife Cafe</h1>
         <p>Your perfect spot for coffee and meals</p>
@@ -16,7 +17,7 @@
         $title = "Kape Masarap";
         $price = 100;
         $size = "1 x 250 ml";
-        $image = "/Leilife_2nd/public/assets/image 39.png";
+        $image = UrlHelper::getBaseUrl() . "/public/assets/image 39.png";
         $description = "Masarap kape.";
         $isActive = false;
         include __DIR__ . "/../partials/card.php";
@@ -27,7 +28,7 @@
         $title = "Iced Latte";
         $price = 120;
         $size = "1 x 300 ml";
-        $image = "/Leilife_2nd/public/assets/image 39.png";
+        $image = UrlHelper::getBaseUrl() . "/public/assets/image 39.png";
         $description = "Chill vibes only.";
         $isActive = false; // Example: this one is 'selected'
         include __DIR__ . "/../partials/card.php";
@@ -38,7 +39,7 @@
         $title = "Caramel Macchiato";
         $price = 140;
         $size = "1 x 300 ml";
-        $image = "/Leilife_2nd/public/assets/image 39.png";
+        $image = UrlHelper::getBaseUrl() . "/public/assets/image 39.png";
         $description = "Sweet and bold.";
         $isActive = false;
         include __DIR__ . "/../partials/card.php";
@@ -54,13 +55,13 @@
     <div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-inner">
             <div class="carousel-item active">
-                <img src="/Leilife_2nd/public/assets/image 39.png" class="justify-content-center" alt="...">
+                <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/image 39.png" class="justify-content-center" alt="...">
             </div>
             <div class="carousel-item">
-                <img src="/Leilife_2nd/public/assets/image 39.png" class="justify-content-center" alt="...">
+                <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/image 39.png" class="justify-content-center" alt="...">
             </div>
             <div class="carousel-item">
-                <img src="/Leilife_2nd/public/assets/image 39.png" class="justify-content-center" alt="...">
+                <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/image 39.png" class="justify-content-center" alt="...">
             </div>
         </div>
         <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleAutoplaying"
@@ -81,7 +82,7 @@
 
         <!-- IMAGE -->
         <div class="col-lg-6 col-md-12 p-0 hero-img-wrapper">
-            <img src="/Leilife_2nd/public/assets/image 41.png" class="hero-img" alt="">
+            <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/image 41.png" class="hero-img" alt="">
         </div>
 
         <!-- TEXT -->
@@ -165,7 +166,7 @@
 
             <!-- IMAGE -->
             <div class="col-lg-6 col-md-12 p-0 hero-img-wrapper">
-                <img src="/Leilife_2nd/public/assets/about_us.png" class="hero-img" alt="">
+                <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/about_us.png" class="hero-img" alt="">
             </div>
         </div>
     </div>

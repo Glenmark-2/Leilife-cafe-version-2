@@ -10,7 +10,7 @@ class SessionManager {
             session_set_cookie_params([
                 'path' => '/',
                 'domain' => '', // Default domain
-                'secure' => false, // Set to true if HTTPS
+                'secure' => (getenv('APP_ENV') === 'production'), // Auto-enable for production
                 'httponly' => true,
                 'samesite' => 'Lax'
             ]);
