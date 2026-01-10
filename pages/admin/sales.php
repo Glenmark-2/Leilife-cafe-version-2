@@ -76,4 +76,3 @@
     <button id="nextBtn" class="btn-primary-custom" disabled>Next</button>
 </div>
 
-<script src="/Leilife_2nd/scripts/admin/sales.js"></script>

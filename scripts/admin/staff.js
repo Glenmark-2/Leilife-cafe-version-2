@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
             modalTitle.innerText = 'Add Staff Member';
             saveBtn.innerText = 'Save Staff';
             document.getElementById('staff_id').value = '';
-            staffImgPreview.src = '/Leilife_2nd/public/assets/default_user.png';
+            staffImgPreview.src = `${window.BASE_URL}/public/assets/default_user.png`;
             passwordInput.setAttribute('required', 'required');
             updateCategory();
             if (staffModal) staffModal.show();
@@ -195,8 +195,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
                     staffImgPreview.src = staff.photo_path && staff.photo_path !== 'default_user.png'
-                        ? `/Leilife_2nd/public/assets/staffs/${staff.photo_path}`
-                        : '/Leilife_2nd/public/assets/default_user.png';
+                        ? `${window.BASE_URL}/public/assets/staffs/${staff.photo_path}`
+                        : `${window.BASE_URL}/public/assets/default_user.png`;
 
                     if (staffModal) staffModal.show();
                 } else {
@@ -248,8 +248,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const row = document.createElement('tr');
 
             const photo = staff.photo_path && staff.photo_path !== 'default_user.png'
-                ? `/Leilife_2nd/public/assets/staffs/${staff.photo_path}`
-                : '/Leilife_2nd/public/assets/default_user.png';
+                ? `${window.BASE_URL}/public/assets/staffs/${staff.photo_path}`
+                : `${window.BASE_URL}/public/assets/default_user.png`;
 
             const roleDisplay = staff.role.charAt(0).toUpperCase() + staff.role.slice(1);
             const positionDisplay = staff.position || roleDisplay;
@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded', function () {
             row.innerHTML = `
                 <td class="nameCol">
                     <div class="staffNameDiv d-flex align-items-center gap-2">
-                        <img src="${photo}" alt="" class="staffPhoto" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" onerror="this.src='/Leilife_2nd/public/assets/default_user.png'">
+                        <img src="${photo}" alt="" class="staffPhoto" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" onerror="this.onerror=null;this.src='${window.BASE_URL}/public/assets/default_user.png'">
                         <p class="mb-0">${staff.full_name}</p>
                     </div>
                 </td>

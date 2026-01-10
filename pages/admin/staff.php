@@ -90,7 +90,7 @@ $archivedStaff = $staffService->getArchivedStaffs();
                     <div class="mb-3 text-center">
                         <label for="staffPicture" class="form-label d-block fw-bold">Photo Profile</label>
                         <div class="mb-2">
-                            <img id="staff-img-preview" src="/Leilife_2nd/public/assets/default_user.png" alt="Preview" class="rounded-circle shadow-sm" style="width: 100px; height: 100px; object-fit: cover; border: 3px solid #d0b28c;">
+                            <img id="staff-img-preview" src="<?= UrlHelper::getBaseUrl() ?>/public/assets/default_user.png" alt="Preview" class="rounded-circle shadow-sm" style="width: 100px; height: 100px; object-fit: cover; border: 3px solid #d0b28c;">
                         </div>
                         <input type="file" class="form-control form-control-sm mx-auto" id="staffPicture" name="staffPicture" style="max-width: 250px;" accept="image/*">
                     </div>

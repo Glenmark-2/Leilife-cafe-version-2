@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             // Trigger download
-            window.location.href = '/Leilife_2nd/backend/api/admin/export_sales_excel.php?' + params.toString();
+            window.location.href = `${window.BASE_URL}/backend/api/admin/export_sales_excel.php?` + params.toString();
         });
     }
 
@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             // Trigger download
-            window.location.href = '/Leilife_2nd/backend/api/admin/export_sales_csv.php?' + params.toString();
+            window.location.href = `${window.BASE_URL}/backend/api/admin/export_sales_csv.php?` + params.toString();
         });
     }
 
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             // Trigger export
-            window.location.href = '/Leilife_2nd/backend/api/admin/export_sales_pdf.php?' + params.toString();
+            window.location.href = `${window.BASE_URL}/backend/api/admin/export_sales_pdf.php?` + params.toString();
         });
     }
 
@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         try {
-            const response = await fetch('/Leilife_2nd/backend/api/admin/get_sales_data.php?' + params.toString());
+            const response = await fetch(`${window.BASE_URL}/backend/api/admin/get_sales_data.php?` + params.toString());
             const result = await response.json();
 
             if (result.status === 'success') {
