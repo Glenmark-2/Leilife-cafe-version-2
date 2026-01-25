@@ -8,6 +8,7 @@ class UserRegistration {
     public $phone_number;
     public $password;
     public $verification_token;
+    public $otp_code;
     public $token_expires_at;
     public $created_at;
 
@@ -19,6 +20,7 @@ class UserRegistration {
         $this->phone_number = $data['phone_number'] ?? null;
         $this->password = $data['password'] ?? null;
         $this->verification_token = $data['verification_token'] ?? null;
+        $this->otp_code = $data['otp_code'] ?? null;
         $this->token_expires_at = $data['token_expires_at'] ?? null;
         $this->created_at = $data['created_at'] ?? null;
     }

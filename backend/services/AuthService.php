@@ -41,8 +41,9 @@ class AuthService {
         // Hash the password
         $hashed_password = password_hash($data['password'], PASSWORD_BCRYPT);
 
-        // Generate Token
+        // Generate Token and OTP
         $token = bin2hex(random_bytes(32)); // 64 chars
+        $otpCode = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
         $expiresAt = date('Y-m-d H:i:s', strtotime('+24 hours'));
 
         // Create UserRegistration object
@@ -53,6 +54,7 @@ class AuthService {
         $registration->phone_number = $data['phone_number'] ?? '';
         $registration->password = $hashed_password;
         $registration->verification_token = $token;
+        $registration->otp_code = $otpCode;
         $registration->token_expires_at = $expiresAt;
 
         // Save to UserRegistrations DB
@@ -60,7 +62,8 @@ class AuthService {
             // Send Verification Email
             require_once __DIR__ . '/MailService.php';
             $mailService = new MailService();
-            $emailSent = $mailService->sendVerification($data['email'], $token);
+            $source = $data['source'] ?? 'web';
+            $emailSent = $mailService->sendVerification($data['email'], $token, $otpCode, $source);
             
             if (!$emailSent) {
                 // If email fails, do we fail registration? 
@@ -90,8 +93,22 @@ class AuthService {
             return ['success' => false, 'message' => 'Invalid or expired verification token.'];
         }
 
+        return $this->finalizeRegistration($registration);
+    }
+
+    public function verifyOTP($email, $otp) {
+        $registration = $this->userRegistrationRepository->findByOTP($email, $otp);
+
+        if (!$registration) {
+            return ['success' => false, 'message' => 'Invalid or expired verification code.'];
+        }
+
+        return $this->finalizeRegistration($registration);
+    }
+
+    private function finalizeRegistration($registration) {
         if (strtotime($registration->token_expires_at) < time()) {
-             return ['success' => false, 'message' => 'Verification token has expired.'];
+             return ['success' => false, 'message' => 'Verification has expired.'];
         }
 
         // Move to Users table
@@ -106,7 +123,7 @@ class AuthService {
         if ($this->userRepository->create($user)) {
             // Delete from temporary table
             $this->userRegistrationRepository->delete($registration->id);
-            return ['success' => true, 'message' => 'Email verified successfully. You can now login.'];
+            return ['success' => true, 'message' => 'Account verified successfully. You can now login.'];
         }
 
         return ['success' => false, 'message' => 'Failed to verify account.'];
@@ -194,5 +211,39 @@ class AuthService {
         $user->password = null;
 
         return ['success' => true, 'user' => $user];
+    }
+
+    public function resendOTP($email) {
+        $registration = $this->userRegistrationRepository->findByEmail($email);
+
+        if (!$registration) {
+             return ['success' => false, 'message' => 'No pending registration found for this email.'];
+        }
+
+        // Generate new OTP
+        $otpCode = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+        $registration->otp_code = $otpCode;
+        $registration->token_expires_at = date('Y-m-d H:i:s', strtotime('+24 hours'));
+
+        if ($this->updateRegistration($registration)) {
+            require_once __DIR__ . '/MailService.php';
+            $mailService = new MailService();
+            $emailSent = $mailService->sendVerification($email, $registration->verification_token, $otpCode);
+            
+            if ($emailSent) {
+                return ['success' => true, 'message' => 'New verification code sent.'];
+            }
+        }
+
+        return ['success' => false, 'message' => 'Failed to resend code.'];
+    }
+
+    private function updateRegistration($reg) {
+        $query = "UPDATE user_registrations SET otp_code = :otp, token_expires_at = :expires WHERE id = :id";
+        $stmt = $this->userRegistrationRepository->getConnection()->prepare($query);
+        $stmt->bindParam(":otp", $reg->otp_code);
+        $stmt->bindParam(":expires", $reg->token_expires_at);
+        $stmt->bindParam(":id", $reg->id);
+        return $stmt->execute();
     }
 }

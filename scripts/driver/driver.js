@@ -1,8 +1,8 @@
 // Configuration Constants
-const ROUTE_UPDATE_DISTANCE_M = 30; // Min distance to trigger a major route re-calc
-const REROUTE_DEVIATION_METERS = 25; // Reroute if driver is >25m away from polyline
-const MIN_MOVE_TO_UPDATE_M = 1.5;   // Ignore micro-jitters
-const MAX_ACCEPTABLE_JUMP_M = 60;   // Ignore GPS spikes
+const REROUTE_DEVIATION_METERS = 20;
+const MIN_MOVE_TO_UPDATE_M = 0.5;   // More sensitive for people standing still
+const MAX_ACCEPTABLE_JUMP_M = 1000;  // Be more forgiving about initial GPS lock jumps
+const SNAP_THRESHOLD_M = 15;
 
 class DriverNavigation {
     constructor() {
@@ -11,54 +11,51 @@ class DriverNavigation {
         this.customerMarker = null;
         this.currentRoute = null;
         this.watchId = null;
+        this.gpsWatchdog = null;
 
         this.driverCoords = null;
-        this.customerCoords = window.deliveryData.customer; // From PHP
-        this.orsKey = window.deliveryData.orsKey; // From PHP (.env)
+        this.lastHeading = 0;
+        this.initialFitDone = false;
 
+        this.customerCoords = window.deliveryData.customer;
         this.isFollowMode = true;
-        this.isMapInteracting = false;
+
+        if (!this.customerCoords || (!this.customerCoords.lat && this.customerCoords.lat !== 0)) {
+            console.error("MAP SYSTEM: No destination coords provided.");
+            return;
+        }
 
         this.init();
     }
 
     init() {
-        if (!this.customerCoords || !this.customerCoords.lat) {
-            console.warn("No active delivery coordinates found.");
-            return;
-        }
-
         // Initialize MapLibre
         this.map = new maplibregl.Map({
             container: 'deliveryMap',
             style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
             center: [this.customerCoords.lng, this.customerCoords.lat],
-            zoom: 14,
-            pitch: 45,
+            zoom: 17,
+            pitch: 60,
             attributionControl: false
         });
 
         this.map.on('load', () => {
+            console.log("MAP SYSTEM: Map loaded. Initializing tracking...");
             this.setupMarkers();
-            this.startTracking();
             this.setupUIListeners();
-
-            // Initial path fit
-            if (this.driverCoords) {
-                this.getRoute();
-            }
+            this.startTracking();
         });
 
-        // Detect user interaction to disable follow mode
         this.map.on('dragstart', () => {
             if (this.isFollowMode) {
+                console.log("MAP SYSTEM: Follow mode disabled by user interaction.");
                 this.setFollowMode(false);
             }
         });
     }
 
     setupMarkers() {
-        // Customer Destination Marker
+        // Customer Marker
         const customerEl = document.createElement('div');
         customerEl.className = 'customer-marker';
         customerEl.innerHTML = '<i class="ph-fill ph-map-pin-fill"></i>';
@@ -67,67 +64,47 @@ class DriverNavigation {
             .setLngLat([this.customerCoords.lng, this.customerCoords.lat])
             .addTo(this.map);
 
-        // Driver Marker (Pointer)
+        // Driver Marker
         const driverEl = document.createElement('div');
         driverEl.className = 'driver-marker';
 
         this.driverMarker = new maplibregl.Marker({
             element: driverEl,
-            rotationAlignment: 'viewport', // Marker stays UP relative to screen
-            pitchAlignment: 'viewport'
+            rotationAlignment: 'map',
+            pitchAlignment: 'map'
         })
-            .setLngLat([this.customerCoords.lng, this.customerCoords.lat - 0.001]) // Start slightly offset
+            .setLngLat([this.customerCoords.lng, this.customerCoords.lat])
             .addTo(this.map);
     }
 
     setupUIListeners() {
-        document.getElementById('toggleFollowBtn').addEventListener('click', () => {
-            this.setFollowMode(!this.isFollowMode);
-        });
+        const followBtn = document.getElementById('toggleFollowBtn');
+        if (followBtn) {
+            followBtn.addEventListener('click', () => {
+                this.setFollowMode(!this.isFollowMode);
+                if (this.isFollowMode && this.driverCoords) {
+                    this.updateMapCamera(this.driverCoords, this.lastHeading);
+                }
+            });
+        }
 
-        document.getElementById('recenterBtn').addEventListener('click', () => {
-            const btn = document.getElementById('recenterBtn');
-            const icon = btn.querySelector('i');
-
-            // Visual feedback
-            icon.classList.add('ph-spin');
-
-            // Force a high-accuracy check
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    icon.classList.remove('ph-spin');
-                    console.log("Manual GPS refresh successful.");
-
-                    this.onLocationUpdate(pos, true); // True = forced
-
-                    this.map.easeTo({
-                        center: [pos.coords.longitude, pos.coords.latitude],
-                        zoom: 25,
-                        duration: 1000
-                    });
+        const recenterBtn = document.getElementById('recenterBtn');
+        if (recenterBtn) {
+            recenterBtn.addEventListener('click', () => {
+                if (this.driverCoords) {
+                    this.updateMapCamera(this.driverCoords, this.lastHeading, true);
                     this.setFollowMode(true);
-                },
-                (err) => {
-                    icon.classList.remove('ph-spin');
-                    console.error("Manual GPS refresh failed:", err);
-                    // Fallback to last known if possible
-                    if (this.driverCoords) {
-                        this.map.easeTo({
-                            center: [this.driverCoords.lng, this.driverCoords.lat],
-                            zoom: 17,
-                            duration: 1000
-                        });
-                        this.setFollowMode(true);
-                    }
-                },
-                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-            );
-        });
+                } else {
+                    console.warn("MAP SYSTEM: Recenter clicked but no GPS lock.");
+                }
+            });
+        }
     }
 
     setFollowMode(state) {
         this.isFollowMode = state;
         const btn = document.getElementById('toggleFollowBtn');
+        if (!btn) return;
         if (state) {
             btn.classList.add('active', 'btn-primary');
             btn.classList.remove('btn-white');
@@ -139,208 +116,221 @@ class DriverNavigation {
 
     startTracking() {
         if (!navigator.geolocation) {
-            alert("Geolocation is not supported by your browser.");
+            console.error("MAP SYSTEM: Geolocation is not supported.");
             return;
         }
 
-        this.watchId = navigator.geolocation.watchPosition(
+        this.resetWatchdog();
+
+        navigator.geolocation.getCurrentPosition(
             (pos) => {
-                console.log("GPS Position received:", pos.coords.latitude, pos.coords.longitude);
+                console.log("MAP SYSTEM: Initial GPS fix.");
                 this.onLocationUpdate(pos);
             },
-            (err) => console.error("GPS Error:", err),
-            {
-                enableHighAccuracy: true,
-                timeout: 15000,
-                maximumAge: 0
-            }
+            (err) => console.warn("MAP SYSTEM: Initial fix failed: " + err.message),
+            { enableHighAccuracy: false, timeout: 5000 }
         );
 
-        // Dummy update for immediate visibility if needed
-        setTimeout(() => {
-            if (!this.driverCoords) {
-                console.log("No GPS yet, using customer-relative offset for initial view.");
+        this.watchId = navigator.geolocation.watchPosition(
+            (pos) => {
+                this.resetWatchdog();
+                this.onLocationUpdate(pos);
+            },
+            (err) => {
+                console.error("MAP SYSTEM: GPS Error (" + err.code + "): " + err.message);
+                if (err.code === 1) alert("Please enable Location Services to use the map.");
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 1000
             }
-        }, 3000);
+        );
     }
 
-    onLocationUpdate(position, isForced = false) {
-        const { latitude, longitude, heading, speed } = position.coords;
+    resetWatchdog() {
+        if (this.gpsWatchdog) clearTimeout(this.gpsWatchdog);
+        this.gpsWatchdog = setTimeout(() => {
+            console.log("MAP SYSTEM: GPS stalled, restarting watch...");
+            navigator.geolocation.clearWatch(this.watchId);
+            this.startTracking();
+        }, 20000);
+    }
+
+    onLocationUpdate(position) {
+        const { latitude, longitude, heading, accuracy } = position.coords;
         const newCoords = { lat: latitude, lng: longitude };
 
-        // 1. Initial coords setup
+        console.log(`MAP SYSTEM: Update | Accuracy: ${accuracy.toFixed(1)}m | Lat: ${latitude} | Lng: ${longitude}`);
+
         if (!this.driverCoords) {
-            console.log("First GPS lock acquired.");
             this.driverCoords = newCoords;
-            this.animateMarker(newCoords);
+            this.driverMarker.setLngLat([longitude, latitude]);
+            this.updateMapCamera(newCoords, heading || 0, true);
             this.getRoute();
             return;
         }
 
-        // 2. Filter micro-movements (unless forced by user)
         const dist = this.getDistance(this.driverCoords, newCoords);
-        console.log(`Movement detected: ${dist.toFixed(2)}m (Forced: ${isForced})`);
-        if (!isForced && dist < MIN_MOVE_TO_UPDATE_M) return;
-        if (dist > MAX_ACCEPTABLE_JUMP_M) return;
 
-        // 3. Update Position Tracking
-        this.driverCoords = newCoords;
+        if (dist < MIN_MOVE_TO_UPDATE_M && this.currentRoute) return;
 
-        // 4. Cubic Smoothing Move
-        this.animateMarker(newCoords);
-
-        // 5. Rotation Logic (Heading or Vector)
-        if (heading !== null) {
-            this.rotateMarker(heading);
-        }
-
-        // 6. Rerouting Logic
-        if (this.currentRoute) {
-            const deviation = this.getDeviationFromRoute(newCoords, this.currentRoute);
-            if (deviation > REROUTE_DEVIATION_METERS) {
-                console.log("Deviation detected (" + deviation.toFixed(1) + "m). Rerouting...");
-                this.getRoute();
-            }
-        }
-
-        // 7. Auto-pan / Level following (Heading Up Mode)
-        // 7. Auto-pan / Level following (Heading Up Mode)
-        if (this.isFollowMode) {
-            // In Heading Up mode, we rotate the MAP so that the driver's heading is 0 (UP)
-            // But MapLibre bearing is counter-clockwise, so we use -heading
-            this.map.easeTo({
-                center: [longitude, latitude],
-                bearing: heading !== null ? -heading : this.map.getBearing(),
-                pitch: 45,
-                duration: 500,
-                easing: (t) => t * (2 - t)
-            });
-        }
-    }
-
-    animateMarker(target) {
-        // Simple cubic transition for visual marker
-        // In a real app we'd use requestAnimationFrame for true per-frame interp
-        this.driverMarker.setLngLat([target.lng, target.lat]);
-    }
-
-    rotateMarker(bearing) {
-        // We keep the rider icon always facing forward (Up on the phone)
-        // The map bearing handles the orientation relative to the path
-    }
-
-    async getRoute() {
-        if (!this.driverCoords || !this.customerCoords || !this.orsKey) {
-            console.warn("Missing coordinates or API key for routing.");
+        if (dist > MAX_ACCEPTABLE_JUMP_M) {
+            console.warn("MAP SYSTEM: GPS Jump ignored (" + dist.toFixed(0) + "m).");
             return;
         }
 
-        const url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${this.orsKey}&start=${this.driverCoords.lng},${this.driverCoords.lat}&end=${this.customerCoords.lng},${this.customerCoords.lat}`;
+        let effectiveHeading = heading;
+        if (effectiveHeading === null || effectiveHeading === undefined) {
+            effectiveHeading = this.calculateBearing(this.driverCoords, newCoords);
+        }
+        this.lastHeading = effectiveHeading;
+
+        let visualPos = newCoords;
+        if (this.currentRoute) {
+            const snapResult = this.getSnapPosition(newCoords, this.currentRoute);
+            if (snapResult.distance < SNAP_THRESHOLD_M) {
+                visualPos = snapResult.point;
+            }
+        }
+
+        this.driverMarker.setLngLat([visualPos.lng, visualPos.lat]);
+        this.driverMarker.setRotation(effectiveHeading);
+
+        if (this.isFollowMode) {
+            this.updateMapCamera(visualPos, effectiveHeading);
+        }
+
+        if (this.currentRoute) {
+            const deviation = this.getDeviationFromRoute(newCoords, this.currentRoute);
+            if (deviation > REROUTE_DEVIATION_METERS) {
+                console.log("MAP SYSTEM: Deviation detected (" + deviation.toFixed(0) + "m). Requesting new route.");
+                this.getRoute();
+            }
+        } else {
+            this.getRoute();
+        }
+
+        this.driverCoords = newCoords;
+    }
+
+    updateMapCamera(coords, heading, instant = false) {
+        if (!this.map) return;
+        this.map.easeTo({
+            center: [coords.lng, coords.lat],
+            bearing: heading || 0,
+            pitch: 60,
+            duration: instant ? 0 : 1200,
+            easing: (t) => t
+        });
+    }
+
+    async getRoute() {
+        if (!this.driverCoords || !this.customerCoords) {
+            return;
+        }
+
+        // Use backend proxy to avoid CORS and hide API key
+        const start = `${this.driverCoords.lng},${this.driverCoords.lat}`;
+        const end = `${this.customerCoords.lng},${this.customerCoords.lat}`;
+        const url = `../backend/api/proxy_route.php?start=${start}&end=${end}`;
 
         try {
-            console.log("Fetching route from ORS...");
             const response = await fetch(url);
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.error || "Route proxy failure");
+            }
             const data = await response.json();
 
             if (data.features && data.features.length > 0) {
-                console.log("Route received successfully.");
                 this.drawRoute(data.features[0]);
                 this.updateDirections(data.features[0].properties.segments[0]);
             } else {
-                console.warn("ORS returned no features:", data);
+                console.warn("MAP SYSTEM: Proxy returned no route features.");
             }
-        } catch (error) {
-            console.error("Routing Error:", error);
+        } catch (e) {
+            console.error("MAP SYSTEM: Routing Proxy Request Failed: ", e.message);
         }
     }
 
     drawRoute(routeFeature) {
         this.currentRoute = routeFeature.geometry.coordinates;
 
-        // Add or Update Layer
-        if (this.map.getSource('route')) {
-            this.map.getSource('route').setData(routeFeature);
-        } else {
-            this.map.addSource('route', {
-                type: 'geojson',
-                data: routeFeature
-            });
+        const sourceId = 'route';
+        const layerId = 'route-layer';
 
+        if (this.map.getSource(sourceId)) {
+            this.map.getSource(sourceId).setData(routeFeature);
+        } else {
+            this.map.addSource(sourceId, { type: 'geojson', data: routeFeature });
             this.map.addLayer({
-                id: 'route-layer',
+                id: layerId,
                 type: 'line',
-                source: 'route',
-                layout: {
-                    'line-join': 'round',
-                    'line-cap': 'round'
-                },
-                paint: {
-                    'line-color': '#4a90e2',
-                    'line-width': 6,
-                    'line-opacity': 0.8
-                }
+                source: sourceId,
+                layout: { 'line-join': 'round', 'line-cap': 'round' },
+                paint: { 'line-color': '#007AFF', 'line-width': 8, 'line-opacity': 0.8 }
             });
         }
 
-        // Fit bounds for first route only
-        if (!this.initialFit) {
+        if (!this.initialFitDone) {
             const bounds = new maplibregl.LngLatBounds();
             this.currentRoute.forEach(c => bounds.extend(c));
-            this.map.fitBounds(bounds, { padding: 50 });
-            this.initialFit = true;
+            this.map.fitBounds(bounds, { padding: 80, duration: 2000 });
+            this.initialFitDone = true;
         }
     }
 
     updateDirections(segment) {
-        const panel = document.getElementById('directionsPanel');
         const instructionEl = document.getElementById('stepInstruction');
         const distanceEl = document.getElementById('stepDistance');
 
-        if (segment.steps && segment.steps.length > 0) {
-            panel.classList.remove('d-none');
-            const currentStep = segment.steps[0];
-            instructionEl.innerText = currentStep.instruction;
-            distanceEl.innerText = `${Math.round(currentStep.distance)} meters away`;
+        if (instructionEl && segment.steps && segment.steps.length > 0) {
+            const panel = document.getElementById('directionsPanel');
+            if (panel) panel.classList.remove('d-none');
+            const step = segment.steps[0];
+            instructionEl.innerHTML = `<span class="text-white-50 small">Next:</span> <br> ${step.instruction}`;
+            distanceEl.innerText = `${Math.round(step.distance)}m away`;
         }
     }
 
-    // Haversine helper
+    getSnapPosition(pt, polyline) {
+        let bestPoint = pt, minDistance = Infinity;
+        for (let i = 0; i < polyline.length - 1; i++) {
+            const v = { lng: polyline[i][0], lat: polyline[i][1] };
+            const w = { lng: polyline[i + 1][0], lat: polyline[i + 1][1] };
+            const l2 = Math.pow(this.getDistance(v, w), 2);
+            if (l2 === 0) continue;
+            let t = ((pt.lng - v.lng) * (w.lng - v.lng) + (pt.lat - v.lat) * (w.lat - v.lat)) / l2;
+            t = Math.max(0, Math.min(1, t));
+            const snap = { lng: v.lng + t * (w.lng - v.lng), lat: v.lat + t * (w.lat - v.lat) };
+            const dist = this.getDistance(pt, snap);
+            if (dist < minDistance) { minDistance = dist; bestPoint = snap; }
+        }
+        return { point: bestPoint, distance: minDistance };
+    }
+
+    calculateBearing(p1, p2) {
+        const dLon = (p2.lng - p1.lng) * Math.PI / 180;
+        const lat1 = p1.lat * Math.PI / 180, lat2 = p2.lat * Math.PI / 180;
+        const y = Math.sin(dLon) * Math.cos(lat2);
+        const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+        return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+    }
+
     getDistance(c1, c2) {
         const R = 6371e3;
-        const φ1 = c1.lat * Math.PI / 180;
-        const φ2 = c2.lat * Math.PI / 180;
-        const Δφ = (c2.lat - c1.lat) * Math.PI / 180;
-        const Δλ = (c2.lng - c1.lng) * Math.PI / 180;
-        const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-            Math.cos(φ1) * Math.cos(φ2) *
-            Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c;
+        const φ1 = c1.lat * Math.PI / 180, φ2 = c2.lat * Math.PI / 180;
+        const Δφ = (c2.lat - c1.lat) * Math.PI / 180, Δλ = (c2.lng - c1.lng) * Math.PI / 180;
+        const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+        return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
     }
 
     getDeviationFromRoute(pt, polyline) {
-        // Find minDist from point to any segment in polyline
-        let minDist = Infinity;
-        for (let i = 0; i < polyline.length - 1; i++) {
-            const d = this.distToSegment(pt, { lng: polyline[i][0], lat: polyline[i][1] }, { lng: polyline[i + 1][0], lat: polyline[i + 1][1] });
-            if (d < minDist) minDist = d;
-        }
-        return minDist;
-    }
-
-    distToSegment(p, v, w) {
-        const l2 = Math.pow(this.getDistance(v, w), 2);
-        if (l2 == 0) return this.getDistance(p, v);
-        let t = ((p.lng - v.lng) * (w.lng - v.lng) + (p.lat - v.lat) * (w.lat - v.lat)) / l2;
-        t = Math.max(0, Math.min(1, t));
-        return this.getDistance(p, {
-            lng: v.lng + t * (w.lng - v.lng),
-            lat: v.lat + t * (w.lat - v.lat)
-        });
+        return this.getSnapPosition(pt, polyline).distance;
     }
 }
 
-// Global instance
 document.addEventListener('DOMContentLoaded', () => {
     window.navSystem = new DriverNavigation();
 });
