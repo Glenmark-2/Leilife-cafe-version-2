@@ -114,49 +114,52 @@ $customerCoords = $currentDelivery ? [ 'lat' => (float)$currentDelivery['custome
     position: absolute;
     bottom: 30px;
     right: 15px;
-    z-index: 10;
+    z-index: 1000;
     display: flex;
     flex-direction: column;
 }
 .map-controls-overlay .btn {
-    width: 44px;
-    height: 44px;
+    width: 50px;
+    height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
-    font-size: 1.25rem;
+    font-size: 1.5rem;
+    border-radius: 15px;
 }
 .btn-white {
     background: white;
-    color: var(--primary-color);
-    border: 1px solid rgba(0,0,0,0.1);
+    color: #333;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 #directionsPanel {
-    border-top: 2px solid rgba(255,255,255,0.2);
-    box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+    background: rgba(0, 122, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
 }
 .driver-marker {
-    width: 64px;
-    height: 64px;
-    background-image: url('assets/rider.png');
+    width: 55px;
+    height: 55px;
+    background-image: url('../public/assets/rider.png');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
     cursor: pointer;
-    /* Rider always points UP, map rotates around it */
-    transform-origin: center center;
-    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
     pointer-events: none;
-    z-index: 999;
 }
 .customer-marker {
-    font-size: 2.5rem;
-    color: #ef4444;
-    text-shadow: 0 0 10px rgba(255,255,255,0.8);
+    font-size: 3rem;
+    color: #ff3b30;
+    filter: drop-shadow(0 0 10px rgba(255,59,48,0.5));
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 5;
 }
 </style>
 
@@ -164,8 +167,7 @@ $customerCoords = $currentDelivery ? [ 'lat' => (float)$currentDelivery['custome
 // Expose destination for the mapping system
 window.deliveryData = {
     customer: <?php echo json_encode($customerCoords); ?>,
-    orderNumber: "<?php echo $currentDelivery['order_number'] ?? ''; ?>",
-    orsKey: "<?php echo getenv('ORS_API_KEY') ?: ''; ?>"
+    orderNumber: "<?php echo $currentDelivery['order_number'] ?? ''; ?>"
 };
 </script>
 

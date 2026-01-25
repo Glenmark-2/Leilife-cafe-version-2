@@ -10,11 +10,15 @@ class UserRegistrationRepository {
         $this->conn = $db;
     }
 
+    public function getConnection() {
+        return $this->conn;
+    }
+
     public function create(UserRegistration $reg) {
         $query = "INSERT INTO user_registrations 
-                    (first_name, last_name, email, phone_number, password, verification_token, token_expires_at)
+                    (first_name, last_name, email, phone_number, password, verification_token, otp_code, token_expires_at)
                   VALUES 
-                    (:first_name, :last_name, :email, :phone_number, :password, :token, :expires_at)";
+                    (:first_name, :last_name, :email, :phone_number, :password, :token, :otp_code, :expires_at)";
 
         $stmt = $this->conn->prepare($query);
 
@@ -24,6 +28,7 @@ class UserRegistrationRepository {
         $stmt->bindParam(":phone_number", $reg->phone_number);
         $stmt->bindParam(":password", $reg->password);
         $stmt->bindParam(":token", $reg->verification_token);
+        $stmt->bindParam(":otp_code", $reg->otp_code);
         $stmt->bindParam(":expires_at", $reg->token_expires_at);
 
         if ($stmt->execute()) {
@@ -50,6 +55,20 @@ class UserRegistrationRepository {
         $query = "SELECT * FROM user_registrations WHERE verification_token = :token LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":token", $token);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return new UserRegistration($row);
+        }
+        return null;
+    }
+
+    public function findByOTP($email, $otp) {
+        $query = "SELECT * FROM user_registrations WHERE email = :email AND otp_code = :otp LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":email", $email);
+        $stmt->bindParam(":otp", $otp);
         $stmt->execute();
 
         if ($stmt->rowCount() > 0) {

@@ -164,10 +164,13 @@ a.buttonDiv {
     aside#navBar {
         position: fixed;
         left: 0;
+        top: 0;
+        bottom: 0;
         transform: translateX(-100%); /* Hide off-screen with transform */
         background-color: #fff;
         height: 100vh;
         width: 260px; /* Ensure width is kept */
+        z-index: 1001; /* Above backdrop */
     }
 
     aside#navBar.open {
@@ -181,6 +184,23 @@ a.buttonDiv {
     
     #pageContent {
         padding: 15px;
+    }
+
+    /* Backdrop Styling */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 1000;
+        backdrop-filter: blur(2px);
+    }
+
+    .sidebar-overlay.show {
+        display: block;
     }
 }
 
