@@ -41,13 +41,20 @@ class OrderController {
 
     public function getUserOrders() {
         SessionManager::startSession();
-        if (!SessionManager::isLoggedIn()) {
+        
+        $userId = null;
+        if (SessionManager::isLoggedIn()) {
+             $userId = SessionManager::get('user_id');
+        } elseif (isset($_GET['user_id'])) {
+             $userId = $_GET['user_id'];
+        }
+
+        if (!$userId) {
             http_response_code(401);
             echo json_encode(['success' => false, 'message' => 'Unauthorized']);
             return;
         }
 
-        $userId = SessionManager::get('user_id');
         $result = $this->orderService->getUserOrders($userId);
         
         echo json_encode($result);

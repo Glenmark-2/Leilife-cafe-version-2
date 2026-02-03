@@ -6,13 +6,20 @@ require_once __DIR__ . '/../models/User.php';
 
 SessionManager::startSession();
 
-if (!SessionManager::isLoggedIn()) {
+$data = json_decode(file_get_contents('php://input'), true);
+
+$userId = null;
+if (SessionManager::isLoggedIn()) {
+    $userId = SessionManager::get('user_id');
+} elseif (isset($data['user_id'])) {
+    $userId = $data['user_id'];
+}
+
+if (!$userId) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
 }
-
-$data = json_decode(file_get_contents('php://input'), true);
 
 if (
     !isset($data['street']) || !isset($data['barangay']) || !isset($data['city']) ||
@@ -22,7 +29,6 @@ if (
     exit;
 }
 
-$userId = SessionManager::get('user_id');
 $street = $data['street'];
 $barangay = $data['barangay'];
 $city = $data['city'];

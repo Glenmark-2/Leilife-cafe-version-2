@@ -238,6 +238,15 @@ class AuthService {
         return ['success' => false, 'message' => 'Failed to resend code.'];
     }
 
+    public function getUserById($id) {
+        $user = $this->userRepository->findById($id);
+        if ($user) {
+            $user->password = null; // Security
+            return ['status' => 'success', 'user' => $user];
+        }
+        return ['status' => 'error', 'message' => 'User not found.'];
+    }
+
     private function updateRegistration($reg) {
         $query = "UPDATE user_registrations SET otp_code = :otp, token_expires_at = :expires WHERE id = :id";
         $stmt = $this->userRegistrationRepository->getConnection()->prepare($query);

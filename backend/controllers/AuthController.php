@@ -37,4 +37,9 @@ class AuthController {
             echo json_encode(['success' => false, 'message' => 'Email and password are required.']);
         }
     }
+
+    public function profile($id) {
+        $result = $this->authService->getUserById($id);
+        echo json_encode($result);
+    }
 }
