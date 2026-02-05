@@ -48,4 +48,37 @@ class AuthController
         $result = $this->authService->getUserProfile($userId);
         echo json_encode($result);
     }
+
+    public function forgotPasswordRequest()
+    {
+        $data = json_decode(file_get_contents("php://input"), true) ?: $_POST;
+        if (empty($data['email'])) {
+            echo json_encode(['success' => false, 'message' => 'Email is required.']);
+            return;
+        }
+        $result = $this->authService->requestPasswordReset($data['email']);
+        echo json_encode($result);
+    }
+
+    public function forgotPasswordVerify()
+    {
+        $data = json_decode(file_get_contents("php://input"), true) ?: $_POST;
+        if (empty($data['email']) || empty($data['otp'])) {
+            echo json_encode(['success' => false, 'message' => 'Email and OTP are required.']);
+            return;
+        }
+        $result = $this->authService->verifyResetOTP($data['email'], $data['otp']);
+        echo json_encode($result);
+    }
+
+    public function forgotPasswordReset()
+    {
+        $data = json_decode(file_get_contents("php://input"), true) ?: $_POST;
+        if (empty($data['email']) || empty($data['otp']) || empty($data['new_password'])) {
+            echo json_encode(['success' => false, 'message' => 'Email, OTP, and new password are required.']);
+            return;
+        }
+        $result = $this->authService->resetPassword($data['email'], $data['otp'], $data['new_password']);
+        echo json_encode($result);
+    }
 }
