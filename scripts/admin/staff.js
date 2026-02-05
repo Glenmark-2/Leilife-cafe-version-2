@@ -6,6 +6,24 @@ document.addEventListener('DOMContentLoaded', function () {
         staffModal = new bootstrap.Modal(addStaffModalEl);
     }
 
+    // OTP Modal Initialization
+    const otpModalEl = document.getElementById('otpVerificationModal');
+    let otpModal;
+    if (otpModalEl) {
+        otpModal = new bootstrap.Modal(otpModalEl);
+    }
+    const closeOtpModalBtn = document.getElementById('closeOtpModal');
+    if (closeOtpModalBtn) {
+        closeOtpModalBtn.addEventListener('click', () => otpModal?.hide());
+    }
+    
+    // When OTP modal closes, always bring back the Staff modal
+    if (otpModalEl) {
+        otpModalEl.addEventListener('hidden.bs.modal', function () {
+            if (staffModal) staffModal.show();
+        });
+    }
+
     const form = document.getElementById('staffForm');
     const modalTitle = document.getElementById('addStaffModalLabel');
     const saveBtn = document.getElementById('saveStaffBtn');
@@ -16,6 +34,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const staffPicture = document.getElementById('staffPicture');
     const passwordInput = document.getElementById('password');
     const passwordStrength = document.getElementById('passwordStrength');
+    const emailInput = document.getElementById('email');
+
+    // OTP Modal Elements
+    const otpModalEmail = document.getElementById('otp-modal-email');
+    const otpModalInput = document.getElementById('otp-modal-input');
+    const verifyOtpModalBtn = document.getElementById('verifyOtpModalBtn');
+    const resendOtpModalBtn = document.getElementById('resendOtpModalBtn');
+    const otpError = document.getElementById('otp-error');
+    const verificationStatus = document.getElementById('verification-status');
+
+    let emailVerified = false;
+    let currentVerificationEmail = '';
 
     const addStaffBtnTrigger = document.getElementById('add-staff');
     if (addStaffBtnTrigger) {
@@ -29,6 +59,14 @@ document.addEventListener('DOMContentLoaded', function () {
             staffImgPreview.src = `${window.BASE_URL}/public/assets/default_user.png`;
             passwordInput.setAttribute('required', 'required');
             updateCategory();
+            
+            // Reset verification state
+            emailVerified = false;
+            currentVerificationEmail = '';
+            verificationStatus.style.display = 'none';
+            if (emailInput) emailInput.removeAttribute('readonly');
+            updateSaveButtonText();
+
             if (staffModal) staffModal.show();
         });
     }
@@ -78,15 +116,42 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // Password is only strictly required on ADD for auth accounts
         if (form.dataset.mode === 'add' && required) {
             passwordInput.setAttribute('required', 'required');
         } else {
             passwordInput.removeAttribute('required');
         }
+        
+        updateSaveButtonText();
     }
 
-    accountCategoryRadios.forEach(r => r.addEventListener('change', updateCategory));
+    function updateSaveButtonText() {
+        if (!saveBtn) return;
+        
+        const isAdminDriver = document.querySelector('input[name="accountCategory"]:checked')?.value === 'admin_driver';
+        const isAddMode = form.dataset.mode === 'add';
+        
+        if (!isAddMode || !isAdminDriver) {
+            saveBtn.innerHTML = '<i class="bi bi-floppy"></i> Save Staff';
+            return;
+        }
+        
+        if (!emailVerified) {
+            saveBtn.innerHTML = '<i class="bi bi-envelope-check"></i> Verify Email';
+        } else {
+            saveBtn.innerHTML = '<i class="bi bi-person-plus"></i> Add Staff';
+        }
+    }
+
+    accountCategoryRadios.forEach(r => {
+        r.addEventListener('change', () => {
+            updateCategory();
+            emailVerified = false;
+            verificationStatus.style.display = 'none';
+            if (emailInput) emailInput.removeAttribute('readonly');
+            updateSaveButtonText();
+        });
+    });
 
     // Image Preview
     if (staffPicture) {
@@ -121,9 +186,52 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // --- Save Logic ---
+    // --- DUPLICATION CHECKS ---
+    const usernameInput = document.getElementById('username');
+
+    async function checkAvailability(field, value) {
+        if (!value) return true; // Let required validation handle empty
+        try {
+            const res = await fetch(`${window.BASE_URL}/backend/api/admin/check_availability.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ field, value })
+            });
+            const data = await res.json();
+            return data;
+        } catch (err) {
+            console.error('Availability check failed', err);
+            return { success: false, available: true }; // Assume available on error to avoid blocking logic, or handle stricter
+        }
+    }
+
+    if (usernameInput) {
+        usernameInput.addEventListener('blur', async function() {
+            const val = this.value.trim();
+            if (!val) return;
+            
+            // Remove existing feedback
+            this.classList.remove('is-invalid', 'is-valid');
+            let feedback = this.parentNode.querySelector('.invalid-feedback');
+            if(feedback) feedback.remove();
+
+            const result = await checkAvailability('username', val);
+            
+            if (result.success && !result.available) {
+                this.classList.add('is-invalid');
+                const div = document.createElement('div');
+                div.className = 'invalid-feedback';
+                div.innerText = result.message;
+                this.parentNode.appendChild(div);
+            } else if (result.success && result.available) {
+                this.classList.add('is-valid');
+            }
+        });
+    }
+
+    // --- FORM SUBMIT LOGIC ---
     if (form) {
-        form.addEventListener('submit', function (e) {
+        form.addEventListener('submit', async function (e) {
             e.preventDefault();
 
             if (!form.checkValidity()) {
@@ -131,8 +239,88 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            const formData = new FormData(this);
+            const isAdminDriver = document.querySelector('input[name="accountCategory"]:checked')?.value === 'admin_driver';
             const mode = form.dataset.mode;
+
+            // Handle Verification Flow for Admin/Driver
+            if (mode === 'add' && isAdminDriver && !emailVerified) {
+                const email = emailInput.value.trim();
+                if (!email) {
+                    alert('Please enter a valid email address.');
+                    emailInput.focus();
+                    return;
+                }
+
+                // Check Email Availability First
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Checking Email...';
+                
+                const emailCheck = await checkAvailability('email', email);
+                if (emailCheck.success && !emailCheck.available) {
+                    alert(emailCheck.message);
+                    saveBtn.disabled = false;
+                    updateSaveButtonText();
+                    return;
+                }
+
+                // Initial Send OTP Logic
+                saveBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Sending Code...';
+
+                try {
+                    const res = await fetch(`${window.BASE_URL}/backend/api/admin/request_staff_verification.php`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email })
+                    });
+                    const data = await res.json();
+
+                    if (data.success) {
+                        currentVerificationEmail = email;
+                        otpModalEmail.textContent = email;
+                        otpModalInput.value = '';
+                        otpError.style.display = 'none';
+                        otpModalInput.classList.remove('is-invalid');
+                        
+                        // Swap Modals: Hide Staff Modal -> Show OTP Modal
+                        if (staffModal) staffModal.hide();
+                        if (otpModal) otpModal.show();
+                        
+                        // Focus on input when modal opens
+                        setTimeout(() => otpModalInput.focus(), 500);
+
+                    } else {
+                        alert(data.message || 'Failed to send verification code.');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Error sending code. Please try again.');
+                } finally {
+                    saveBtn.disabled = false;
+                    updateSaveButtonText();
+                }
+                return; // Stop form submission
+            }
+
+            // Check Username Availability before Final Submit (for Admin/Driver)
+            if (isAdminDriver) {
+                 const username = usernameInput.value.trim();
+                 // If editing, we might want to skip check if username didn't change, 
+                 // but checking anyway is safe as long as backend handles "except self". 
+                 // But check_availability.php is simple. 
+                 // For now, let's only block on 'add' mode or if we add "except current id" logic.
+                 // To keep it simple, checking on ADD is most critical.
+                 if (mode === 'add') {
+                     const userCheck = await checkAvailability('username', username);
+                     if (userCheck.success && !userCheck.available) {
+                         alert(userCheck.message);
+                         usernameInput.focus();
+                         return;
+                     }
+                 }
+            }
+
+            // Normal Save/Update Logic
+            const formData = new FormData(this);
             const apiEndpoint = mode === 'edit' ? '../backend/api/admin/update_staff.php' : '../backend/api/admin/add_staff.php';
 
             saveBtn.disabled = true;
@@ -150,18 +338,108 @@ document.addEventListener('DOMContentLoaded', function () {
                     } else {
                         alert(result.message || 'Error processing request');
                         saveBtn.disabled = false;
-                        saveBtn.innerText = mode === 'edit' ? 'Update Staff' : 'Save Staff';
+                        updateSaveButtonText(); // Reset text
                     }
                 })
                 .catch(err => {
                     console.error(err);
                     alert('An unexpected error occurred.');
                     saveBtn.disabled = false;
-                    saveBtn.innerText = mode === 'edit' ? 'Update Staff' : 'Save Staff';
+                    updateSaveButtonText();
                 });
         });
     }
 
+    // --- OTP MODAL LOGIC ---
+    
+    // Auto-focus logic handled in submit handler
+
+    // Verify OTP Button (Inside Modal)
+    if (verifyOtpModalBtn) {
+        verifyOtpModalBtn.addEventListener('click', async function() {
+            const otp = otpModalInput.value.trim();
+            if (otp.length !== 6) {
+                otpModalInput.classList.add('is-invalid');
+                otpError.style.display = 'block';
+                return;
+            }
+
+            this.disabled = true;
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="bi bi-hourglass-split"></i> Verifying...';
+
+            try {
+                const res = await fetch(`${window.BASE_URL}/backend/api/admin/verify_staff_otp.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: currentVerificationEmail, otp })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    // Success!
+                    emailVerified = true;
+                    if (otpModal) otpModal.hide();
+                    
+                    // Update Main Form UI
+                    verificationStatus.style.display = 'block';
+                    emailInput.setAttribute('readonly', 'readonly');
+                    updateSaveButtonText();
+                    
+                    // Show success toast or alert?
+                    // alert('Email verified successfully!');
+                    
+                } else {
+                    otpModalInput.classList.add('is-invalid');
+                    otpError.textContent = data.message || 'Invalid code';
+                    otpError.style.display = 'block';
+                    otpModalInput.value = '';
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Verification error: ' + err.message);
+            } finally {
+                this.disabled = false;
+                this.innerHTML = originalText;
+            }
+        });
+    }
+
+    // Resend OTP Button (Inside Modal)
+    if (resendOtpModalBtn) {
+        resendOtpModalBtn.addEventListener('click', async function() {
+            this.disabled = true;
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="bi bi-hourglass-split"></i> Sending...';
+
+            try {
+                const res = await fetch(`${window.BASE_URL}/backend/api/admin/request_staff_verification.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: currentVerificationEmail })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    otpModalInput.value = '';
+                    otpModalInput.classList.remove('is-invalid');
+                    otpError.style.display = 'none';
+                    alert('New code sent!');
+                } else {
+                    alert(data.message);
+                }
+            } catch (err) {
+                alert('Failed to resend code.');
+            } finally {
+                // Cooldown
+                setTimeout(() => {
+                    this.disabled = false;
+                    this.innerHTML = originalText;
+                }, 10000); 
+            }
+        });
+    }
+
+    // Edit Staff Logic
     window.editStaff = function (id) {
         fetch(`../backend/api/admin/get_staff.php?id=${id}`)
             .then(res => res.json())
@@ -184,20 +462,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     updateCategory();
 
-                    // If it's a general position, set it
                     if (!isAuth) {
                         roleSelect.value = staff.position || staff.role;
                     } else {
                         roleSelect.value = staff.role.charAt(0).toUpperCase() + staff.role.slice(1);
                         document.getElementById('username').value = staff.admin_user || staff.driver_user || '';
                         document.getElementById('email').value = staff.admin_mail || staff.driver_mail || '';
-                        passwordInput.removeAttribute('required'); // Password optional on edit
+                        passwordInput.removeAttribute('required'); 
                     }
 
                     staffImgPreview.src = staff.photo_path && staff.photo_path !== 'default_user.png'
                         ? `${window.BASE_URL}/public/assets/staffs/${staff.photo_path}`
                         : `${window.BASE_URL}/public/assets/default_user.png`;
 
+                    // Reset verification UI for edit mode
+                    emailVerified = false; 
+                    verificationStatus.style.display = 'none';
+                    if (emailInput) emailInput.removeAttribute('readonly');
+                    
                     if (staffModal) staffModal.show();
                 } else {
                     alert(result.message);
@@ -332,6 +614,5 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     };
 
-    // Initial Load
     filterStaff();
 });
