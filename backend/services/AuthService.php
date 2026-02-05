@@ -3,17 +3,82 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 // require_once __DIR__ . '/../../vendor/autoload.php'; 
 require_once __DIR__ . '/../repositories/UserRepository.php';
+require_once __DIR__ . '/../repositories/UserRegistrationRepository.php';
+require_once __DIR__ . '/../repositories/PasswordResetRepository.php';
 
 class AuthService
 {
     private $userRepository;
     private $userRegistrationRepository;
+    private $passwordResetRepository;
 
-    public function __construct(UserRepository $userRepository, UserRegistrationRepository $userRegistrationRepository = null)
-    {
+    public function __construct(
+        UserRepository $userRepository,
+        ?UserRegistrationRepository $userRegistrationRepository = null,
+        ?PasswordResetRepository $passwordResetRepository = null
+    ) {
         $this->userRepository = $userRepository;
-        // Optional for now until fully wired, but essential for the new flow
         $this->userRegistrationRepository = $userRegistrationRepository;
+        $this->passwordResetRepository = $passwordResetRepository;
+    }
+
+    public function requestPasswordReset($email)
+    {
+        date_default_timezone_set('Asia/Manila');
+        $user = $this->userRepository->findByEmail($email);
+        if (!$user) {
+            // For security, don't reveal if email exists or not, but the user specifically asked to check.
+            // "ask for email first then check if its in the db"
+            return ['success' => false, 'message' => 'Email not found in our records.'];
+        }
+
+        $otp = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+5 minutes'));
+
+        // Clear previous resets for this email and global cleanup of expired ones
+        $this->passwordResetRepository->cleanupExpiredResets(date('Y-m-d H:i:s'));
+        $this->passwordResetRepository->deleteResetsForEmail($email);
+
+        if ($this->passwordResetRepository->createReset($email, $otp, $expiresAt)) {
+            require_once __DIR__ . '/MailService.php';
+            $mailService = new MailService();
+            if ($mailService->sendPasswordResetOTP($email, $otp)) {
+                return ['success' => true, 'message' => 'OTP sent to your email.'];
+            }
+        }
+
+        return ['success' => false, 'message' => 'Failed to send OTP. Please try again.'];
+    }
+
+    public function verifyResetOTP($email, $otp)
+    {
+        date_default_timezone_set('Asia/Manila');
+        $reset = $this->passwordResetRepository->findValidReset($email, $otp);
+        if ($reset) {
+            return ['success' => true, 'message' => 'OTP verified.'];
+        }
+        return ['success' => false, 'message' => 'Invalid or expired OTP.'];
+    }
+
+    public function resetPassword($email, $otp, $newPassword)
+    {
+        date_default_timezone_set('Asia/Manila');
+        $reset = $this->passwordResetRepository->findValidReset($email, $otp);
+        if (!$reset) {
+            return ['success' => false, 'message' => 'Verification failed or session expired.'];
+        }
+
+        $user = $this->userRepository->findByEmail($email);
+        if (!$user) return ['success' => false, 'message' => 'User not found.'];
+
+        $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+
+        if ($this->userRepository->updatePassword($user->id, $hashedPassword)) {
+            $this->passwordResetRepository->deleteResetsForEmail($email);
+            return ['success' => true, 'message' => 'Password reset successfully!'];
+        }
+
+        return ['success' => false, 'message' => 'Failed to reset password.'];
     }
 
     // Implement the register logic
