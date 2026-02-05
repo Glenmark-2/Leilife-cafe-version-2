@@ -124,4 +124,40 @@ class MailService
             return false;
         }
     }
+
+    public function sendStaffVerificationOTP($toEmail, $otpCode)
+    {
+        $mail = $this->getMailer();
+        if (!$mail) return false;
+
+        try {
+            $mail->addAddress($toEmail);
+
+            // Content
+            $mail->isHTML(true);
+            $mail->Subject = 'Verify Your Leilife Staff Account';
+
+            $body = "
+                <div style='font-family: Arial, sans-serif; color: #333;'>
+                    <h1>Staff Account Verification</h1>
+                    <p>Welcome to the Leilife team! Please use the verification code below to complete your account setup:</p>
+                    <div style='margin: 20px 0; padding: 20px; background-color: #f9f9f9; text-align: center; border: 1px dashed #d4a373;'>
+                        <h2 style='margin: 10px 0; font-size: 32px; letter-spacing: 5px; color: #d4a373;'>$otpCode</h2>
+                    </div>
+                    <p>This code will expire in 5 minutes.</p>
+                    <p>If you did not request this account, please contact your administrator.</p>
+                </div>
+            ";
+            $altBody = "Your staff verification code is: $otpCode";
+
+            $mail->Body    = $body;
+            $mail->AltBody = $altBody;
+
+            $mail->send();
+            return true;
+        } catch (Exception $e) {
+            error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
+            return false;
+        }
+    }
 }
