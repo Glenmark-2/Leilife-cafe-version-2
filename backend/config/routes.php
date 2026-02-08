@@ -12,4 +12,5 @@ return [
     'cart' => __DIR__ . '/../../components/cart.php',
     'verify' => __DIR__ . '/../../pages/verify.php',
     'user-receipt' => __DIR__ . '/../../pages/user_receipt.php',
+    'forgot_password' => __DIR__ . '/../../pages/forgot_password.php',
 ];

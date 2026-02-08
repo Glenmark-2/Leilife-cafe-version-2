@@ -16,6 +16,21 @@ if (in_array(strtolower($data['role']), ['admin', 'driver'])) {
         echo json_encode(['success' => false, 'message' => 'Username, Email and Password are required for Admin/Driver.']);
         exit;
     }
+
+    // Check if email has been verified
+    require_once __DIR__ . '/../../config/Database.php';
+    $database = new Database();
+    $db = $database->getConnection();
+
+    $checkQuery = "SELECT email FROM verified_staff_emails WHERE email = :email";
+    $stmt = $db->prepare($checkQuery);
+    $stmt->bindParam(':email', $data['email']);
+    $stmt->execute();
+
+    if ($stmt->rowCount() === 0) {
+        echo json_encode(['success' => false, 'message' => 'Email not verified. Please verify email first.']);
+        exit;
+    }
 }
 
 $photo_path = 'default_user.png';
@@ -26,18 +41,18 @@ if (isset($_FILES['staffPicture']) && $_FILES['staffPicture']['error'] === UPLOA
     $fileName = $_FILES['staffPicture']['name'];
     $fileNameCmps = explode(".", $fileName);
     $fileExtension = strtolower(end($fileNameCmps));
-    
+
     $newFileName = str_replace(' ', '_', strtolower($data['fullName'])) . '_' . time() . '.' . $fileExtension;
     $uploadFileDir = __DIR__ . '/../../../public/assets/staffs/';
     $dest_path = $uploadFileDir . $newFileName;
-    
+
     $allowedfileExtensions = array('jpg', 'gif', 'png', 'jpeg', 'webp');
     if (in_array($fileExtension, $allowedfileExtensions)) {
         if (move_uploaded_file($fileTmpPath, $dest_path)) {
             $photo_path = $newFileName;
         } else {
-             echo json_encode(['success' => false, 'message' => 'Failed to upload photo. Check permissions.']);
-             exit;
+            echo json_encode(['success' => false, 'message' => 'Failed to upload photo. Check permissions.']);
+            exit;
         }
     } else {
         echo json_encode(['success' => false, 'message' => 'Invalid file extension. Allowed: ' . implode(',', $allowedfileExtensions)]);
@@ -51,6 +66,14 @@ $staffService = new StaffService();
 $result = $staffService->addStaff($data);
 
 if ($result) {
+    // Clean up the verified email record
+    if (in_array(strtolower($data['role']), ['admin', 'driver'])) {
+        $deleteQuery = "DELETE FROM verified_staff_emails WHERE email = :email";
+        $deleteStmt = $db->prepare($deleteQuery);
+        $deleteStmt->bindParam(':email', $data['email']);
+        $deleteStmt->execute();
+    }
+
     echo json_encode(['success' => true, 'message' => 'Staff added successfully!', 'staff_id' => $result]);
 } else {
     echo json_encode(['success' => false, 'message' => 'Failed to save staff data to database.']);

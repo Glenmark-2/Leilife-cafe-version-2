@@ -12,6 +12,7 @@ class User
     public $profile_photo;
     public $created_at;
     public $updated_at;
+    public $has_password; // Added for UI logic (e.g. Google users)
 
     // Address fields
     public $street;

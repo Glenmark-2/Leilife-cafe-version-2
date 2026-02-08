@@ -137,7 +137,13 @@ $archivedStaff = $staffService->getArchivedStaffs();
                         <div class="mb-3">
                             <label for="email" class="form-label fw-bold">Email Address *</label>
                             <input type="email" class="form-control" id="email" name="email" placeholder="email@example.com">
+                            <small class="form-text text-muted">Email verification required for Admin/Driver accounts</small>
+                            <!-- Verification Status Badge -->
+                            <div id="verification-status" class="mt-2" style="display: none;">
+                                <span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> Verified</span>
+                            </div>
                         </div>
+
                         <div class="mb-3">
                             <label for="password" class="form-label fw-bold">Password *</label>
                             <input type="password" class="form-control" id="password" name="password" minlength="8" placeholder="At least 8 characters">
@@ -154,3 +160,5 @@ $archivedStaff = $staffService->getArchivedStaffs();
         </div>
     </div>
 </div>
+
+<?php include __DIR__ . '/../../components/otp_verification_modal.php'; ?>

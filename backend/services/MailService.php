@@ -6,30 +6,33 @@ use PHPMailer\PHPMailer\SMTP;
 
 require_once __DIR__ . '/../helpers/EnvLoader.php';
 
-class MailService {
-    
-    public function __construct() {
+class MailService
+{
+
+    public function __construct()
+    {
         // Ensure Env is loaded
         EnvLoader::load(__DIR__ . '/../../.env');
     }
 
-    private function getMailer() {
+    private function getMailer()
+    {
         $mail = new PHPMailer(true);
-        
+
         try {
             // Server settings
             // $mail->SMTPDebug = SMTP::DEBUG_SERVER;  // Enable verbose debug output
-            $mail->isSMTP();                                            
-            $mail->Host       = getenv('SMTP_HOST');                     
-            $mail->SMTPAuth   = true;                                   
-            $mail->Username   = getenv('SMTP_USER');                     
-            $mail->Password   = getenv('SMTP_PASS');                               
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;            
-            $mail->Port       = getenv('SMTP_PORT');                                    
+            $mail->isSMTP();
+            $mail->Host       = getenv('SMTP_HOST');
+            $mail->SMTPAuth   = true;
+            $mail->Username   = getenv('SMTP_USER');
+            $mail->Password   = getenv('SMTP_PASS');
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = getenv('SMTP_PORT');
 
             // Recipients
             $mail->setFrom(getenv('SMTP_FROM_EMAIL'), getenv('SMTP_FROM_NAME'));
-            
+
             return $mail;
         } catch (Exception $e) {
             error_log("Mailer Error: " . $e->getMessage());
@@ -37,20 +40,21 @@ class MailService {
         }
     }
 
-    public function sendVerification($toEmail, $token, $otpCode = null, $source = 'web') {
+    public function sendVerification($toEmail, $token, $otpCode = null, $source = 'web')
+    {
         $mail = $this->getMailer();
         if (!$mail) return false;
 
         try {
-            $mail->addAddress($toEmail);     
+            $mail->addAddress($toEmail);
 
             // Content
-            $mail->isHTML(true);                                  
+            $mail->isHTML(true);
             $mail->Subject = 'Verify your Leilife Account';
-            
+
             require_once __DIR__ . '/../helpers/UrlHelper.php';
             $verifyLink = UrlHelper::getFullUrl("public/index.php?page=verify&token=" . $token);
-            
+
             if ($source === 'mobile') {
                 $body = "
                     <h1>Welcome to Leilife!</h1>
@@ -73,6 +77,78 @@ class MailService {
                 ";
                 $altBody = "Please verify your email by visiting: $verifyLink";
             }
+
+            $mail->Body    = $body;
+            $mail->AltBody = $altBody;
+
+            $mail->send();
+            return true;
+        } catch (Exception $e) {
+            error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
+            return false;
+        }
+    }
+
+    public function sendPasswordResetOTP($toEmail, $otpCode)
+    {
+        $mail = $this->getMailer();
+        if (!$mail) return false;
+
+        try {
+            $mail->addAddress($toEmail);
+
+            // Content
+            $mail->isHTML(true);
+            $mail->Subject = 'Reset your Leilife Password';
+
+            $body = "
+                <div style='font-family: Arial, sans-serif; color: #333;'>
+                    <h1>Password Reset Request</h1>
+                    <p>We received a request to reset your password. Please use the verification code below to proceed:</p>
+                    <div style='margin: 20px 0; padding: 20px; background-color: #f9f9f9; text-align: center; border: 1px dashed #d4a373;'>
+                        <h2 style='margin: 10px 0; font-size: 32px; letter-spacing: 5px; color: #d4a373;'>$otpCode</h2>
+                    </div>
+                    <p>This code will expire in 5 minutes.</p>
+                    <p>If you did not request this, please ignore this email.</p>
+                </div>
+            ";
+            $altBody = "Your password reset code is: $otpCode";
+
+            $mail->Body    = $body;
+            $mail->AltBody = $altBody;
+
+            $mail->send();
+            return true;
+        } catch (Exception $e) {
+            error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
+            return false;
+        }
+    }
+
+    public function sendStaffVerificationOTP($toEmail, $otpCode)
+    {
+        $mail = $this->getMailer();
+        if (!$mail) return false;
+
+        try {
+            $mail->addAddress($toEmail);
+
+            // Content
+            $mail->isHTML(true);
+            $mail->Subject = 'Verify Your Leilife Staff Account';
+
+            $body = "
+                <div style='font-family: Arial, sans-serif; color: #333;'>
+                    <h1>Staff Account Verification</h1>
+                    <p>Welcome to the Leilife team! Please use the verification code below to complete your account setup:</p>
+                    <div style='margin: 20px 0; padding: 20px; background-color: #f9f9f9; text-align: center; border: 1px dashed #d4a373;'>
+                        <h2 style='margin: 10px 0; font-size: 32px; letter-spacing: 5px; color: #d4a373;'>$otpCode</h2>
+                    </div>
+                    <p>This code will expire in 5 minutes.</p>
+                    <p>If you did not request this account, please contact your administrator.</p>
+                </div>
+            ";
+            $altBody = "Your staff verification code is: $otpCode";
 
             $mail->Body    = $body;
             $mail->AltBody = $altBody;
