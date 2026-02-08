@@ -76,7 +76,7 @@ class UserRepository {
                        '' COLLATE utf8mb4_unicode_ci as last_name 
                 FROM admins a JOIN staffs s ON a.staff_id = s.staff_id
                 UNION ALL
-                SELECT d.staff_id as id, 
+                SELECT d.driver_id as id, 
                        d.email COLLATE utf8mb4_unicode_ci, 
                        d.username COLLATE utf8mb4_unicode_ci, 
                        d.password COLLATE utf8mb4_unicode_ci, 
