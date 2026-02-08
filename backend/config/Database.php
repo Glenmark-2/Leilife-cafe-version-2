@@ -38,4 +38,19 @@ class Database
 
         return $this->conn;
     }
+
+    public function getMySQLiConnection()
+    {
+        $mysqli = new mysqli($this->host, $this->username, $this->password, $this->db_name);
+
+        if ($mysqli->connect_error) {
+            error_log("MySQLi Connection Error: " . $mysqli->connect_error);
+            return null;
+        }
+
+        // THE BEST PART:
+        $mysqli->set_charset("utf8mb4");
+
+        return $mysqli;
+    }
 }

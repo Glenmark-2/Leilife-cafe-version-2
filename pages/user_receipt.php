@@ -8,18 +8,39 @@ require_once __DIR__ . '/../backend/repositories/SettingsRepository.php';
 // FPDF library path
 require_once __DIR__ . '/../backend/fpdf186/fpdf.php';
 
+// SessionManager::startSession();
+
+// if (!SessionManager::isLoggedIn()) {
+//     die("Access denied. Please login.");
+// }
+
+// $userId = SessionManager::get('user_id');
+// $orderId = $_GET['order_id'] ?? null;
+
+// if (!$orderId) {
+//     die("Order ID is required.");
+// }
+
 SessionManager::startSession();
 
-if (!SessionManager::isLoggedIn()) {
+// Check if there's a session OR a user_id from the mobile app URL
+$userId = SessionManager::get('user_id');
+if (!$userId && isset($_GET['user_id'])) {
+    $userId = $_GET['user_id'];
+}
+
+// If we still don't have a userId, then deny access
+if (!$userId) {
     die("Access denied. Please login.");
 }
 
-$userId = SessionManager::get('user_id');
 $orderId = $_GET['order_id'] ?? null;
 
 if (!$orderId) {
     die("Order ID is required.");
 }
+
+// Proceed with your existing code using $userId and $orderId...
 
 // 1. Fetch Data
 $db = (new Database())->getConnection();
@@ -123,9 +144,9 @@ foreach ($orderItems as $item) {
 $pdf->Ln(5);
 
 // ---- TOTALS ----
-$subtotal = number_format($order->total_amount, 2, '.', '');
+$subtotal = number_format($order->total_amount - $order->delivery_fee, 2, '.', '');
 $deliveryFee = number_format($order->delivery_fee ?? 0, 2, '.', '');
-$total = number_format(($order->total_amount + ($order->delivery_fee ?? 0)), 2, '.', '');
+$total = number_format($order->total_amount , 2, '.', '');
 
 $pdf->SetLineWidth(0.5);
 $pdf->Line(130, $pdf->GetY(), 200, $pdf->GetY());
