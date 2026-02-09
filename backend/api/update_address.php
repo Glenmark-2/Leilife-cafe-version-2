@@ -6,13 +6,15 @@ require_once __DIR__ . '/../models/User.php';
 
 SessionManager::startSession();
 
-if (!SessionManager::isLoggedIn()) {
+$data = json_decode(file_get_contents('php://input'), true);
+
+if (!SessionManager::isLoggedIn() && (!isset($data['user_id']) && !isset($_GET['user_id']))) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
 }
 
-$data = json_decode(file_get_contents('php://input'), true);
+$userId = $data['user_id'] ?? SessionManager::get('user_id');
 
 if (
     !isset($data['street']) || !isset($data['barangay']) || !isset($data['city']) ||
@@ -21,8 +23,6 @@ if (
     echo json_encode(['success' => false, 'message' => 'Missing required address fields']);
     exit;
 }
-
-$userId = SessionManager::get('user_id');
 $street = $data['street'];
 $barangay = $data['barangay'];
 $city = $data['city'];

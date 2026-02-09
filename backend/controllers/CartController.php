@@ -15,15 +15,16 @@ class CartController {
             session_start();
         }
 
-        if (!isset($_SESSION['user_id'])) {
-            $this->sendResponse(false, 'User not logged in', null, 401);
-            return;
-        }
-
-        $userId = $_SESSION['user_id'];
-        
         $input = json_decode(file_get_contents("php://input"), true);
         $action = isset($_GET['action']) ? $_GET['action'] : (isset($input['action']) ? $input['action'] : '');
+
+        // Support both session (web) and user_id parameter (mobile)
+        $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : (isset($input['user_id']) ? $input['user_id'] : (isset($_GET['user_id']) ? $_GET['user_id'] : null));
+
+        if (!$userId) {
+            $this->sendResponse(false, 'User not logged in or User ID missing', null, 401);
+            return;
+        }
 
         switch ($action) {
             case 'get_cart':
@@ -38,12 +39,24 @@ class CartController {
             case 'remove_item':
                 $this->removeItem($userId, $input);
                 break;
+            case 'clear_cart':
+                $this->clearCart($userId);
+                break;
             case 'merge_cart':
                 $this->mergeCart($userId, $input);
                 break;
             default:
-                $this->sendResponse(false, 'Invalid action', null, 400);
+                $this->sendResponse(false, 'Invalid action: ' . $action, null, 400);
                 break;
+        }
+    }
+
+    private function clearCart($userId) {
+        $success = $this->cartService->clearCart($userId);
+        if ($success) {
+            $this->getCart($userId);
+        } else {
+            $this->sendResponse(false, 'Failed to clear cart');
         }
     }
 
