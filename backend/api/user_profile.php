@@ -34,8 +34,8 @@ $authController = new AuthController($authService);
 
 // Example: Handling a request to view a user profile by ID
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id'])) {
-    // You would define a 'profile' method in AuthController
-    $authController->profile($_GET['id']);
+    $role = $_GET['role'] ?? null;
+    $authController->profile($_GET['id'], $role);
 } else {
     // Or, if you intended to use 'findById' as a temporary endpoint name:
     // This assumes you defined a method called findUserById in your AuthController

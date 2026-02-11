@@ -35,16 +35,16 @@ try {
     $stmt->execute(['driver_id' => $driverId]);
     $deliveredToday = (int)$stmt->fetchColumn();
 
-    // Current Active Delivery (if any)
+    // Current Active Deliveries (All orders out for delivery assigned to this driver)
     $stmt = $db->prepare("SELECT o.*, u.first_name, u.last_name, u.phone_number as customer_phone,
                                  ua.latitude as customer_lat, ua.longitude as customer_lng
                           FROM orders o 
                           LEFT JOIN users u ON o.user_id = u.id 
                           LEFT JOIN user_addresses ua ON o.user_id = ua.user_id
                           WHERE o.assigned_driver_id = :driver_id AND o.status = 'out_for_delivery'
-                          LIMIT 1");
+                          ORDER BY o.updated_at ASC");
     $stmt->execute(['driver_id' => $driverId]);
-    $activeDelivery = $stmt->fetch(PDO::FETCH_ASSOC);
+    $activeDeliveries = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     echo json_encode([
         'success' => true,
@@ -53,7 +53,8 @@ try {
             'status' => 'Active'
         ],
         'recent_activities' => $recentActivities,
-        'active_delivery' => $activeDelivery
+        'active_deliveries' => $activeDeliveries,
+        'active_delivery' => !empty($activeDeliveries) ? $activeDeliveries[0] : null
     ]);
 
 } catch (Exception $e) {

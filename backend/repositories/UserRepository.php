@@ -11,14 +11,76 @@ class UserRepository {
     }
 
     // Implement this method to find a user by ID
-    public function findById($id) {
-        $query = "SELECT u.*, 
-                         ua.street, ua.barangay, ua.city, ua.province, ua.region, ua.latitude, ua.longitude 
-                  FROM users u
-                  LEFT JOIN user_addresses ua ON u.id = ua.user_id
-                  WHERE u.id = :id LIMIT 1";
+    public function findById($id, $role = null) {
+        $query = "
+            SELECT * FROM (
+                /* 1. Customer Segment */
+                SELECT u.id, 
+                       u.email COLLATE utf8mb4_unicode_ci as email, 
+                       u.password COLLATE utf8mb4_unicode_ci as password, 
+                       u.phone_number COLLATE utf8mb4_unicode_ci as phone_number, 
+                       u.role COLLATE utf8mb4_unicode_ci as role, 
+                       u.first_name COLLATE utf8mb4_unicode_ci as first_name, 
+                       u.last_name COLLATE utf8mb4_unicode_ci as last_name, 
+                       u.profile_photo COLLATE utf8mb4_unicode_ci as profile_photo, 
+                       u.created_at, u.updated_at,
+                       ua.street COLLATE utf8mb4_unicode_ci as street, 
+                       ua.barangay COLLATE utf8mb4_unicode_ci as barangay, 
+                       ua.city COLLATE utf8mb4_unicode_ci as city, 
+                       ua.province COLLATE utf8mb4_unicode_ci as province, 
+                       ua.region COLLATE utf8mb4_unicode_ci as region, 
+                       ua.latitude, ua.longitude
+                FROM users u
+                LEFT JOIN user_addresses ua ON u.id = ua.user_id
+                
+                UNION ALL
+                
+                /* 2. Admin Segment (from staffs table) */
+                SELECT a.staff_id as id, 
+                       a.email COLLATE utf8mb4_unicode_ci, 
+                       a.password COLLATE utf8mb4_unicode_ci, 
+                       CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci as phone_number, 
+                       'admin' COLLATE utf8mb4_unicode_ci as role, 
+                       s.full_name COLLATE utf8mb4_unicode_ci as first_name, 
+                       '' COLLATE utf8mb4_unicode_ci as last_name, 
+                       s.photo_path COLLATE utf8mb4_unicode_ci as profile_photo, 
+                       s.created_at, CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci as updated_at,
+                       CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci, CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci, CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci, 
+                       CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci, CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci, CAST(NULL AS CHAR), CAST(NULL AS CHAR)
+                FROM admins a 
+                JOIN staffs s ON a.staff_id = s.staff_id
+                
+                UNION ALL
+                
+                /* 3. Driver Segment (from staffs table) */
+                SELECT d.driver_id as id, 
+                       d.email COLLATE utf8mb4_unicode_ci, 
+                       d.password COLLATE utf8mb4_unicode_ci, 
+                       CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci as phone_number, 
+                       'driver' COLLATE utf8mb4_unicode_ci as role, 
+                       s.full_name COLLATE utf8mb4_unicode_ci as first_name, 
+                       '' COLLATE utf8mb4_unicode_ci as last_name, 
+                       s.photo_path COLLATE utf8mb4_unicode_ci as profile_photo, 
+                       s.created_at, CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci as updated_at,
+                       CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci, CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci, CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci, 
+                       CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci, CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci, CAST(NULL AS CHAR), CAST(NULL AS CHAR)
+                FROM drivers d 
+                JOIN staffs s ON d.staff_id = s.staff_id
+            ) AS all_users 
+            WHERE id = :id";
+            
+        if ($role) {
+            $query .= " AND role = :role";
+        }
+        
+        $query .= " LIMIT 1";
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":id", $id);
+        if ($role) {
+            $stmt->bindParam(":role", $role);
+        }
+        
         $stmt->execute();
 
         if ($stmt->rowCount() > 0) {

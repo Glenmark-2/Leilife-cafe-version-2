@@ -322,9 +322,9 @@ class AuthService
         return $stmt->execute();
     }
 
-    public function getUserProfile($userId)
+    public function getUserProfile($userId, $role = null)
     {
-        $user = $this->userRepository->findById($userId);
+        $user = $this->userRepository->findById($userId, $role);
         if ($user) {
             $user->has_password = !empty($user->password);
             $user->password = null; // Don't return the password

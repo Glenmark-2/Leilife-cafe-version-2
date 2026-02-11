@@ -139,10 +139,11 @@ class OrderService
                 // Construct Redirect URLs
                 // Assuming running on localhost/Leilife_2nd
                 // Construct Redirect URLs dynamically
-                $successUrl = UrlHelper::getFullUrl("/backend/api/paymongo_callback.php?status=success&order_id=" . $orderId);
-                $failedUrl = UrlHelper::getFullUrl("/backend/api/paymongo_callback.php?status=failed&order_id=" . $orderId);
+            $platform = $data['platform'] ?? 'web';
+            $successUrl = UrlHelper::getFullUrl("/backend/api/paymongo_callback.php?status=success&order_id=" . $orderId . "&platform=" . $platform);
+            $failedUrl = UrlHelper::getFullUrl("/backend/api/paymongo_callback.php?status=failed&order_id=" . $orderId . "&platform=" . $platform);
 
-                $sourceResult = $payMongo->createSource($amountInCentavos, $successUrl, $failedUrl, 'PHP', $order->payment_method, [
+            $sourceResult = $payMongo->createSource($amountInCentavos, $successUrl, $failedUrl, 'PHP', $order->payment_method, [
                     'order_id' => $orderId
                 ]);
 
@@ -344,7 +345,28 @@ class OrderService
                 return ['success' => true, 'message' => 'Order was already fully refunded. Status updated.'];
             }
 
-            $amountInCentavos = (int) round($remainingBalance * 100);
+            // --- FIX FOR REFUND MATCHING ISSUE ---
+            // PayMongo sometimes has slight centavo differences due to rounding, or 
+            // there might be a mismatch in transaction records.
+            // We verify the actual payment amount from PayMongo to be safe.
+            $paymentData = $payMongo->retrievePayment($paymentId);
+            if ($paymentData['success']) {
+                $paymongoAmount = (int) $paymentData['data']['attributes']['amount']; // In centavos
+                $paymongoRefunded = (int) ($paymentData['data']['attributes']['refund_details']['total_refunded'] ?? 0);
+                $paymongoRemaining = $paymongoAmount - $paymongoRefunded;
+
+                $internalAmountInCentavos = (int) round($remainingBalance * 100);
+
+                // Cap the refund amount to PayMongo's remaining balance
+                $amountInCentavos = min($internalAmountInCentavos, $paymongoRemaining);
+                
+                if ($amountInCentavos <= 0) {
+                     return ['success' => false, 'message' => 'No refundable balance remaining on PayMongo for payment ID: ' . $paymentId];
+                }
+            } else {
+                // Fallback to internal math if API check fails
+                $amountInCentavos = (int) round($remainingBalance * 100);
+            }
 
             $refundResult = $payMongo->createRefund($paymentId, $amountInCentavos, $reason);
 
@@ -354,16 +376,17 @@ class OrderService
                 $this->orderRepository->updateItemsStatusByOrderId($orderId, 'cancelled');
 
                 // Update Log
-                $this->transactionRepository->create([
-                    'order_id' => $orderId,
-                    'transaction_type' => 'refund',
-                    'transaction_reference' => $refundResult['data']['id'],
-                    'amount' => $remainingBalance,
-                    'status' => 'success',
-                    'description' => 'Remaining balance fully refunded via PayMongo. Reason: ' . $reason,
-                    'payment_method' => $order->payment_method,
-                    'raw_response' => $refundResult
-                ]);
+            $actualRefundAmount = $amountInCentavos / 100;
+            $this->transactionRepository->create([
+                'order_id' => $orderId,
+                'transaction_type' => 'refund',
+                'transaction_reference' => $refundResult['data']['id'],
+                'amount' => $actualRefundAmount,
+                'status' => 'success',
+                'description' => 'Remaining balance fully refunded via PayMongo. Reason: ' . $reason,
+                'payment_method' => $order->payment_method,
+                'raw_response' => $refundResult
+            ]);
 
                 return ['success' => true, 'message' => 'Refund successful.'];
             } else {

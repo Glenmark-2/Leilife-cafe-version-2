@@ -23,6 +23,7 @@ $payMongo = new PayMongoService();
 // Get Parameters
 $orderId = $_GET['order_id'] ?? null;
 $status = $_GET['status'] ?? null;
+$platform = $_GET['platform'] ?? 'web';
 
 if (!$orderId) {
     die("Invalid Callback: Missing Order ID.");
@@ -37,6 +38,12 @@ if (!$order) {
 // Ensure we are redirecting to frontend dynamically
 $frontendUrl = UrlHelper::getFullUrl("/public/index.php?page=order_tracking&order_id=" . $orderId);
 $cartUrl = UrlHelper::getFullUrl("/public/index.php?page=checkout&error=payment_failed");
+
+// Mobile Redirects (Deep Linking)
+if ($platform === 'mobile') {
+    $frontendUrl = "leilife://orders?status=success&order_id=" . $orderId;
+    $cartUrl = "leilife://checkout?status=failed&error=payment_failed";
+}
 
 if ($status === 'failed') {
     // Payment failed or cancelled by user

@@ -43,9 +43,9 @@ class AuthController
     }
 
     // Handle profile request
-    public function profile($userId)
+    public function profile($userId, $role = null)
     {
-        $result = $this->authService->getUserProfile($userId);
+        $result = $this->authService->getUserProfile($userId, $role);
         echo json_encode($result);
     }
 
