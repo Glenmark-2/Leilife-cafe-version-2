@@ -11,6 +11,7 @@ require_once __DIR__ . '/../repositories/CartRepository.php';
 require_once __DIR__ . '/../repositories/TransactionRepository.php';
 require_once __DIR__ . '/../repositories/SettingsRepository.php';
 require_once __DIR__ . '/../services/OrderService.php';
+require_once __DIR__ . '/../helpers/NotificationHelper.php';
 
 $database = new Database();
 $db = $database->getConnection();
@@ -43,6 +44,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if ($result['success']) {
         http_response_code(201);
+        
+        // --- NEW: Notify Admins via Push ---
+        try {
+            $adminTokens = NotificationHelper::getTokensByRole('admin', $db);
+            if (!empty($adminTokens)) {
+                $orderNum = $result['order_number'] ?? 'New';
+                NotificationHelper::sendPushToMany(
+                    $adminTokens,
+                    "New Order 🔔",
+                    "A new order (#$orderNum) has been placed.",
+                    ["orderId" => $result['order_id'] ?? null, "type" => "new_order"]
+                );
+            }
+        } catch (Exception $e) {
+            error_log("Failed to send admin notification: " . $e->getMessage());
+        }
     } else {
         http_response_code(400);
     }

@@ -23,6 +23,7 @@ class UserRepository {
                        u.first_name COLLATE utf8mb4_unicode_ci as first_name, 
                        u.last_name COLLATE utf8mb4_unicode_ci as last_name, 
                        u.profile_photo COLLATE utf8mb4_unicode_ci as profile_photo, 
+                       u.push_token COLLATE utf8mb4_unicode_ci as push_token,
                        u.created_at, u.updated_at,
                        ua.street COLLATE utf8mb4_unicode_ci as street, 
                        ua.barangay COLLATE utf8mb4_unicode_ci as barangay, 
@@ -44,6 +45,7 @@ class UserRepository {
                        s.full_name COLLATE utf8mb4_unicode_ci as first_name, 
                        '' COLLATE utf8mb4_unicode_ci as last_name, 
                        s.photo_path COLLATE utf8mb4_unicode_ci as profile_photo, 
+                       a.push_token COLLATE utf8mb4_unicode_ci as push_token,
                        s.created_at, CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci as updated_at,
                        CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci, CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci, CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci, 
                        CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci, CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci, CAST(NULL AS CHAR), CAST(NULL AS CHAR)
@@ -61,6 +63,7 @@ class UserRepository {
                        s.full_name COLLATE utf8mb4_unicode_ci as first_name, 
                        '' COLLATE utf8mb4_unicode_ci as last_name, 
                        s.photo_path COLLATE utf8mb4_unicode_ci as profile_photo, 
+                       d.push_token COLLATE utf8mb4_unicode_ci as push_token,
                        s.created_at, CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci as updated_at,
                        CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci, CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci, CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci, 
                        CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci, CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci, CAST(NULL AS CHAR), CAST(NULL AS CHAR)
@@ -119,14 +122,17 @@ class UserRepository {
         // We use a UNION to search across all potential user tables.
         // For admins/drivers, we join with staffs to get names.
         $query = "
-            SELECT id, email, password, role, first_name, last_name FROM (
+            SELECT id, email, password, role, first_name, last_name, profile_photo, push_token, phone_number FROM (
                 SELECT id, 
                        email COLLATE utf8mb4_unicode_ci as email, 
                        CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci as username, 
                        password COLLATE utf8mb4_unicode_ci as password, 
                        role COLLATE utf8mb4_unicode_ci as role, 
                        first_name COLLATE utf8mb4_unicode_ci as first_name, 
-                       last_name COLLATE utf8mb4_unicode_ci as last_name 
+                       last_name COLLATE utf8mb4_unicode_ci as last_name,
+                       profile_photo COLLATE utf8mb4_unicode_ci as profile_photo,
+                       push_token COLLATE utf8mb4_unicode_ci as push_token,
+                       phone_number COLLATE utf8mb4_unicode_ci as phone_number
                 FROM users
                 UNION ALL
                 SELECT a.staff_id as id, 
@@ -135,7 +141,10 @@ class UserRepository {
                        a.password COLLATE utf8mb4_unicode_ci, 
                        'admin' COLLATE utf8mb4_unicode_ci as role, 
                        s.full_name COLLATE utf8mb4_unicode_ci as first_name, 
-                       '' COLLATE utf8mb4_unicode_ci as last_name 
+                       '' COLLATE utf8mb4_unicode_ci as last_name,
+                       s.photo_path COLLATE utf8mb4_unicode_ci as profile_photo,
+                       a.push_token COLLATE utf8mb4_unicode_ci as push_token,
+                       CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci as phone_number
                 FROM admins a JOIN staffs s ON a.staff_id = s.staff_id
                 UNION ALL
                 SELECT d.driver_id as id, 
@@ -144,7 +153,10 @@ class UserRepository {
                        d.password COLLATE utf8mb4_unicode_ci, 
                        'driver' COLLATE utf8mb4_unicode_ci as role, 
                        s.full_name COLLATE utf8mb4_unicode_ci as first_name, 
-                       '' COLLATE utf8mb4_unicode_ci as last_name 
+                       '' COLLATE utf8mb4_unicode_ci as last_name,
+                       s.photo_path COLLATE utf8mb4_unicode_ci as profile_photo,
+                       d.push_token COLLATE utf8mb4_unicode_ci as push_token,
+                       CAST(NULL AS CHAR) COLLATE utf8mb4_unicode_ci as phone_number
                 FROM drivers d JOIN staffs s ON d.staff_id = s.staff_id
             ) AS all_users 
             WHERE email = :identifier OR username = :identifier 

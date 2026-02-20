@@ -20,12 +20,27 @@ $data = json_decode(file_get_contents("php://input"));
 
 if(!empty($data->user_id) && !empty($data->push_token)) {
     try {
-        // We use $db because that's our connection variable above
-        $query = "UPDATE users SET push_token = ? WHERE id = ?";
+        $role = $data->role ?? 'customer';
+        $table = 'users';
+        $idColumn = 'id';
+
+        if ($role === 'admin') {
+            $table = 'admins';
+            $idColumn = 'staff_id';
+            // Ensure column exists (one-time check/add)
+            try { $db->exec("ALTER TABLE admins ADD COLUMN push_token TEXT NULL"); } catch (Exception $e) {}
+        } elseif ($role === 'driver') {
+            $table = 'drivers';
+            $idColumn = 'driver_id';
+            // Ensure column exists
+            try { $db->exec("ALTER TABLE drivers ADD COLUMN push_token TEXT NULL"); } catch (Exception $e) {}
+        }
+
+        $query = "UPDATE $table SET push_token = ? WHERE $idColumn = ?";
         $stmt = $db->prepare($query);
         
         if($stmt->execute([$data->push_token, $data->user_id])) {
-            echo json_encode(["status" => "success", "success" => true, "message" => "Token saved."]);
+            echo json_encode(["status" => "success", "success" => true, "message" => "Token saved for $role."]);
         } else {
             echo json_encode(["status" => "error", "success" => false, "message" => "Update failed."]);
         }

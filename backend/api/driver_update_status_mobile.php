@@ -6,27 +6,7 @@ header("Access-Control-Allow-Methods: POST");
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../services/RealtimeService.php';
 
-// --- NEW FIX: Helper function to send Expo Push Notification ---
-function sendExpoPushNotification($token, $title, $body, $data = []) {
-    if (empty($token) || strpos($token, 'ExponentPushToken') === false) return false;
-
-    $payload = [
-        "to" => $token,
-        "title" => $title,
-        "body" => $body,
-        "data" => $data,
-        "sound" => "default"
-    ];
-
-    $ch = curl_init('https://exp.host/--/api/v2/push/send');
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $response = curl_exec($ch);
-    curl_close($ch);
-    return $response;
-}
+require_once __DIR__ . '/../helpers/NotificationHelper.php';
 
 $data = json_decode(file_get_contents("php://input"), true);
 if (!$data) $data = $_POST;
@@ -68,7 +48,7 @@ try {
         $token = $stmt->fetchColumn();
 
         if ($token) {
-            sendExpoPushNotification(
+            NotificationHelper::sendPush(
                 $token,
                 "Order Update 🛵",
                 "Your order #{$order['order_number']} is now out for delivery!",
@@ -99,7 +79,7 @@ try {
 
             // --- PUSH NOTIFICATION: Notify Delivered ---
             if (!empty($orderInfo['push_token'])) {
-                sendExpoPushNotification(
+                NotificationHelper::sendPush(
                     $orderInfo['push_token'],
                     "Order Delivered ✅",
                     "Enjoy your meal! Your order #{$orderInfo['order_number']} has been delivered.",

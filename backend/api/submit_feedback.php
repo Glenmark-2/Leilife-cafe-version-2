@@ -52,11 +52,28 @@ if (!empty($data->order_id) && !empty($data->rating)) {
         if ($result) {
             // REAL-TIME: Notify Admin Analytics
             require_once __DIR__ . '/../services/RealtimeService.php';
+            require_once __DIR__ . '/../helpers/NotificationHelper.php';
+            
             RealtimeService::trigger('admin-analytics', 'feedback-submitted', [
                 'order_id' => $data->order_id,
                 'rating' => $data->rating,
                 'sentiment' => $sentiment
             ]);
+
+            // PUSH NOTIFICATION: Notify Admins
+            try {
+                $adminTokens = NotificationHelper::getTokensByRole('admin', $db);
+                if (!empty($adminTokens)) {
+                    NotificationHelper::sendPushToMany(
+                        $adminTokens,
+                        "New Customer Review ⭐",
+                        "A new {$data->rating}-star review has been submitted for Order #{$order->order_number}.",
+                        ["orderId" => $data->order_id, "type" => "feedback"]
+                    );
+                }
+            } catch (Exception $e) {
+                error_log("Feedback Admin Notif Error: " . $e->getMessage());
+            }
 
             echo json_encode(["success" => true, "message" => "Feedback submitted successfully"]);
         } else {

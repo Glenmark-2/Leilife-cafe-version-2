@@ -32,11 +32,36 @@ class Database
             $this->conn = new PDO("mysql:host=" . $this->host . ";dbname=" . $this->db_name, $this->username, $this->password);
             $this->conn->exec("set names utf8mb4");
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            
+            // --- NEW: Sync Schema for Push Notifications ---
+            $this->syncPushTokenSchema();
         } catch (PDOException $exception) {
             error_log("Database Connection Error: " . $exception->getMessage());
         }
 
         return $this->conn;
+    }
+
+    private function syncPushTokenSchema()
+    {
+        $tables = [
+            'users' => 'id',
+            'admins' => 'staff_id',
+            'drivers' => 'driver_id'
+        ];
+
+        foreach ($tables as $table => $idCol) {
+            try {
+                // Check if column exists
+                $stmt = $this->conn->query("SHOW COLUMNS FROM `$table` LIKE 'push_token'");
+                if ($stmt->rowCount() == 0) {
+                    $this->conn->exec("ALTER TABLE `$table` ADD COLUMN push_token TEXT NULL");
+                    error_log("Added push_token column to $table");
+                }
+            } catch (Exception $e) {
+                error_log("Failed to sync schema for $table: " . $e->getMessage());
+            }
+        }
     }
 
     public function getMySQLiConnection()

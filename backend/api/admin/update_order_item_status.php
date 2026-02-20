@@ -17,7 +17,7 @@ $db = $database->getConnection();
 $orderRepo = new OrderRepository($db);
 $cartRepo = new CartRepository($db);
 $transactionRepo = new TransactionRepository($db);
-$productRepo = new ProductRepository(); 
+$productRepo = new ProductRepository($db); 
 
 $orderService = new OrderService($orderRepo, $productRepo, $cartRepo, $transactionRepo);
 

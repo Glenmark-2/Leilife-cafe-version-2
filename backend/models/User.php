@@ -10,6 +10,7 @@ class User
     public $password;
     public $role;
     public $profile_photo;
+    public $push_token;
     public $created_at;
     public $updated_at;
     public $has_password; // Added for UI logic (e.g. Google users)
@@ -33,6 +34,7 @@ class User
         $this->password = $data['password'] ?? null;
         $this->role = $data['role'] ?? 'customer'; // Default role
         $this->profile_photo = $data['profile_photo'] ?? null;
+        $this->push_token = $data['push_token'] ?? null;
         $this->created_at = $data['created_at'] ?? null;
         $this->updated_at = $data['updated_at'] ?? null;
 

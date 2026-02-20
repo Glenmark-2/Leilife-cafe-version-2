@@ -2,6 +2,8 @@
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET");
+ini_set('display_errors', 0);
+error_reporting(E_ERROR | E_PARSE);
 
 require_once __DIR__ . '/../../config/Database.php';
 require_once __DIR__ . '/../../repositories/FeedbackRepository.php';
