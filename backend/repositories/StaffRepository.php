@@ -75,6 +75,17 @@ class StaffRepository
         return $stmt->execute();
     }
 
+    public function createDriver($data)
+    {
+        $query = "INSERT INTO drivers (staff_id, username, email, password) VALUES (:staff_id, :username, :email, :password)";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':staff_id', $data['staff_id']);
+        $stmt->bindParam(':username', $data['username']);
+        $stmt->bindParam(':email', $data['email']);
+        $stmt->bindParam(':password', $data['password']);
+        return $stmt->execute();
+    }
+
     public function getStaffById($id)
     {
         $query = "SELECT s.*, a.username as admin_user, a.email as admin_mail, d.username as driver_user, d.email as driver_mail 
