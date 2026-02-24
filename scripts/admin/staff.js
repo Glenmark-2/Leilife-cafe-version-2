@@ -58,6 +58,18 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('staff_id').value = '';
             staffImgPreview.src = `${window.BASE_URL}/public/assets/default_user.png`;
             passwordInput.setAttribute('required', 'required');
+            roleSelect.disabled = false;
+            
+            // Show all fields for Add mode
+            document.getElementById('account-type-section').style.display = 'block';
+            document.getElementById('photo-section').style.display = 'block';
+            document.getElementById('common-fields-divider').style.display = 'block';
+            
+            // Reset Auth fields for Add mode
+            if (usernameInput) usernameInput.readOnly = false;
+            if (emailInput) emailInput.readOnly = false;
+            document.getElementById('password-section').style.display = 'block';
+
             updateCategory();
             
             // Reset verification state
@@ -207,6 +219,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (usernameInput) {
         usernameInput.addEventListener('blur', async function() {
+            if (form.dataset.mode !== 'add') return; // Only validate on Add
             const val = this.value.trim();
             if (!val) return;
             
@@ -321,6 +334,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Normal Save/Update Logic
             const formData = new FormData(this);
+            if (!formData.has('role')) {
+                formData.append('role', roleSelect.value);
+            }
             const apiEndpoint = mode === 'edit' ? '../backend/api/admin/update_staff.php' : '../backend/api/admin/add_staff.php';
 
             saveBtn.disabled = true;
@@ -458,18 +474,49 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     const isAuth = ['admin', 'driver'].includes(staff.role);
                     const categoryVal = isAuth ? 'admin_driver' : 'staff';
-                    document.querySelector(`input[name="accountCategory"][value="${categoryVal}"]`).checked = true;
+                    const categoryRadio = document.querySelector(`input[name="accountCategory"][value="${categoryVal}"]`);
+                    if (categoryRadio) categoryRadio.checked = true;
 
                     updateCategory();
 
+                    // Hide restricted fields for Edit mode
+                    document.getElementById('account-type-section').style.display = 'none';
+                    authFields.style.display = 'none'; 
+
+                    // Ensure photo section and divider are visible for editing
+                    document.getElementById('photo-section').style.display = 'block';
+                    document.getElementById('common-fields-divider').style.display = 'block';
+
+
                     if (!isAuth) {
                         roleSelect.value = staff.position || staff.role;
+                        roleSelect.disabled = false;
+                        authFields.style.display = 'none';
                     } else {
                         roleSelect.value = staff.role.charAt(0).toUpperCase() + staff.role.slice(1);
-                        document.getElementById('username').value = staff.admin_user || staff.driver_user || '';
-                        document.getElementById('email').value = staff.admin_mail || staff.driver_mail || '';
+                        roleSelect.disabled = true; 
+                        
+                        // Show Auth fields but make them read-only
+                        authFields.style.display = 'block';
+                        if (usernameInput) {
+                            usernameInput.value = staff.admin_user || staff.driver_user || '';
+                            usernameInput.readOnly = true;
+                        }
+                        if (emailInput) {
+                            emailInput.value = staff.admin_mail || staff.driver_mail || '';
+                            emailInput.readOnly = true;
+                        }
+                        
+                        // Hide password in edit mode to keep it simple
+                        document.getElementById('password-section').style.display = 'none';
+
                         passwordInput.removeAttribute('required'); 
                     }
+
+                    // Re-enable for FormData capture (special case for hidden/readonly inputs)
+                    // If they are readonly, they are still captured by FormData. 
+                    // If they are disabled, they are NOT. 
+                    // Username/Email should NOT be disabled, just readonly.
 
                     staffImgPreview.src = staff.photo_path && staff.photo_path !== 'default_user.png'
                         ? `${window.BASE_URL}/public/assets/staffs/${staff.photo_path}`

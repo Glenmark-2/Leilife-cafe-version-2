@@ -25,18 +25,18 @@ if (isset($_FILES['staffPicture']) && $_FILES['staffPicture']['error'] === UPLOA
     $fileType = $_FILES['staffPicture']['type'];
     $fileNameCmps = explode(".", $fileName);
     $fileExtension = strtolower(end($fileNameCmps));
-    
+
     $newFileName = str_replace(' ', '_', strtolower($data['fullName'])) . '_' . time() . '.' . $fileExtension;
     $uploadFileDir = __DIR__ . '/../../../public/assets/staffs/';
     $dest_path = $uploadFileDir . $newFileName;
-    
+
     $allowedfileExtensions = array('jpg', 'gif', 'png', 'jpeg', 'webp');
     if (in_array($fileExtension, $allowedfileExtensions)) {
         if (move_uploaded_file($fileTmpPath, $dest_path)) {
             $data['photo_path'] = $newFileName;
         } else {
-             echo json_encode(['success' => false, 'message' => 'Failed to upload photo.']);
-             exit;
+            echo json_encode(['success' => false, 'message' => 'Failed to upload photo.']);
+            exit;
         }
     }
 }
