@@ -10,7 +10,9 @@ require_once __DIR__ . '/../repositories/ProductRepository.php';
 require_once __DIR__ . '/../repositories/CartRepository.php';
 require_once __DIR__ . '/../repositories/TransactionRepository.php';
 require_once __DIR__ . '/../repositories/SettingsRepository.php';
+require_once __DIR__ . '/../repositories/UserRepository.php';
 require_once __DIR__ . '/../services/OrderService.php';
+require_once __DIR__ . '/../services/DeliveryQuoteService.php';
 require_once __DIR__ . '/../helpers/NotificationHelper.php';
 
 $database = new Database();
@@ -21,6 +23,7 @@ $productRepo = new ProductRepository($db);
 $cartRepo = new CartRepository($db);
 $transactionRepo = new TransactionRepository($db);
 $settingsRepo = new SettingsRepository($db);
+$userRepo = new UserRepository($db);
 
 $orderService = new OrderService($orderRepo, $productRepo, $cartRepo, $transactionRepo);
 
@@ -37,6 +40,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$settings['is_store_open']) {
         echo json_encode(['success' => false, 'message' => 'Store is currently closed. Cannot place order.']);
         exit;
+    }
+
+    // Mobile-only authoritative delivery fee and ETA computation.
+    $deliveryMethod = $data['delivery_method'] ?? 'delivery';
+    if ($deliveryMethod !== 'pickup') {
+        $storeCoords = DeliveryQuoteService::getStoreCoordsFromSettings($settings);
+        if (!$storeCoords) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Store coordinates are not configured. Please set them in Admin > Settings > Delivery.'
+            ]);
+            exit;
+        }
+
+        $customerLat = DeliveryQuoteService::parseCoord($data['latitude'] ?? null);
+        $customerLng = DeliveryQuoteService::parseCoord($data['longitude'] ?? null);
+        if ($customerLat === null || $customerLng === null) {
+            $user = $userRepo->findById($userId);
+            $customerLat = DeliveryQuoteService::parseCoord($user->latitude ?? null);
+            $customerLng = DeliveryQuoteService::parseCoord($user->longitude ?? null);
+        }
+        if ($customerLat === null || $customerLng === null) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Customer address coordinates are missing. Please update your delivery address.'
+            ]);
+            exit;
+        }
+
+        $distanceKm = DeliveryQuoteService::haversineKm(
+            $storeCoords['latitude'],
+            $storeCoords['longitude'],
+            $customerLat,
+            $customerLng
+        );
+        $deliveryFee = DeliveryQuoteService::calculateFee($distanceKm);
+        $eta = DeliveryQuoteService::estimateWindow($distanceKm);
+
+        // Override client fee for consistency and security.
+        $data['delivery_fee'] = $deliveryFee;
+        $data['estimated_eta_min'] = $eta['min'];
+        $data['estimated_eta_max'] = $eta['max'];
+        $data['delivery_distance_km'] = round($distanceKm, 2);
+    } else {
+        $data['delivery_fee'] = 0;
     }
 
     $data['platform'] = 'mobile';

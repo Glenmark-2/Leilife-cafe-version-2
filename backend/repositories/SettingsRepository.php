@@ -5,6 +5,7 @@ class SettingsRepository
 {
     private $conn;
     private $table = "site_settings";
+    private $existingColumns = null;
 
     public function __construct($db = null)
     {
@@ -42,6 +43,8 @@ class SettingsRepository
                 opening_hours JSON,
                 delivery_fee DECIMAL(10, 2) DEFAULT 50.00,
                 free_delivery_threshold DECIMAL(10, 2) DEFAULT 1000.00,
+                store_latitude DECIMAL(10, 8) NULL,
+                store_longitude DECIMAL(11, 8) NULL,
                 enable_cod BOOLEAN DEFAULT TRUE,
                 enable_gcash BOOLEAN DEFAULT TRUE,
                 paymongo_public_key VARCHAR(255),
@@ -75,6 +78,30 @@ class SettingsRepository
         }
     }
 
+    private function getExistingColumns()
+    {
+        if ($this->existingColumns !== null) {
+            return $this->existingColumns;
+        }
+
+        $this->existingColumns = [];
+        try {
+            $query = "SHOW COLUMNS FROM " . $this->table;
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute();
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($rows as $row) {
+                if (!empty($row['Field'])) {
+                    $this->existingColumns[$row['Field']] = true;
+                }
+            }
+        } catch (Throwable $e) {
+            // Return empty map; update logic will skip unknown fields safely.
+        }
+
+        return $this->existingColumns;
+    }
+
     public function getSettings()
     {
         if (!$this->conn) return null;
@@ -88,6 +115,7 @@ class SettingsRepository
     {
         $fields = [];
         $params = [];
+        $existingColumns = $this->getExistingColumns();
 
         // List of updatable fields
         $updatable = [
@@ -107,11 +135,14 @@ class SettingsRepository
             'enable_gcash',
             'paymongo_public_key',
             'paymongo_secret_key',
-            'receipt_footer'
+            'receipt_footer',
+            // Store coordinates for mobile distance/ETA calculations.
+            'store_latitude',
+            'store_longitude'
         ];
 
         foreach ($updatable as $key) {
-            if (isset($data[$key])) {
+            if (isset($data[$key]) && isset($existingColumns[$key])) {
                 $fields[] = "$key = :$key";
                 $params[":$key"] = $data[$key];
             }
