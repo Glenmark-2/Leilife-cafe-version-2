@@ -73,7 +73,7 @@ $archivedStaff = $staffService->getArchivedStaffs();
 
                 <div class="modal-body">
                     <!-- 1. ASK FIRST: Account Type -->
-                    <div class="mb-3">
+                    <div class="mb-3" id="account-type-section">
                         <label class="form-label fw-bold">Account Type *</label>
                         <div class="d-flex gap-3 p-2 bg-light rounded border">
                             <div class="form-check">
@@ -87,7 +87,7 @@ $archivedStaff = $staffService->getArchivedStaffs();
                         </div>
                     </div>
 
-                    <div class="mb-3 text-center">
+                    <div class="mb-3 text-center" id="photo-section">
                         <label for="staffPicture" class="form-label d-block fw-bold">Photo Profile</label>
                         <div class="mb-2">
                             <img id="staff-img-preview" src="<?= UrlHelper::getBaseUrl() ?>/public/assets/default_user.png" alt="Preview" class="rounded-circle shadow-sm" style="width: 100px; height: 100px; object-fit: cover; border: 3px solid #d0b28c;">
@@ -95,7 +95,7 @@ $archivedStaff = $staffService->getArchivedStaffs();
                         <input type="file" class="form-control form-control-sm mx-auto" id="staffPicture" name="staffPicture" style="max-width: 250px;" accept="image/*">
                     </div>
 
-                    <hr>
+                    <hr id="common-fields-divider">
 
                     <!-- Common Fields -->
                     <div class="mb-3">
@@ -144,7 +144,7 @@ $archivedStaff = $staffService->getArchivedStaffs();
                             </div>
                         </div>
 
-                        <div class="mb-3">
+                        <div class="mb-3" id="password-section">
                             <label for="password" class="form-label fw-bold">Password *</label>
                             <input type="password" class="form-control" id="password" name="password" minlength="8" placeholder="At least 8 characters">
                             <div id="passwordStrength" class="form-text small mt-1"></div>

@@ -1,33 +1,39 @@
 <?php
 require_once __DIR__ . '/../repositories/StaffRepository.php';
 
-class StaffService {
+class StaffService
+{
     private $staffRepo;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->staffRepo = new StaffRepository();
     }
 
-    public function getAllStaffs() {
+    public function getAllStaffs()
+    {
         return $this->staffRepo->getAllStaffs();
     }
 
-    public function getArchivedStaffs() {
+    public function getArchivedStaffs()
+    {
         return $this->staffRepo->getArchivedStaffs();
     }
 
-    public function archiveStaff($id, $isArchived) {
+    public function archiveStaff($id, $isArchived)
+    {
         return $this->staffRepo->updateArchivedStatus($id, $isArchived);
     }
 
-    public function addStaff($data) {
+    public function addStaff($data)
+    {
         $inputRole = strtolower($data['role']);
-        $finalRole = 'staff';
+        $finalRole = 'Staff';
         $finalPosition = $data['role']; // e.g. "Cook", "Manager"
 
         if ($inputRole === 'admin' || $inputRole === 'driver') {
             $finalRole = $inputRole;
-            $finalPosition = null;
+            $finalPosition = $data['role']; // e.g. "Admin", "Driver"
         }
 
         $staffData = [
@@ -63,18 +69,20 @@ class StaffService {
         return $staffId;
     }
 
-    public function getStaff($id) {
+    public function getStaff($id)
+    {
         return $this->staffRepo->getStaffById($id);
     }
 
-    public function updateStaff($data) {
+    public function updateStaff($data)
+    {
         $inputRole = strtolower($data['role']);
-        $finalRole = 'staff';
+        $finalRole = 'Staff';
         $finalPosition = $data['role'];
 
         if ($inputRole === 'admin' || $inputRole === 'driver') {
             $finalRole = $inputRole;
-            $finalPosition = null;
+            $finalPosition = $data['role'];
         }
 
         $staffData = [
