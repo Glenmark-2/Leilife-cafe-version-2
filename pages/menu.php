@@ -7,7 +7,7 @@ $menuData = $productService->getMenuStructure();
 
 // Fallback if empty (optional, but good for stability if DB is empty)
 if (empty($menuData)) {
-    $menuData = []; 
+    $menuData = [];
 }
 
 // Determine the first category to show by default
@@ -18,9 +18,9 @@ $firstCategory = array_key_first($menuData);
     <!-- Desktop Navigation (Web devices > 576px) -->
     <div class="d-none d-sm-flex justify-content-start gap-3 mb-5 border-bottom pb-3">
         <?php foreach (array_keys($menuData) as $category): ?>
-            <button type="button" 
-                    class="btn btn-primary-custom main-cat-desktop <?php echo $category === $firstCategory ? 'active' : ''; ?>" 
-                    onclick="switchCategory('<?php echo $category; ?>')">
+            <button type="button"
+                class="btn btn-primary-custom main-cat-desktop <?php echo $category === $firstCategory ? 'active' : ''; ?>"
+                onclick="switchCategory('<?php echo $category; ?>')">
                 <?php echo $category; ?>
             </button>
         <?php endforeach; ?>
@@ -29,12 +29,12 @@ $firstCategory = array_key_first($menuData);
     <!-- Mobile Navigation (Small screens < 576px) -->
     <!-- Sentinel to detect when we scroll past this point -->
     <div id="sticky-sentinel" class="d-block d-sm-none"></div>
-    
+
     <div id="mobileNav" class="d-flex d-sm-none overflow-auto pb-3 mb-4 mobile-cat-scroll" style="white-space: nowrap;">
         <?php foreach (array_keys($menuData) as $category): ?>
-            <button type="button" 
-                    class="btn btn-sm main-cat-mobile me-2 <?php echo $category === $firstCategory ? 'active' : ''; ?>" 
-                    onclick="switchCategory('<?php echo $category; ?>')">
+            <button type="button"
+                class="btn btn-sm main-cat-mobile me-2 <?php echo $category === $firstCategory ? 'active' : ''; ?>"
+                onclick="switchCategory('<?php echo $category; ?>')">
                 <?php echo $category; ?>
             </button>
         <?php endforeach; ?>
@@ -88,7 +88,7 @@ $firstCategory = array_key_first($menuData);
             // Subcategory Title
             const section = document.createElement('div');
             section.className = 'mb-5';
-            
+
             const title = document.createElement('h4');
             title.className = 'mb-4 fw-bold text-secondary text-uppercase';
             title.style.letterSpacing = '1px';
@@ -103,11 +103,11 @@ $firstCategory = array_key_first($menuData);
             // - 5 cols on lg (desktops) >= 992px
             const grid = document.createElement('div');
             // Align start (default) so items start from left
-            grid.className = 'row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3 g-md-4'; 
-            
+            grid.className = 'row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3 g-md-4';
+
             // Generate Cards
             grid.innerHTML = products.map(product => createCardHtml(product)).join('');
-            
+
             section.appendChild(grid);
             container.appendChild(section);
         });
@@ -132,12 +132,16 @@ $firstCategory = array_key_first($menuData);
                 btn.classList.remove('active');
             }
         });
-        
+
         // Render Content
         renderCategory(categoryName);
 
         // Reset Scroll Position
-        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+        window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: "instant"
+        });
     }
 
     // Initialize Default
@@ -150,7 +154,7 @@ $firstCategory = array_key_first($menuData);
         const mobileNav = document.getElementById('mobileNav');
         const sentinel = document.getElementById('sticky-sentinel');
         const navbar = document.querySelector('.navbar');
-        
+
         if (mobileNav && sentinel && navbar) {
             const headerHeight = navbar.offsetHeight;
             // Set css var for sticky top position
@@ -161,9 +165,9 @@ $firstCategory = array_key_first($menuData);
                 // If sentinel is NOT visible and we are scrolling down (boundingClientRect.top is negative or smaller than header)
                 // Actually simple check: Is sentinel above the stick point?
                 if (e.boundingClientRect.top < headerHeight) {
-                     mobileNav.classList.add('is-stuck');
+                    mobileNav.classList.add('is-stuck');
                 } else {
-                     mobileNav.classList.remove('is-stuck');
+                    mobileNav.classList.remove('is-stuck');
                 }
             }, {
                 root: null,

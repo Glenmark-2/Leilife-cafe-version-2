@@ -41,4 +41,3 @@ echo '<script
 
 </body>
 </html>';
-

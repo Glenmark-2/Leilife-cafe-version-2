@@ -64,7 +64,8 @@ class SettingsRepository
         }
     }
 
-    private function checkAndAddColumn($columnName, $type) {
+    private function checkAndAddColumn($columnName, $type)
+    {
         try {
             $query = "SHOW COLUMNS FROM " . $this->table . " LIKE '" . $columnName . "'";
             $stmt = $this->conn->prepare($query);

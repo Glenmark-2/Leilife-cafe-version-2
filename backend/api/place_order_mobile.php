@@ -14,6 +14,7 @@ require_once __DIR__ . '/../repositories/UserRepository.php';
 require_once __DIR__ . '/../services/OrderService.php';
 require_once __DIR__ . '/../services/DeliveryQuoteService.php';
 require_once __DIR__ . '/../helpers/NotificationHelper.php';
+require_once __DIR__ . '/../helpers/StoreStatusHelper.php';
 
 $database = new Database();
 $db = $database->getConnection();
@@ -37,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $settings = $settingsRepo->getSettings();
-    if (!$settings['is_store_open']) {
+    if (!StoreStatusHelper::isStoreOpen($settings)) {
         echo json_encode(['success' => false, 'message' => 'Store is currently closed. Cannot place order.']);
         exit;
     }
@@ -89,10 +90,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $data['platform'] = 'mobile';
     $result = $orderService->placeOrder($userId, $data);
-    
+
     if ($result['success']) {
         http_response_code(201);
-        
+
         // --- NEW: Notify Admins via Push ---
         try {
             $adminTokens = NotificationHelper::getTokensByRole('admin', $db);
@@ -111,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         http_response_code(400);
     }
-    
+
     echo json_encode($result);
 } else {
     http_response_code(405);

@@ -111,6 +111,19 @@
         font-size: 14px;
         height: fit-content;
       }
-      .cart-container {
-        
+
+
+      .store-closed-banner {
+        background-color: #721c24;
+        color: #ffffff;
+        text-align: center;
+        padding: 8px 0;
+        font-size: 0.95rem;
+        font-weight: 500;
+        z-index: 2000;
+        width: 100%;
+      }
+
+      .store-closed-banner i {
+        font-size: 1.1rem;
       }

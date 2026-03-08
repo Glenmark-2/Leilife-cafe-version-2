@@ -18,8 +18,13 @@
 
               <div class="mb-3">
                 <label for="password" class="form-label">Password <span style="color: red;">*</span></label>
-                <input type="password" id="login_password" name="password" class="inputs" placeholder="Enter your password" required>
-
+                <div class="password-wrapper">
+                  <input type="password" id="login_password" name="password" class="inputs" placeholder="Enter your password" required>
+                  <span class="toggle-password" onclick="togglePasswordVisibility()">
+                    <i class="bi bi-eye" id="eyeIcon"></i>
+                  </span>
+                </div>
+                <p id="forgotPass" class="text-end"><a href="<?= UrlHelper::getBaseUrl() ?>/public/index.php?page=forgot_password" style="color: red !important; text-decoration: none !important;">forgot your password?</a></p>
               </div>
 
               <button type="submit" class="btn-primary-custom center-btn">Login</button>
@@ -43,7 +48,8 @@
                   data-theme="outline"
                   data-text="signin_with"
                   data-size="large"
-                  data-logo_alignment="left">
+                  data-logo_alignment="left"
+                  data-width="340">
                 </div>
               </div>
             </form>
@@ -85,7 +91,23 @@
                   });
               }
             </script>
-            <p id="forgotPass"><a href="<?= UrlHelper::getBaseUrl() ?>/public/index.php?page=forgot_password">forgot your password?</a></p>
+
+
+            <script>
+              function togglePasswordVisibility() {
+                const passwordInput = document.getElementById('login_password');
+                const eyeIcon = document.getElementById('eyeIcon');
+                if (passwordInput.type === 'password') {
+                  passwordInput.type = 'text';
+                  eyeIcon.classList.remove('bi-eye');
+                  eyeIcon.classList.add('bi-eye-slash');
+                } else {
+                  passwordInput.type = 'password';
+                  eyeIcon.classList.remove('bi-eye-slash');
+                  eyeIcon.classList.add('bi-eye');
+                }
+              }
+            </script>
             <div id="terms">
               <p>By continuing, you agree to our updated Terms & Conditions and Privacy Policy.</p>
             </div>
