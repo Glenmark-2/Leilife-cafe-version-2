@@ -16,6 +16,7 @@ require_once __DIR__ . '/../repositories/UserRepository.php';
 require_once __DIR__ . '/../services/OrderService.php';
 require_once __DIR__ . '/../services/DeliveryQuoteService.php';
 require_once __DIR__ . '/../helpers/NotificationHelper.php';
+require_once __DIR__ . '/../helpers/StoreStatusHelper.php';
 
 $database = new Database();
 $db = $database->getConnection();
@@ -58,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $userId = $sessionUserId;
 
     $settings = $settingsRepo->getSettings();
-    if (!$settings['is_store_open']) {
+    if (!StoreStatusHelper::isStoreOpen($settings)) {
         echo json_encode(['success' => false, 'message' => 'Store is currently closed. Cannot place order.']);
         exit;
     }
@@ -111,10 +112,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data['platform'] = 'mobile';
     $data['user_id'] = $userId;
     $result = $orderService->placeOrder($userId, $data);
-    
+
     if ($result['success']) {
         http_response_code(201);
-        
+
         // --- NEW: Notify Admins via Push ---
         // ONLY notify immediately if it's COD. For GCash/GrabPay, notify via callback once authorized!
         if (isset($data['payment_method']) && strtolower($data['payment_method']) === 'cod') {
@@ -136,7 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         http_response_code(400);
     }
-    
+
     echo json_encode($result);
     } catch (Throwable $e) {
         error_log('place_order_mobile fatal: ' . $e->getMessage());

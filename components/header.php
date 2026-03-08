@@ -15,6 +15,7 @@
       <link rel="stylesheet" href="../css/users/components/footer.css">
       <link rel="stylesheet" href="../global_styles.css">
       <link rel="stylesheet" href="../css/users/components/cart.css">
+      <link rel="stylesheet" href="../css/users/components/login.css">
 
 
       <!-- Your CSS -->
@@ -28,41 +29,63 @@
       }
       ?>
     </head>
+    <?php
+    require_once __DIR__ . '/../backend/helpers/UrlHelper.php';
+    require_once __DIR__ . '/../backend/helpers/SessionManager.php';
+    require_once __DIR__ . '/../backend/repositories/SettingsRepository.php';
+    require_once __DIR__ . '/../backend/config/Database.php';
+    require_once __DIR__ . '/../backend/helpers/StoreStatusHelper.php';
+
+    $db_header = new Database();
+    $settingsRepo_header = new SettingsRepository($db_header->getConnection());
+    $settings_header = $settingsRepo_header->getSettings();
+
+    // Store Status Logic (Centralized via StoreStatusHelper)
+    $isStoreOpen = StoreStatusHelper::isStoreOpen($settings_header);
+    ?>
 
     <body>
-
-      <!-- Navbar -->
-      <nav class="navbar navbar-expand-sm sticky-top" style="background-color: #d0b28c;">
-        <div class="container-fluid mx-3 mx-sm-5">
-          <!-- Logo -->
-          <a class="navbar-brand d-flex align-items-center" href="?page=home">
-            <img class="logo" src="<?php echo UrlHelper::getFullUrl('/public/assets/leilife.png'); ?>" alt="Leilife logo">
-          </a>
-
-          <!-- Hamburger toggle button -->
-          <button class="navbar-toggler" type="button" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-
-          <!-- Desktop menu (middle + right buttons) -->
-          <div class="d-none d-sm-flex w-100 justify-content-between">
-            <div class="mx-auto d-flex gap-2">
-              <a class="btn btn-text" href="index.php?page=home">Home</a>
-              <a class="btn btn-text" href="index.php?page=menu">Menu</a>
-              <a class="btn btn-text" href="index.php?page=home#contact-us">Contact</a>
+      <header class="sticky-top shadow-sm">
+        <?php if (!$isStoreOpen): ?>
+          <div class="store-closed-banner">
+            <div class="container d-flex align-items-center justify-content-center gap-2">
+              <i class="bi bi-clock-fill"></i>
+              <span><strong>Store is Closed:</strong> We are not accepting orders right now. You can still browse our menu.</span>
             </div>
-            <div class="d-flex gap-2 align-items-center">
-              <?php 
-              require_once __DIR__ . '/../backend/helpers/SessionManager.php';
-              if (SessionManager::isLoggedIn()): 
-              ?>
-                                <a class="btn btn-text" href="index.php?page=profile">Profile</a>
+          </div>
+        <?php endif; ?>
+
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-sm" style="background-color: #d0b28c;">
+          <div class="container-fluid mx-3 mx-sm-5">
+            <!-- Logo -->
+            <a class="navbar-brand d-flex align-items-center" href="?page=home">
+              <img class="logo" src="<?php echo UrlHelper::getFullUrl('/public/assets/leilife.png'); ?>" alt="Leilife logo">
+            </a>
+
+            <!-- Hamburger toggle button -->
+            <button class="navbar-toggler" type="button" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Desktop menu (middle + right buttons) -->
+            <div class="d-none d-sm-flex w-100 justify-content-between">
+              <div class="mx-auto d-flex gap-2">
+                <a class="btn btn-text" href="index.php?page=home">Home</a>
+                <a class="btn btn-text" href="index.php?page=menu">Menu</a>
+                <a class="btn btn-text" href="index.php?page=home#contact-us">Contact</a>
+              </div>
+              <div class="d-flex gap-2 align-items-center">
+                <?php
+                if (SessionManager::isLoggedIn()):
+                ?>
+                  <a class="btn btn-text" href="index.php?page=profile">Profile</a>
                   <a class="btn btn-text" href="<?php echo UrlHelper::getFullUrl('/backend/api/logout_user.php'); ?>">Logout</a>
-              <?php else: ?>
+                <?php else: ?>
                   <a class="btn btn-text" href="#" id="webLogin">Login</a>
                   <a class="btn btn-text" href="index.php?page=sign_up">Sign up</a>
-              <?php endif; ?>
-              
+                <?php endif; ?>
+
                 <?php if ($page !== 'checkout'): ?>
                   <a href="#" class="btn btn-link p-0 position-relative" id="cartBtn">
                     <i class="bi bi-cart-fill" style="color:black; font-size:1.5rem;"></i>
@@ -72,43 +95,44 @@
                   </a>
                 <?php endif; ?>
 
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Mobile dropdown menu -->
-        <div id="navbarDropdownContent">
-          <a class="btn btn-text" href="index.php?page=home">Home</a>
-          <a class="btn btn-text" href="index.php?page=menu">Menu</a>
-          <a class="btn btn-text" href="index.php?page=home#about-us">About</a>
-          <a class="btn btn-text" href="index.php?page=home#contact-us">Contact</a>
-          <hr style="width: 80%; border-top: 1px solid #cccccc; margin: 0.5rem auto;">
-          <?php if (SessionManager::isLoggedIn()): ?>
+          <!-- Mobile dropdown menu -->
+          <div id="navbarDropdownContent">
+            <a class="btn btn-text" href="index.php?page=home">Home</a>
+            <a class="btn btn-text" href="index.php?page=menu">Menu</a>
+            <a class="btn btn-text" href="index.php?page=home#about-us">About</a>
+            <a class="btn btn-text" href="index.php?page=home#contact-us">Contact</a>
+            <hr style="width: 80%; border-top: 1px solid #cccccc; margin: 0.5rem auto;">
+            <?php if (SessionManager::isLoggedIn()): ?>
               <a class="btn btn-text" href="index.php?page=profile">Profile</a>
               <a class="btn btn-text" href="<?php echo UrlHelper::getFullUrl('/backend/api/logout_user.php'); ?>">Logout</a>
-          <?php else: ?>
+            <?php else: ?>
               <a class="btn btn-text" href="#" id="mobileLogin">Login</a>
               <a class="btn btn-text" href="index.php?page=sign_up">Sign up</a>
-          <?php endif; ?>
-          <?php if ($page !== 'checkout'): ?>
-            <a class="btn btn-text" href="#" id="mobileCartBtn">Cart</a>
-          <?php endif; ?>
-        </div>
-      </nav>
+            <?php endif; ?>
+            <?php if ($page !== 'checkout'): ?>
+              <a class="btn btn-text" href="#" id="mobileCartBtn">Cart</a>
+            <?php endif; ?>
+          </div>
+        </nav>
+      </header>
 
       <div class="cart-container d-none" id="cart-container">
-          <?php include __DIR__ . "/cart.php"; ?>
+        <?php include __DIR__ . "/cart.php"; ?>
       </div>
 
       <!-- Mobile Sticky View Bag Button -->
       <?php if ($page !== 'checkout'): ?>
-      <div id="mobile-sticky-cart" class="fixed-bottom p-3 d-sm-none d-none" style="z-index: 1040; background: white; border-top: 1px solid #dee2e6;">
-        <!-- rounded-5 or rounded-pill for fully rounded -->
-        <button id="sticky-bag-btn" class="btn btn-primary-custom w-100 shadow-sm d-flex justify-content-center align-items-center gap-2 py-2 px-3 rounded-pill">
+        <div id="mobile-sticky-cart" class="fixed-bottom p-3 d-sm-none d-none" style="z-index: 1040; background: white; border-top: 1px solid #dee2e6;">
+          <!-- rounded-5 or rounded-pill for fully rounded -->
+          <button id="sticky-bag-btn" class="btn btn-primary-custom w-100 shadow-sm d-flex justify-content-center align-items-center gap-2 py-2 px-3 rounded-pill">
             <span class="fw-bold">View my bag</span>
             <span class="badge bg-white text-dark rounded-pill" id="mobile-sticky-count">0</span>
-        </button>
-      </div>
+          </button>
+        </div>
       <?php endif; ?>
 
       <div class="container-fluid px-0">
@@ -121,15 +145,6 @@
         <script>
           window.isLoggedIn = <?php echo SessionManager::isLoggedIn() ? 'true' : 'false'; ?>;
           window.BASE_URL = "<?php echo UrlHelper::getBaseUrl(); ?>";
-          <?php 
-              require_once __DIR__ . '/../backend/repositories/SettingsRepository.php';
-              // We need a DB connection here or reuse if available. Header is usually top level.
-              // Let's create one responsibly.
-              $db_header = new Database();
-              $settingsRepo_header = new SettingsRepository($db_header->getConnection());
-              $settings_header = $settingsRepo_header->getSettings();
-              $isStoreOpen = $settings_header['is_store_open'] ?? 1;
-          ?>
           window.isStoreOpen = <?php echo $isStoreOpen ? 'true' : 'false'; ?>;
         </script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

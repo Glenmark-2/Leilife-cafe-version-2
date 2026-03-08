@@ -307,7 +307,20 @@ document.addEventListener('DOMContentLoaded', () => {
             placeOrderBtn.disabled = true;
             placeOrderBtn.textContent = 'Processing...';
 
-            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+            const paymentMethodEl = document.querySelector('input[name="paymentMethod"]:checked');
+            if (!paymentMethodEl) {
+                const warningModalEl = document.getElementById('paymentWarningModal');
+                if (warningModalEl) {
+                    const warningModal = bootstrap.Modal.getOrCreateInstance(warningModalEl);
+                    warningModal.show();
+                } else {
+                    alert('No payment method selected or available.');
+                }
+                placeOrderBtn.disabled = false;
+                placeOrderBtn.textContent = 'Place Order';
+                return;
+            }
+            const paymentMethod = paymentMethodEl.value;
             let deliveryMethod = document.querySelector('input[name="deliveryOption"]:checked').value;
 
             if (deliveryMethod === 'homeDelivery') deliveryMethod = 'delivery';

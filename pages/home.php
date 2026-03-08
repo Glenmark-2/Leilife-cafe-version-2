@@ -15,10 +15,10 @@
         <?php
         require_once __DIR__ . '/../backend/services/ProductService.php';
         $productService = new ProductService();
-        
+
         // Fetch valid products (not archived)
         $allProducts = $productService->getAllProductsAdmin(['is_archived' => 0]);
-        
+
         // Shuffle to get random "Favorites" each load, or you could pick specific IDs
         if (!empty($allProducts)) {
             shuffle($allProducts);
@@ -32,19 +32,19 @@
             $price = $product['price'];
             $id = $product['product_id'];
             // Using category name as "Size" placeholder since size isn't in DB, or empty string
-            $size = $product['category_name'] ?? ''; 
-            
+            $size = $product['category_name'] ?? '';
+
             // Check if image is a full URL or relative path
             $img = $product['image_path'];
             if ($img && strpos($img, 'http') !== 0) {
-                 // dynamic path handling
-                 $image = UrlHelper::getBaseUrl() . "/public/assets/products/" . $img;
+                // dynamic path handling
+                $image = UrlHelper::getBaseUrl() . "/public/assets/products/" . $img;
             } else {
-                 $image = $img ?: UrlHelper::getBaseUrl() . "/public/assets/products/not_available.png";
+                $image = $img ?: UrlHelper::getBaseUrl() . "/public/assets/products/not_available.png";
             }
 
             $description = $product['description'];
-            
+
             // LOGIC FOR IS_ACTIVE: Highlight the 2nd card (index 1) to make it stand out
             // This answers "how should i use it" -> use it to highlight a specific item
             $isActive = false; // Hover effect takes over now 
@@ -256,16 +256,16 @@
         </div>
     </div>
 
-<!-- Custom Cart Notification Modal -->
-<div id="cart-notification" class="cart-notification-overlay">
-    <div class="cart-notification-modal">
-        <div style="text-align: center;">
-             <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/leilife.png" alt="Leilife" class="mb-2" style="width: 50px; height: auto;">
-             <h5 class="fw-bold mb-2" style="color: #5a4b40;">Great Choice!</h5>
+    <!-- Custom Cart Notification Modal -->
+    <div id="cart-notification" class="cart-notification-overlay">
+        <div class="cart-notification-modal">
+            <div style="text-align: center;">
+                <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/leilife.png" alt="Leilife" class="mb-2" style="width: 50px; height: auto;">
+                <h5 class="fw-bold mb-2" style="color: #5a4b40;">Great Choice!</h5>
+            </div>
+            <p id="cart-notification-message" class="mb-0 text-center" style="color: #6c757d; font-size: 0.95rem;">Item added to your cart.</p>
         </div>
-        <p id="cart-notification-message" class="mb-0 text-center" style="color: #6c757d; font-size: 0.95rem;">Item added to your cart.</p>
     </div>
-</div>
 
 
 </div>
