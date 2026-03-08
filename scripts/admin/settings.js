@@ -149,14 +149,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // --- Before Unload Prompt (Native Backup) ---
-    window.onbeforeunload = function(e) {
-        if (!saveBtn.disabled) {
-            const msg = "You have unsaved changes. Are you sure you want to leave?";
-            e.returnValue = msg;
-            return msg;
-        }
-    };
+
 
     // --- Fetch Settings ---
     async function fetchSettings() {
@@ -211,9 +204,25 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         formData.append('opening_hours', JSON.stringify(hours));
 
+        const isCodEnabled = document.getElementById('enable_cod').checked;
+        const isGcashEnabled = document.getElementById('enable_gcash').checked;
+
+        if (!isCodEnabled && !isGcashEnabled) {
+            const warningModalEl = document.getElementById('paymentWarningModal');
+            if (warningModalEl) {
+                const warningModal = bootstrap.Modal.getOrCreateInstance(warningModalEl);
+                warningModal.show();
+            } else {
+                alert('At least one payment method (COD or E-Wallet) must be enabled to save the settings.');
+            }
+            saveBtn.disabled = false;
+            saveBtn.innerText = 'Save All Changes';
+            return false;
+        }
+
         formData.set('is_store_open', document.getElementById('is_store_open').checked);
-        formData.set('enable_cod', document.getElementById('enable_cod').checked);
-        formData.set('enable_gcash', document.getElementById('enable_gcash').checked);
+        formData.set('enable_cod', isCodEnabled);
+        formData.set('enable_gcash', isGcashEnabled);
 
         try {
             const response = await fetch('/Leilife_2nd/backend/api/admin/update_settings.php', {

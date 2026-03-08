@@ -28,6 +28,12 @@ try {
     $data['enable_cod'] = isset($data['enable_cod']) && ($data['enable_cod'] === 'true' || $data['enable_cod'] === '1' || $data['enable_cod'] === 1) ? 1 : 0;
     $data['enable_gcash'] = isset($data['enable_gcash']) && ($data['enable_gcash'] === 'true' || $data['enable_gcash'] === '1' || $data['enable_gcash'] === 1) ? 1 : 0;
 
+    if ($data['enable_cod'] === 0 && $data['enable_gcash'] === 0) {
+        http_response_code(400);
+        echo json_encode(["success" => false, "message" => "At least one payment method must be enabled."]);
+        exit;
+    }
+
     $success = $repo->updateSettings($data);
 
     if ($success) {

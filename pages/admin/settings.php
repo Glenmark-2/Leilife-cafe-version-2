@@ -188,5 +188,27 @@
     </div>
 </div>
 
+<!-- Payment Warning Modal -->
+<div class="modal fade" id="paymentWarningModal" tabindex="-1" aria-hidden="true" style="z-index: 1055;">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 450px;">
+        <div class="modal-content text-center" style="border-radius: 20px; padding: 40px; padding-bottom: 30px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+            <div class="modal-body p-0">
+                <div class="d-flex justify-content-center mb-4">
+                    <div style="width: 80px; height: 80px; border-radius: 50%; border: 4px solid #fbbc05; display: flex; align-items: center; justify-content: center;">
+                        <span style="font-size: 45px; font-weight: bold; color: #fbbc05; line-height: 1; margin-top: -5px;">!</span>
+                    </div>
+                </div>
+                <h3 class="fw-bold mb-3" style="color: #333; font-size: 1.6rem;">Action Required</h3>
+                <p class="text-secondary mb-4" style="font-size: 1.1rem; line-height: 1.5; padding: 0 10px;">
+                    At least one payment method (COD or E-Wallet) must be enabled to save the settings.
+                </p>
+                <div class="d-flex justify-content-center mt-4">
+                    <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-dismiss="modal" style="font-weight: 500; font-size: 1.1rem; width: 140px; background-color: #333; border: none; padding-top: 10px; padding-bottom: 10px;">Got it</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <link rel="stylesheet" href="/Leilife_2nd/css/admin/settings.css">
 <script src="/Leilife_2nd/scripts/admin/settings.js"></script>

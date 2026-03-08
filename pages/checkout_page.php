@@ -133,14 +133,25 @@
                 <h5>Payment Method</h5>
                 <hr class="hr">
 
+                <?php
+                $enable_cod = isset($settings_header['enable_cod']) ? (int)$settings_header['enable_cod'] : 1;
+                $enable_gcash = isset($settings_header['enable_gcash']) ? (int)$settings_header['enable_gcash'] : 1;
+                ?>
+
                 <div class="form-check mb-3">
-                    <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="cod" checked>
-                    <label class="form-check-label" for="cod">Cash on Delivery</label>
+                    <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="cod"
+                        <?php echo $enable_cod ? 'checked' : 'disabled'; ?>>
+                    <label class="form-check-label <?php echo !$enable_cod ? 'text-muted' : ''; ?>" for="cod">
+                        Cash on Delivery <?php echo !$enable_cod ? '(Unavailable)' : ''; ?>
+                    </label>
                 </div>
 
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="paymentMethod" id="gcash" value="gcash">
-                    <label class="form-check-label" for="gcash">E-Wallet (Gcash)</label>
+                    <input class="form-check-input" type="radio" name="paymentMethod" id="gcash" value="gcash"
+                        <?php echo !$enable_cod && $enable_gcash ? 'checked' : (!$enable_gcash ? 'disabled' : ''); ?>>
+                    <label class="form-check-label <?php echo !$enable_gcash ? 'text-muted' : ''; ?>" for="gcash">
+                        E-Wallet (Gcash) <?php echo !$enable_gcash ? '(Unavailable)' : ''; ?>
+                    </label>
                 </div>
             </div>
         </div>
@@ -208,6 +219,26 @@
             </div>
         </div>
     </div>
-</div>
+    <!-- Payment Warning Modal -->
+    <div class="modal fade" id="paymentWarningModal" tabindex="-1" aria-hidden="true" style="z-index: 1055;">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 450px;">
+            <div class="modal-content text-center" style="border-radius: 20px; padding: 40px; padding-bottom: 30px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                <div class="modal-body p-0">
+                    <div class="d-flex justify-content-center mb-4">
+                        <div style="width: 80px; height: 80px; border-radius: 50%; border: 4px solid #fbbc05; display: flex; align-items: center; justify-content: center;">
+                            <span style="font-size: 45px; font-weight: bold; color: #fbbc05; line-height: 1; margin-top: -5px;">!</span>
+                        </div>
+                    </div>
+                    <h3 class="fw-bold mb-3" style="color: #333; font-size: 1.6rem;">Payment Required</h3>
+                    <p class="text-secondary mb-4" style="font-size: 1.1rem; line-height: 1.5; padding: 0 10px;">
+                        No payment method is selected or currently available. Please select one to place your order.
+                    </p>
+                    <div class="d-flex justify-content-center mt-4">
+                        <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-dismiss="modal" style="font-weight: 500; font-size: 1.1rem; width: 140px; background-color: #333; border: none; padding-top: 10px; padding-bottom: 10px;">Got it</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<script src="<?php echo UrlHelper::getBaseUrl(); ?>/scripts/users/checkout_page.js?v=<?php echo time(); ?>"></script>
+    <script src="<?php echo UrlHelper::getBaseUrl(); ?>/scripts/users/checkout_page.js?v=<?php echo time(); ?>"></script>
