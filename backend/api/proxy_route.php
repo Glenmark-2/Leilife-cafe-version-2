@@ -7,6 +7,7 @@ EnvLoader::load(__DIR__ . '/../../.env');
 
 // Set headers for JSON response
 header('Content-Type: application/json');
+ini_set('display_errors', '0');
 
 // Check if coordinates are provided
 $start = $_GET['start'] ?? null;

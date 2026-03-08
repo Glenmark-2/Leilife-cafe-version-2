@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 class NotificationHelper {
     public static function sendPush($token, $title, $body, $data = []) {
         if (empty($token)) return;

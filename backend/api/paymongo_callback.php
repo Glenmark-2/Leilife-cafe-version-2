@@ -10,6 +10,7 @@ require_once __DIR__ . '/../repositories/TransactionRepository.php';
 require_once __DIR__ . '/../repositories/CartRepository.php';
 require_once __DIR__ . '/../services/PayMongoService.php';
 require_once __DIR__ . '/../helpers/UrlHelper.php';
+require_once __DIR__ . '/../helpers/NotificationHelper.php';
 
 // Instantiate DB
 $database = new Database();
@@ -41,8 +42,15 @@ $cartUrl = UrlHelper::getFullUrl("/public/index.php?page=checkout&error=payment_
 
 // Mobile Redirects (Deep Linking)
 if ($platform === 'mobile') {
-    $frontendUrl = "leilife://orders?status=success&order_id=" . $orderId;
-    $cartUrl = "leilife://checkout?status=failed&error=payment_failed";
+    $appRedirect = $_GET['app_redirect'] ?? null;
+    if (!empty($appRedirect)) {
+        // App Redirect provides the exact Expo Go or Standalone deep link
+        $frontendUrl = $appRedirect;
+        $cartUrl = $appRedirect;
+    } else {
+        $frontendUrl = "leilife://orders?status=success&order_id=" . $orderId;
+        $cartUrl = "leilife://checkout?status=failed&error=payment_failed";
+    }
 }
 
 if ($status === 'failed') {
@@ -66,7 +74,8 @@ if ($status === 'failed') {
         'raw_response' => ['get_params' => $_GET]
     ]);
 
-    // Redirect to cart/checkout with error
+    // Output JS redirect for mobile WebView deep link interception
+    // Redirect via HTTP header for deep link interception
     header("Location: " . $cartUrl);
     exit;
 }
@@ -156,8 +165,26 @@ if ($status === 'success') {
                 $cartRepo->clearCart($cart->id);
             }
 
-            // Redirect to Success Page
-            header("Location: " . $frontendUrl . "&payment=success");
+            // --- NEW: Notify Admins via Push ---
+            try {
+                $adminTokens = NotificationHelper::getTokensByRole('admin', $db);
+                if (!empty($adminTokens)) {
+                    $orderNum = $order->order_number ?? 'New';
+                    NotificationHelper::sendPushToMany(
+                        $adminTokens,
+                        "New Order 🔔",
+                        "A new order (#$orderNum) has been paid via PayMongo.",
+                        ["orderId" => $orderId, "type" => "new_order"]
+                    );
+                }
+            } catch (Exception $e) {
+                error_log("Failed to send admin notification: " . $e->getMessage());
+            }
+
+            // Redirect to Success Page via HTML for deep link interception
+            // Redirect to Success Page via HTML for deep link interception
+            $finalUrl = $frontendUrl . (strpos($frontendUrl, '?') !== false ? '&' : '?') . "payment=success";
+            header("Location: " . $finalUrl);
             exit;
 
         } else {

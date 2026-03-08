@@ -32,7 +32,7 @@ class DashboardRepository
         ];
 
         // Counts by status (Overall)
-        $query = "SELECT status, COUNT(*) as count FROM orders GROUP BY status";
+        $query = "SELECT status, COUNT(*) as count FROM orders WHERE NOT (payment_method IN ('gcash', 'grab_pay') AND payment_status = 'unpaid') GROUP BY status";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
 
@@ -103,7 +103,7 @@ class DashboardRepository
     {
         $orderBy = "o.created_at DESC";
         // Filter for active orders only: pending, preparing, ready_for_pickup, out_for_delivery
-        $where = "o.status IN ('pending', 'preparing', 'ready_for_pickup', 'out_for_delivery')";
+        $where = "o.status IN ('pending', 'preparing', 'ready_for_pickup', 'out_for_delivery') AND NOT (o.payment_method IN ('gcash', 'grab_pay') AND o.payment_status = 'unpaid')";
 
         switch ($filter) {
             case 'date_asc':

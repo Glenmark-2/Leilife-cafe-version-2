@@ -1,5 +1,6 @@
 <?php
 header('Content-Type: application/json');
+ini_set('display_errors', '0');
 require_once __DIR__ . '/../helpers/SessionManager.php';
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../models/User.php';
@@ -7,14 +8,26 @@ require_once __DIR__ . '/../models/User.php';
 SessionManager::startSession();
 
 $data = json_decode(file_get_contents('php://input'), true);
+if (!$data) {
+    $data = $_POST;
+}
 
-if (!SessionManager::isLoggedIn() && (!isset($data['user_id']) && !isset($_GET['user_id']))) {
+if (!SessionManager::isLoggedIn()) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
 }
 
-$userId = $data['user_id'] ?? SessionManager::get('user_id');
+$sessionUserId = SessionManager::get('user_id');
+$requestedUserId = $data['user_id'] ?? ($_GET['user_id'] ?? null);
+
+if ($requestedUserId !== null && strval($requestedUserId) !== strval($sessionUserId)) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'Forbidden: user mismatch']);
+    exit;
+}
+
+$userId = $sessionUserId;
 
 if (
     !isset($data['street']) || !isset($data['barangay']) || !isset($data['city']) ||

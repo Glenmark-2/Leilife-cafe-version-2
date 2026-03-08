@@ -3,6 +3,8 @@
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST");
+ini_set('display_errors', '0');
+require_once __DIR__ . '/../helpers/SessionManager.php';
 
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../repositories/OrderRepository.php';
@@ -22,16 +24,30 @@ $productRepo = new ProductRepository($db);
 $orderService = new OrderService($orderRepo, $productRepo, $cartRepo, $transactionRepo);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    SessionManager::startSession();
     $data = json_decode(file_get_contents("php://input"), true);
-    $userId = $data['user_id'] ?? null;
+    $sessionUserId = SessionManager::get('user_id');
+    $requestedUserId = $data['user_id'] ?? null;
     $orderId = $data['order_id'] ?? null;
 
-    if (!$userId || !$orderId) {
-        echo json_encode(['success' => false, 'message' => 'User ID and Order ID are required.']);
+    if (!$sessionUserId) {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Unauthorized.']);
         exit;
     }
 
-    $result = $orderService->cancelOrder($userId, $orderId);
+    if ($requestedUserId !== null && strval($requestedUserId) !== strval($sessionUserId)) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'message' => 'Forbidden: user mismatch.']);
+        exit;
+    }
+
+    if (!$orderId) {
+        echo json_encode(['success' => false, 'message' => 'Order ID is required.']);
+        exit;
+    }
+
+    $result = $orderService->cancelOrder($sessionUserId, $orderId);
     echo json_encode($result);
 } else {
     http_response_code(405);

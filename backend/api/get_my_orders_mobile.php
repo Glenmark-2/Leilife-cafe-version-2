@@ -3,6 +3,8 @@
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET");
+ini_set('display_errors', '0');
+require_once __DIR__ . '/../helpers/SessionManager.php';
 
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../repositories/OrderRepository.php';
@@ -22,14 +24,23 @@ $productRepo = new ProductRepository($db);
 $orderService = new OrderService($orderRepo, $productRepo, $cartRepo, $transactionRepo);
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $userId = $_GET['user_id'] ?? null;
+    SessionManager::startSession();
+    $sessionUserId = SessionManager::get('user_id');
+    $requestedUserId = $_GET['user_id'] ?? null;
 
-    if (!$userId) {
-        echo json_encode(['success' => false, 'message' => 'User ID is required.']);
+    if (!$sessionUserId) {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Unauthorized.']);
         exit;
     }
 
-    $result = $orderService->getUserOrders($userId);
+    if ($requestedUserId !== null && strval($requestedUserId) !== strval($sessionUserId)) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'message' => 'Forbidden: user mismatch.']);
+        exit;
+    }
+
+    $result = $orderService->getUserOrders($sessionUserId);
     echo json_encode($result);
 } else {
     http_response_code(405);
