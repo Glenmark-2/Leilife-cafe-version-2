@@ -99,6 +99,28 @@
 
         <div class="tab-content" id="delivery">
             <div class="settings-section">
+                <h3>Delivery Methods</h3>
+                <div class="form-group toggle-group">
+                    <div class="toggle-info">
+                        <strong>Store Pickup</strong>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" name="enable_pickup" id="enable_pickup">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="form-group toggle-group">
+                    <div class="toggle-info">
+                        <strong>Home Delivery</strong>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" name="enable_home_delivery" id="enable_home_delivery">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-section">
                 <h3>Delivery Fees</h3>
                 <div class="form-grid">
                     <div class="form-group">
@@ -182,6 +204,28 @@
                 <div class="d-flex justify-content-center gap-3 mt-4">
                     <button type="button" class="btn bg-white rounded-pill px-4" data-bs-dismiss="modal" style="font-weight: 500; font-size: 1.1rem; color: #333; border: 1px solid #ddd; padding-top: 10px; padding-bottom: 10px; width: 140px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">Stay</button>
                     <button type="button" class="btn btn-danger rounded-pill px-4" id="discardChangesBtn" style="font-weight: 500; font-size: 1.1rem; background-color: #df364c; border: none; padding-top: 10px; padding-bottom: 10px; width: 150px; box-shadow: 0 2px 5px rgba(223,54,76,0.2);">Leave Page</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delivery Warning Modal -->
+<div class="modal fade" id="deliveryWarningModal" tabindex="-1" aria-hidden="true" style="z-index: 1055;">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 450px;">
+        <div class="modal-content text-center" style="border-radius: 20px; padding: 40px; padding-bottom: 30px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+            <div class="modal-body p-0">
+                <div class="d-flex justify-content-center mb-4">
+                    <div style="width: 80px; height: 80px; border-radius: 50%; border: 4px solid #fbbc05; display: flex; align-items: center; justify-content: center;">
+                        <span style="font-size: 45px; font-weight: bold; color: #fbbc05; line-height: 1; margin-top: -5px;">!</span>
+                    </div>
+                </div>
+                <h3 class="fw-bold mb-3" style="color: #333; font-size: 1.6rem;">Action Required</h3>
+                <p class="text-secondary mb-4" style="font-size: 1.1rem; line-height: 1.5; padding: 0 10px;">
+                    At least one mode of delivery (Store Pickup or Home Delivery) must be enabled to save the settings.
+                </p>
+                <div class="d-flex justify-content-center mt-4">
+                    <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-dismiss="modal" style="font-weight: 500; font-size: 1.1rem; width: 140px; background-color: #333; border: none; padding-top: 10px; padding-bottom: 10px;">Got it</button>
                 </div>
             </div>
         </div>
