@@ -60,7 +60,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Render Initial View
-        toggleDeliveryOptions(deliveryChoice);
+        const checkedDeliveryEl = document.querySelector('input[name="deliveryOption"]:checked');
+        if (checkedDeliveryEl) {
+            toggleDeliveryOptions(checkedDeliveryEl.value);
+        }
     };
 
     // --- Delivery Logic ---
@@ -321,7 +324,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             const paymentMethod = paymentMethodEl.value;
-            let deliveryMethod = document.querySelector('input[name="deliveryOption"]:checked').value;
+            let deliveryMethodEl = document.querySelector('input[name="deliveryOption"]:checked');
+
+            if (!deliveryMethodEl) {
+                const warningModalEl = document.getElementById('deliveryWarningModal');
+                if (warningModalEl) {
+                    const warningModal = bootstrap.Modal.getOrCreateInstance(warningModalEl);
+                    warningModal.show();
+                } else {
+                    alert('No delivery method selected or available.');
+                }
+                placeOrderBtn.disabled = false;
+                placeOrderBtn.textContent = 'Place Order';
+                return;
+            }
+
+            let deliveryMethod = deliveryMethodEl.value;
 
             if (deliveryMethod === 'homeDelivery') deliveryMethod = 'delivery';
 

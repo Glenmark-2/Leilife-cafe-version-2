@@ -61,6 +61,8 @@ class SettingsRepository
             $this->checkAndAddColumn('receipt_footer', 'TEXT');
             $this->checkAndAddColumn('paymongo_public_key', 'VARCHAR(255)');
             $this->checkAndAddColumn('paymongo_secret_key', 'VARCHAR(255)');
+            $this->checkAndAddColumn('enable_pickup', 'BOOLEAN DEFAULT TRUE');
+            $this->checkAndAddColumn('enable_home_delivery', 'BOOLEAN DEFAULT TRUE');
         }
     }
 
@@ -132,6 +134,8 @@ class SettingsRepository
             'opening_hours',
             'delivery_fee',
             'free_delivery_threshold',
+            'enable_pickup',
+            'enable_home_delivery',
             'enable_cod',
             'enable_gcash',
             'paymongo_public_key',

@@ -94,6 +94,8 @@ document.addEventListener('DOMContentLoaded', function () {
         state['is_store_open'] = document.getElementById('is_store_open').checked;
         state['enable_cod'] = document.getElementById('enable_cod').checked;
         state['enable_gcash'] = document.getElementById('enable_gcash').checked;
+        state['enable_pickup'] = document.getElementById('enable_pickup').checked;
+        state['enable_home_delivery'] = document.getElementById('enable_home_delivery').checked;
 
         // Opening hours
         const hours = {};
@@ -220,9 +222,27 @@ document.addEventListener('DOMContentLoaded', function () {
             return false;
         }
 
+        const isPickupEnabled = document.getElementById('enable_pickup').checked;
+        const isHomeDeliveryEnabled = document.getElementById('enable_home_delivery').checked;
+
+        if (!isPickupEnabled && !isHomeDeliveryEnabled) {
+            const warningModalEl = document.getElementById('deliveryWarningModal');
+            if (warningModalEl) {
+                const warningModal = bootstrap.Modal.getOrCreateInstance(warningModalEl);
+                warningModal.show();
+            } else {
+                alert('At least one mode of delivery (Store Pickup or Home Delivery) must be enabled to save the settings.');
+            }
+            saveBtn.disabled = false;
+            saveBtn.innerText = 'Save All Changes';
+            return false;
+        }
+
         formData.set('is_store_open', document.getElementById('is_store_open').checked);
         formData.set('enable_cod', isCodEnabled);
         formData.set('enable_gcash', isGcashEnabled);
+        formData.set('enable_pickup', isPickupEnabled);
+        formData.set('enable_home_delivery', isHomeDeliveryEnabled);
 
         try {
             const response = await fetch('/Leilife_2nd/backend/api/admin/update_settings.php', {
