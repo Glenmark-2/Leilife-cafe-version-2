@@ -71,14 +71,14 @@ $pusherCluster = getenv('PUSHER_CLUSTER') ?: 'ap1';
 
         <div class="stat-card">
             <div class="stat-info center-text">
-                <h3>Active Admins</h3>
+                <h3>Total Admins</h3>
                 <p class="stat-value text-admins">0</p>
             </div>
         </div>
 
         <div class="stat-card">
             <div class="stat-info center-text">
-                <h3>Active Drivers</h3>
+                <h3>Total Drivers</h3>
                 <p class="stat-value text-drivers">0</p>
             </div>
         </div>
@@ -103,9 +103,9 @@ $pusherCluster = getenv('PUSHER_CLUSTER') ?: 'ap1';
                 </div>
             </div>
 
-            <div class="table-responsive flex-grow-1">
+            <div class="table-responsive flex-grow-1" style="max-height: 500px; overflow-y: auto;">
                 <table class="dashboard-table table table-hover mb-0">
-                    <thead>
+                    <thead style="position: sticky; top: 0; z-index: 1; background-color: #e1d1bbff;">
                         <tr>
                             <th>Order ID</th>
                             <th>Customer</th>
@@ -125,6 +125,14 @@ $pusherCluster = getenv('PUSHER_CLUSTER') ?: 'ap1';
                 </table>
             </div>
         </div>
+    </div>
+    <div id="pagination-container" class="pagination-container mt-3 d-flex justify-content-between align-items-center">
+        <div id="pagination-info" class="text-muted fw-bold">Showing 0 to 0 of 0 entries</div>
+        <nav aria-label="Order pagination">
+            <ul class="pagination pagination-sm mb-0" id="pagination-controls">
+                <!-- Pagination items will be populated by JS -->
+            </ul>
+        </nav>
     </div>
 </div>
 

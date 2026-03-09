@@ -190,6 +190,29 @@
         font-weight: 700;
         color: #d0b28c;
     }
+
+    #orders-list {
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+
+    /* Custom Scrollbar for Orders List */
+    #orders-list::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    #orders-list::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    #orders-list::-webkit-scrollbar-thumb {
+        background: #d0b28c;
+        border-radius: 10px;
+    }
+
+    #orders-list::-webkit-scrollbar-thumb:hover {
+        background: #b08d55;
+    }
 </style>
 
 <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
@@ -202,13 +225,13 @@
 
         let activeOrders = [];
         let isLoading = false;
-        
+
         // Pusher Initialization
         initPusher();
 
         function initPusher() {
             if (typeof Pusher === 'undefined') return;
-            
+
             // For the pill, we can't reliably assume pusherConfig is in window 
             // if this component is loaded independently. 
             // So we inject it here from PHP.
@@ -218,7 +241,7 @@
             $pk = getenv('PUSHER_KEY');
             $pc = getenv('PUSHER_CLUSTER') ?: 'ap1';
             ?>
-            
+
             const pKey = '<?php echo $pk; ?>';
             const pCluster = '<?php echo $pc; ?>';
             const uId = window.userId || null;
@@ -256,7 +279,7 @@
 
         function checkOrdersVisibility() {
             if (!window.isLoggedIn) return; // Don't fetch if not logged in
-            
+
             fetchOrders(true).then(() => {
                 if (activeOrders.length > 0) {
                     if (viewOrdersPill) {

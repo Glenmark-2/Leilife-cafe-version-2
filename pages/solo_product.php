@@ -25,10 +25,11 @@ if (!$product || $product['is_archived'] == 1) {
                                 $img = !empty($product['image_path']) ? $product['image_path'] : '';
                                 echo (!empty($img) && !str_starts_with($img, 'http') && !str_starts_with($img, '/'))
                                     ? UrlHelper::getBaseUrl() . '/public/assets/products/' . trim($img)
-                                    : (!empty($img) ? $img : UrlHelper::getBaseUrl() . '/public/assets/products/not_available.png');
+                                    : (!empty($img) ? $img : UrlHelper::getBaseUrl() . '/public/assets/products/food_photo.png');
                                 ?>"
                         alt="<?php echo htmlspecialchars($product['name']); ?>"
-                        class="product-img">
+                        class="product-img"
+                        onerror="this.src='<?= UrlHelper::getBaseUrl() ?>/public/assets/products/food_photo.png'">
                 </div>
             </div>
 
@@ -39,7 +40,7 @@ if (!$product || $product['is_archived'] == 1) {
 
                     <!-- HEART ICON -->
                     <div class="container-fluid d-flex justify-content-between align-items-center p-0">
-                        <h2 class="fw-bold"><?php echo htmlspecialchars($product['name']); ?></h2>
+                        <h2 class="fw-bold"><?php echo ucwords(strtolower(htmlspecialchars($product['name']))); ?></h2>
                         <button class="favorite <?php echo (isset($_SESSION['user_id']) && $productService->isFavorite($_SESSION['user_id'], $product['product_id'])) ? 'active' : ''; ?>" id="favoriteBtn">
                             <i class="bi bi-heart-fill wishlist-icon"></i>
                         </button>
@@ -60,7 +61,7 @@ if (!$product || $product['is_archived'] == 1) {
 
                     <button class="btn btn-primary-custom"
                         data-id="<?php echo $product['product_id']; ?>"
-                        data-name="<?php echo htmlspecialchars($product['name']); ?>"
+                        data-name="<?php echo ucwords(strtolower(htmlspecialchars($product['name']))); ?>"
                         data-price="<?php echo $product['price']; ?>"
                         id="addToCartBtn">
                         Add to cart

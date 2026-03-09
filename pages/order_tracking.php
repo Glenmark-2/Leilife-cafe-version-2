@@ -93,7 +93,7 @@ $pusherCluster = getenv('PUSHER_CLUSTER') ?: 'ap1';
         <a href="index.php?page=home" class="btn btn-primary-custom">Back to Home</a>
     <?php elseif ($order): ?>
 
-        <p class="order-number">Your Order #<?php echo htmlspecialchars($order->order_number ?? $order->id); ?></p>
+        <p class="order-number">Your Order <?php echo htmlspecialchars($order->order_number ?? '#' . $order->id); ?></p>
 
         <?php if ($order->status === 'pending' && $isPickup && $order->payment_status === 'unpaid'):
             // Duration settings
@@ -250,7 +250,7 @@ $pusherCluster = getenv('PUSHER_CLUSTER') ?: 'ap1';
                             if ($isPickup) {
                                 echo htmlspecialchars($settings['store_name'] ?? 'Leilife Cafe & Resto');
                             } else {
-                                echo htmlspecialchars($order->customer_name ?? 'Valued Customer');
+                                echo ucwords(strtolower(htmlspecialchars($order->customer_name ?? 'Valued Customer')));
                             }
                             ?>
                         </span>
@@ -310,16 +310,16 @@ $pusherCluster = getenv('PUSHER_CLUSTER') ?: 'ap1';
                     <div class="order-items-list"> <?php foreach ($order->items as $item): ?>
                             <div class="detail-item mb-3 d-flex align-items-center gap-3">
                                 <?php
-                                                        $itemImg = $item->product_image ?: 'not_available.png';
+                                                        $itemImg = $item->product_image ?: 'food_photo.png';
                                                         if (!str_starts_with($itemImg, 'http') && !str_starts_with($itemImg, '/')) {
                                                             $itemImg = UrlHelper::getBaseUrl() . '/public/assets/products/' . $itemImg;
                                                         }
                                 ?>
-                                <img src="<?php echo htmlspecialchars($itemImg); ?>" class="rounded" style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #eee; <?php echo ($item->status == 'cancelled') ? 'filter: grayscale(1); opacity: 0.6;' : ''; ?>">
+                                <img src="<?php echo htmlspecialchars($itemImg); ?>" class="rounded" style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #eee; <?php echo ($item->status == 'cancelled') ? 'filter: grayscale(1); opacity: 0.6;' : ''; ?>" onerror="this.src='<?= UrlHelper::getBaseUrl() ?>/public/assets/products/food_photo.png'">
 
                                 <div class="flex-grow-1">
                                     <p class="mb-0 fw-bold" style="<?php echo ($item->status == 'cancelled') ? 'text-decoration: line-through; color: #999;' : ''; ?>">
-                                        <?php echo htmlspecialchars($item->product_name); ?>
+                                        <?php echo ucwords(strtolower(htmlspecialchars($item->product_name))); ?>
                                     </p>
                                     <p class="small text-muted mb-0">₱<?php echo number_format($item->price, 2); ?> × <?php echo $item->quantity; ?></p>
                                     <?php if ($item->status == 'cancelled'): ?>

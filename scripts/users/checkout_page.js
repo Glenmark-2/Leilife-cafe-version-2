@@ -60,7 +60,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Render Initial View
-        toggleDeliveryOptions(deliveryChoice);
+        const checkedDeliveryEl = document.querySelector('input[name="deliveryOption"]:checked');
+        if (checkedDeliveryEl) {
+            toggleDeliveryOptions(checkedDeliveryEl.value);
+        }
     };
 
     // --- Delivery Logic ---
@@ -136,14 +139,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Store address data temporarily
             tempAddressData = {
-                street,
-                barangay,
-                city,
-                province,
-                region,
+                street: capitalizeFirstLetter(street),
+                barangay: capitalizeFirstLetter(barangay),
+                city: capitalizeFirstLetter(city),
+                province: capitalizeFirstLetter(province),
+                region: capitalizeFirstLetter(region),
                 latitude,
                 longitude,
-                fullAddress: `${street}, ${barangay}, ${city}, ${province}`
+                fullAddress: `${capitalizeFirstLetter(street)}, ${capitalizeFirstLetter(barangay)}, ${capitalizeFirstLetter(city)}, ${capitalizeFirstLetter(province)}`
             };
 
             // Update the delivery address field
@@ -267,7 +270,9 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = '';
         let subtotal = 0;
 
-        cart.forEach(item => {
+        const availableItems = cart.filter(item => item.is_available !== false);
+
+        availableItems.forEach(item => {
             subtotal += item.price * item.qty;
 
             let imageSrc = item.image || 'not_available.png';
@@ -275,11 +280,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 imageSrc = (window.BASE_URL) + '/public/assets/products/' + imageSrc;
             }
 
+            const capitalizedName = capitalizeFirstLetter(item.name);
+
             const html = `
                 <div class="order-item d-flex align-items-start gap-3 mt-3">
-                    <img src="${imageSrc}" class="order-img" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+                    <img src="${imageSrc}" class="order-img" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;" onerror="this.src='${(window.BASE_URL) + '/public/assets/products/food_photo.png'}'">
                     <div class="flex-grow-1">
-                        <p class="fw-bold mb-1">${item.name}</p>
+                        <p class="fw-bold mb-1">${capitalizedName}</p>
                         <p class="text-muted mb-0">₱${parseFloat(item.price).toFixed(2)} × ${item.qty}</p>
                     </div>
                     <p class="fw-semibold mb-0 order-price">₱${(item.price * item.qty).toFixed(2)}</p>
@@ -296,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const countBadge = document.getElementById('order-summary-count');
         if (countBadge) {
-            countBadge.textContent = cart.length + (cart.length === 1 ? ' Item' : ' Items');
+            countBadge.textContent = availableItems.length + (availableItems.length === 1 ? ' Item' : ' Items');
         }
     }
 
@@ -321,7 +328,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             const paymentMethod = paymentMethodEl.value;
-            let deliveryMethod = document.querySelector('input[name="deliveryOption"]:checked').value;
+            let deliveryMethodEl = document.querySelector('input[name="deliveryOption"]:checked');
+
+            if (!deliveryMethodEl) {
+                const warningModalEl = document.getElementById('deliveryWarningModal');
+                if (warningModalEl) {
+                    const warningModal = bootstrap.Modal.getOrCreateInstance(warningModalEl);
+                    warningModal.show();
+                } else {
+                    alert('No delivery method selected or available.');
+                }
+                placeOrderBtn.disabled = false;
+                placeOrderBtn.textContent = 'Place Order';
+                return;
+            }
+
+            let deliveryMethod = deliveryMethodEl.value;
 
             if (deliveryMethod === 'homeDelivery') deliveryMethod = 'delivery';
 
@@ -362,10 +384,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const items = cart.map(item => ({
-                product_id: item.id,
-                quantity: item.qty
-            }));
+            const items = cart
+                .filter(item => item.is_available !== false)
+                .map(item => ({
+                    product_id: item.id,
+                    quantity: item.qty
+                }));
+
+            if (items.length === 0) {
+                alert('All items in your cart are currently unavailable. Please add available items before placing an order.');
+                placeOrderBtn.disabled = false;
+                placeOrderBtn.textContent = 'Place Order';
+                return;
+            }
 
             const orderData = {
                 items: items,
@@ -415,3 +446,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+function capitalizeFirstLetter(string) {
+    if (!string) return '';
+    return string.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+}

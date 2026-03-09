@@ -68,7 +68,9 @@
         border-radius: 10px;
         background: #fdfbf6;
         border: 1px solid #eee5c7;
-        width: 250px;
+        min-width: 250px;
+        width: fit-content;
+        max-width: 100%;
     }
 
     .info .label {
@@ -82,6 +84,21 @@
         font-size: 1.2rem;
         color: #333;
         margin: 0;
+    }
+
+    .edit-input {
+        font-size: 1.2rem;
+        border: 1px solid #d0b28c;
+        border-radius: 5px;
+        padding: 2px 5px;
+        width: 100%;
+        background-color: transparent;
+        color: #333;
+    }
+
+    .edit-input:focus {
+        outline: none;
+        border-color: #2c3e50;
     }
 
     .editDiv {

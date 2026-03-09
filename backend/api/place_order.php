@@ -36,10 +36,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_once __DIR__ . '/../repositories/SettingsRepository.php';
     $settingsRepo = new SettingsRepository($db);
     $settings = $settingsRepo->getSettings();
-    
+
     if (!$settings['is_store_open']) {
-         echo json_encode(['success' => false, 'message' => 'Store is currently closed. Cannot place order.']);
-         exit;
+        echo json_encode(['success' => false, 'message' => 'Store is currently closed. Cannot place order.']);
+        exit;
     }
 
     $orderController->placeOrder();

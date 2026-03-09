@@ -36,7 +36,7 @@
                         <div class="col-12 col-md-6">
                             <p class="small m-0">Fullname</p>
                             <input type="text" class="form-control" id="contactName" placeholder="Full Name"
-                                value="<?php echo $userData ? htmlspecialchars($userData['first_name'] . ' ' . $userData['last_name']) : ''; ?>" readonly>
+                                value="<?php echo $userData ? ucwords(strtolower(htmlspecialchars($userData['first_name'] . ' ' . $userData['last_name']))) : ''; ?>" readonly>
                         </div>
                         <div class="col-12 col-md-6">
                             <p class="small m-0">Phone Number</p>
@@ -64,14 +64,22 @@
                 <h5>Delivery Options</h5>
                 <hr class="hr">
 
+                <?php
+                $enable_pickup = isset($settings_header['enable_pickup']) ? (int)$settings_header['enable_pickup'] : 1;
+                $enable_home_delivery = isset($settings_header['enable_home_delivery']) ? (int)$settings_header['enable_home_delivery'] : 1;
+                ?>
+
                 <!-- Pickup -->
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="deliveryOption" id="pickup" value="pickup">
-                    <label class="form-check-label" for="pickup">Pick up</label>
+                    <input class="form-check-input" type="radio" name="deliveryOption" id="pickup" value="pickup"
+                        <?php echo $enable_pickup ? 'checked' : 'disabled'; ?>>
+                    <label class="form-check-label <?php echo !$enable_pickup ? 'text-muted' : ''; ?>" for="pickup">
+                        Pick up <?php echo !$enable_pickup ? '(Unavailable)' : ''; ?>
+                    </label>
                 </div>
 
                 <!-- Pickup Sub Option -->
-                <div class="form-check ms-4" id="pickupAddress">
+                <div class="form-check ms-4" id="pickupAddress" style="<?php echo !$enable_pickup ? 'display: none;' : ''; ?>">
                     <input class="form-check-input" type="radio" name="pickupLocation" id="pickupLocation1" value="lunduyan" checked>
                     <label class="form-check-label" for="pickupLocation1">
                         Lunduyan Langaray Village, Barangay 14 Caloocan City
@@ -80,8 +88,11 @@
 
                 <!-- Home Delivery -->
                 <div class="form-check mb-3 mt-2">
-                    <input class="form-check-input" type="radio" name="deliveryOption" id="homeDelivery" value="homeDelivery">
-                    <label class="form-check-label" for="homeDelivery">Home Delivery</label>
+                    <input class="form-check-input" type="radio" name="deliveryOption" id="homeDelivery" value="homeDelivery"
+                        <?php echo !$enable_pickup && $enable_home_delivery ? 'checked' : (!$enable_home_delivery ? 'disabled' : ''); ?>>
+                    <label class="form-check-label <?php echo !$enable_home_delivery ? 'text-muted' : ''; ?>" for="homeDelivery">
+                        Home Delivery <?php echo !$enable_home_delivery ? '(Unavailable)' : ''; ?>
+                    </label>
                 </div>
 
                 <!-- Home Delivery Inputs -->
@@ -105,7 +116,7 @@
                                 $userAddress['city'] ?? '',
                                 $userAddress['province'] ?? ''
                             ]);
-                            $savedAddress = implode(', ', $addressParts);
+                            $savedAddress = ucwords(strtolower(implode(', ', $addressParts)));
                             $savedLat = $userAddress['latitude'] ?? '';
                             $savedLng = $userAddress['longitude'] ?? '';
                         }
@@ -219,6 +230,28 @@
             </div>
         </div>
     </div>
+    <!-- Delivery Warning Modal -->
+    <div class="modal fade" id="deliveryWarningModal" tabindex="-1" aria-hidden="true" style="z-index: 1055;">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 450px;">
+            <div class="modal-content text-center" style="border-radius: 20px; padding: 40px; padding-bottom: 30px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                <div class="modal-body p-0">
+                    <div class="d-flex justify-content-center mb-4">
+                        <div style="width: 80px; height: 80px; border-radius: 50%; border: 4px solid #fbbc05; display: flex; align-items: center; justify-content: center;">
+                            <span style="font-size: 45px; font-weight: bold; color: #fbbc05; line-height: 1; margin-top: -5px;">!</span>
+                        </div>
+                    </div>
+                    <h3 class="fw-bold mb-3" style="color: #333; font-size: 1.6rem;">Delivery Required</h3>
+                    <p class="text-secondary mb-4" style="font-size: 1.1rem; line-height: 1.5; padding: 0 10px;">
+                        No delivery method is selected or currently available. Please select one to place your order.
+                    </p>
+                    <div class="d-flex justify-content-center mt-4">
+                        <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-dismiss="modal" style="font-weight: 500; font-size: 1.1rem; width: 140px; background-color: #333; border: none; padding-top: 10px; padding-bottom: 10px;">Got it</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Payment Warning Modal -->
     <div class="modal fade" id="paymentWarningModal" tabindex="-1" aria-hidden="true" style="z-index: 1055;">
         <div class="modal-dialog modal-dialog-centered" style="max-width: 450px;">

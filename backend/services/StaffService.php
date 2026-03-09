@@ -37,11 +37,11 @@ class StaffService
         }
 
         $staffData = [
-            'full_name' => $data['fullName'],
+            'full_name' => ucwords(strtolower($data['fullName'])),
             'role' => $finalRole,
-            'position' => $finalPosition,
-            'shift' => $data['shift'],
-            'status' => $data['status'] ?? 'Active',
+            'position' => ucwords(strtolower($finalPosition)),
+            'shift' => ucwords(strtolower($data['shift'])),
+            'status' => ucwords(strtolower($data['status'] ?? 'Active')),
             'photo_path' => $data['photo_path'] ?? null
         ];
 
@@ -87,11 +87,11 @@ class StaffService
 
         $staffData = [
             'staff_id' => $data['staff_id'],
-            'full_name' => $data['fullName'],
+            'full_name' => ucwords(strtolower($data['fullName'])),
             'role' => $finalRole,
-            'position' => $finalPosition,
-            'shift' => $data['shift'],
-            'status' => $data['status'] ?? 'Active'
+            'position' => ucwords(strtolower($finalPosition)),
+            'shift' => ucwords(strtolower($data['shift'])),
+            'status' => ucwords(strtolower($data['status'] ?? 'Active'))
         ];
 
         if (isset($data['photo_path'])) {
