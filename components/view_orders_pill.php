@@ -280,7 +280,7 @@
             }
 
             // Adjust the path if necessary. Using absolute path from root.
-            return fetch('/Leilife_2nd/backend/api/get_my_orders.php')
+            return fetch((window.BASE_URL || '') + '/backend/api/get_my_orders.php', { credentials: 'same-origin' })
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
@@ -291,7 +291,7 @@
                     if (data.success) {
                         // Show only active orders: exclude completed, delivered, picked_up, cancelled, and failed
                         const inactiveStatuses = ['delivered', 'picked_up', 'cancelled', 'payment_failed', 'completed'];
-                        activeOrders = data.orders.filter(o => !inactiveStatuses.includes(o.status.toLowerCase()));
+                        activeOrders = data.orders.filter(o => !inactiveStatuses.includes((o.status || '').toLowerCase()));
                         return true;
                     } else {
                         activeOrders = [];
@@ -321,6 +321,59 @@
                 });
         }
 
+        function formatOrderDate(dateValue) {
+            if (!dateValue || typeof dateValue !== 'string') return '';
+
+            const raw = dateValue.trim();
+            // If timestamp includes timezone info (Z or +/-HH:mm), convert to Asia/Manila.
+            const hasTz = /Z$|[+-]\\d{2}:?\\d{2}$/.test(raw);
+            if (hasTz) {
+                const d = new Date(raw);
+                if (!Number.isNaN(d.getTime())) {
+                    return new Intl.DateTimeFormat('en-US', {
+                        timeZone: 'Asia/Manila',
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                    }).format(d);
+                }
+            }
+
+            // Keep DB datetime stable (no timezone shift) for strings like 'YYYY-MM-DD HH:mm:ss'.
+            const m = raw.match(/^(\\d{4})-(\\d{2})-(\\d{2})[ T](\\d{2}):(\\d{2})/);
+            if (m) {
+                const year = parseInt(m[1], 10);
+                const month = parseInt(m[2], 10);
+                const day = parseInt(m[3], 10);
+                const hour24 = parseInt(m[4], 10);
+                const minute = m[5];
+
+                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                const hour12 = (hour24 % 12) || 12;
+                const ampm = hour24 >= 12 ? 'PM' : 'AM';
+
+                return monthNames[month - 1] + ' ' + day + ', ' + year + ', ' + hour12 + ':' + minute + ' ' + ampm;
+            }
+
+            // Final fallback for uncommon formats.
+            const fallback = new Date(raw);
+            if (!Number.isNaN(fallback.getTime())) {
+                return new Intl.DateTimeFormat('en-US', {
+                    timeZone: 'Asia/Manila',
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                }).format(fallback);
+            }
+
+            return raw;
+        }
         function renderOrders(orders) {
             if (orders.length === 0) {
                 ordersList.innerHTML = `<div class="p-4 text-center text-muted">You have no orders yet.</div>`;
@@ -329,13 +382,7 @@
 
             let html = '';
             orders.forEach(order => {
-                const date = new Date(order.created_at).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
+                const date = formatOrderDate(order.created_at);
                 const statusLabel = order.status.replace(/_/g, ' ').toUpperCase();
                 const statusClass = 'status-' + (order.status || 'pending').toLowerCase();
                 const displayId = order.order_number ? order.order_number : ('#' + order.id);
@@ -361,3 +408,6 @@
         }
     });
 </script>
+
+
+
