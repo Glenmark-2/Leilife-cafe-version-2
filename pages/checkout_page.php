@@ -36,7 +36,7 @@
                         <div class="col-12 col-md-6">
                             <p class="small m-0">Fullname</p>
                             <input type="text" class="form-control" id="contactName" placeholder="Full Name"
-                                value="<?php echo $userData ? htmlspecialchars($userData['first_name'] . ' ' . $userData['last_name']) : ''; ?>" readonly>
+                                value="<?php echo $userData ? ucwords(strtolower(htmlspecialchars($userData['first_name'] . ' ' . $userData['last_name']))) : ''; ?>" readonly>
                         </div>
                         <div class="col-12 col-md-6">
                             <p class="small m-0">Phone Number</p>
@@ -116,7 +116,7 @@
                                 $userAddress['city'] ?? '',
                                 $userAddress['province'] ?? ''
                             ]);
-                            $savedAddress = implode(', ', $addressParts);
+                            $savedAddress = ucwords(strtolower(implode(', ', $addressParts)));
                             $savedLat = $userAddress['latitude'] ?? '';
                             $savedLng = $userAddress['longitude'] ?? '';
                         }

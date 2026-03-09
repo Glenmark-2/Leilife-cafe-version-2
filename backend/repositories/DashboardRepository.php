@@ -63,7 +63,7 @@ class DashboardRepository
         $stmtCancelledToday->execute();
         $rowCancelledToday = $stmtCancelledToday->fetch(PDO::FETCH_ASSOC);
         $stats['cancelled_today'] = (int)$rowCancelledToday['count'];
-        
+
         // Update the main 'cancelled' stat to use the today count if that's what's expected for the dashboard UI
         // or just keep both and let the frontend decide. To be safe based on your request:
         $stats['cancelled'] = $stats['cancelled_today'];
@@ -73,33 +73,63 @@ class DashboardRepository
 
     public function getStaffStats()
     {
-        $query = "SELECT TRIM(LOWER(role)) as role, COUNT(*) as count 
-                  FROM staffs 
-                  WHERE TRIM(LOWER(status)) = 'active' 
-                  AND is_archived = 0 
-                  GROUP BY role";
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute();
+        // Count unarchived Admins based on join with admins table
+        $queryAdmin = "SELECT COUNT(*) as count 
+                      FROM staffs s 
+                      JOIN admins a ON s.staff_id = a.staff_id 
+                      WHERE s.is_archived = 0";
+        $stmtAdmin = $this->conn->prepare($queryAdmin);
+        $stmtAdmin->execute();
+        $adminCount = $stmtAdmin->fetch(PDO::FETCH_ASSOC)['count'];
 
-        $stats = [
-            'admin' => 0,
-            'driver' => 0,
-            'staff' => 0
+        // Count unarchived Drivers based on join with drivers table
+        $queryDriver = "SELECT COUNT(*) as count 
+                       FROM staffs s 
+                       JOIN drivers d ON s.staff_id = d.staff_id 
+                       WHERE s.is_archived = 0";
+        $stmtDriver = $this->conn->prepare($queryDriver);
+        $stmtDriver->execute();
+        $driverCount = $stmtDriver->fetch(PDO::FETCH_ASSOC)['count'];
+
+        // Count other unarchived Staff members (those without admin/driver accounts)
+        $queryStaff = "SELECT COUNT(*) as count 
+                      FROM staffs s 
+                      LEFT JOIN admins a ON s.staff_id = a.staff_id 
+                      LEFT JOIN drivers d ON s.staff_id = d.staff_id 
+                      WHERE s.is_archived = 0 
+                      AND a.staff_id IS NULL AND d.staff_id IS NULL";
+        $stmtStaff = $this->conn->prepare($queryStaff);
+        $stmtStaff->execute();
+        $staffCount = $stmtStaff->fetch(PDO::FETCH_ASSOC)['count'];
+
+        return [
+            'admin' => (int)$adminCount,
+            'driver' => (int)$driverCount,
+            'staff' => (int)$staffCount
         ];
-
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $role = strtolower($row['role']);
-            if (isset($stats[$role])) {
-                $stats[$role] = (int)$row['count'];
-            }
-        }
-
-        error_log("DEBUG Staff Stats: " . json_encode($stats));
-
-        return $stats;
     }
 
-    public function getRecentOrders($limit = 10, $filter = 'date_desc')
+    public function countRecentOrders($filter = 'date_desc')
+    {
+        $where = "o.status IN ('pending', 'preparing', 'ready_for_pickup', 'out_for_delivery')";
+
+        switch ($filter) {
+            case 'type_pickup':
+                $where .= " AND o.delivery_method = 'pickup'";
+                break;
+            case 'type_delivery':
+                $where .= " AND o.delivery_method = 'delivery'";
+                break;
+        }
+
+        $query = "SELECT COUNT(*) as total FROM orders o WHERE $where";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return (int)($row['total'] ?? 0);
+    }
+
+    public function getRecentOrders($limit = 10, $offset = 0, $filter = 'date_desc')
     {
         $orderBy = "o.created_at DESC";
         // Filter for active orders only: pending, preparing, ready_for_pickup, out_for_delivery
@@ -135,10 +165,11 @@ class DashboardRepository
                   LEFT JOIN users u ON o.user_id = u.id 
                   WHERE $where
                   ORDER BY $orderBy 
-                  LIMIT :limit";
+                  LIMIT :limit OFFSET :offset";
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

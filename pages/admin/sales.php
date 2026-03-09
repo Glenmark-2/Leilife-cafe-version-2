@@ -43,9 +43,9 @@
 
 
 <div class="table-container">
-    <div class="table-wrapper">
+    <div class="table-wrapper" style="max-height: 500px; overflow-y: auto;">
         <table>
-            <thead>
+            <thead style="position: sticky; top: 0; z-index: 1; background-color: #e1d1bbff;">
                 <tr>
                     <th class="oIDCol">Order ID</th>
                     <th class="nameCol">Customer</th>
@@ -55,24 +55,18 @@
                     <th class="dateCol">Date</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td class="oIDCol">#ORD-20251110-25C68B</td>
-                    <td class="nameCol">Ellie</td>
-                    <td class="totalCol">₱119.00</td>
-                    <td class="statusCol">Delivered</td>
-                    <td class="paymentCol">Cash</td>
-                    <td class="dateCol">Dec 12, 2025</td>
-                </tr>
+            <tbody id="sales-body">
+                <!-- Data will be populated by JS -->
             </tbody>
         </table>
     </div>
 </div>
 
-
-<div class="pagination-container" style="display: flex; justify-content: flex-end; align-items: center; margin-top: 15px; gap: 10px;">
-    <button id="prevBtn" class="btn-primary-custom" disabled>Previous</button>
-    <span id="pageInfo">Page 1 of 1</span>
-    <button id="nextBtn" class="btn-primary-custom" disabled>Next</button>
+<div id="pagination-container" class="pagination-container mt-3 d-flex justify-content-between align-items-center">
+    <div id="page-info" class="text-muted fw-bold">Showing 0 to 0 of 0 entries</div>
+    <nav aria-label="Sales pagination">
+        <ul class="pagination pagination-sm mb-0" id="pagination-controls">
+            <!-- Pagination items will be populated by JS -->
+        </ul>
+    </nav>
 </div>
-

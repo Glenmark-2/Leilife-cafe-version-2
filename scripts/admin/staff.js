@@ -539,8 +539,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('search-input');
     const toggleArchiveBtn = document.getElementById('toggle-archive');
     const pageInfo = document.getElementById('page-info');
-    const prevPageBtn = document.getElementById('prevPage');
-    const nextPageBtn = document.getElementById('nextPage');
+    const paginationControls = document.getElementById('pagination-controls');
+    
+    function toTitleCase(str) {
+        if (!str) return '';
+        return str.toLowerCase().split(' ').map(word => {
+            return word.charAt(0).toUpperCase() + word.slice(1);
+        }).join(' ');
+    }
 
     let allStaffData = [...initialStaff];
     let archivedStaffData = [...initialArchived];
@@ -558,20 +564,18 @@ document.addEventListener('DOMContentLoaded', function () {
         const totalItems = data.length;
         const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-        if (prevPageBtn) prevPageBtn.disabled = currentPage === 1;
-        if (nextPageBtn) nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
-
         const start = (currentPage - 1) * itemsPerPage;
         const end = start + itemsPerPage;
         const pageItems = data.slice(start, end);
 
         if (totalItems === 0) {
-            if (pageInfo) pageInfo.innerText = 'Showing 0 of 0 staff';
+            if (pageInfo) pageInfo.innerText = 'Showing 0 to 0 of 0 entries';
             staffBody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px;">No staff found.</td></tr>`;
+            updatePagination(0);
             return;
         }
 
-        if (pageInfo) pageInfo.innerText = `Showing ${start + 1} to ${Math.min(end, totalItems)} of ${totalItems} staff`;
+        if (pageInfo) pageInfo.innerText = `Showing ${start + 1} to ${Math.min(end, totalItems)} of ${totalItems} entries`;
 
         pageItems.forEach(staff => {
             const row = document.createElement('tr');
@@ -581,7 +585,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 : `${window.BASE_URL}/public/assets/default_user.png`;
 
             const roleDisplay = staff.role.charAt(0).toUpperCase() + staff.role.slice(1);
-            const positionDisplay = staff.position || roleDisplay;
+            const rawPosition = staff.position || roleDisplay;
+            const positionDisplay = toTitleCase(rawPosition);
+            const nameDisplay = toTitleCase(staff.full_name);
+            const shiftDisplay = toTitleCase(staff.shift);
+            const statusDisplay = toTitleCase(staff.status);
 
             const archiveIcon = staff.is_archived == 1 ? 'bi-arrow-counterclockwise' : 'bi-archive';
             const archiveTitle = staff.is_archived == 1 ? 'Restore' : 'Archive';
@@ -590,13 +598,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td class="nameCol">
                     <div class="staffNameDiv d-flex align-items-center gap-2">
                         <img src="${photo}" alt="" class="staffPhoto" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" onerror="this.onerror=null;this.src='${window.BASE_URL}/public/assets/default_user.png'">
-                        <p class="mb-0">${staff.full_name}</p>
+                        <p class="mb-0">${nameDisplay}</p>
                     </div>
                 </td>
                 <td class="posCol">${positionDisplay}</td>
-                <td class="shiftCol">${staff.shift}</td>
+                <td class="shiftCol">${shiftDisplay}</td>
                 <td class="statCol">
-                    <span class="badge ${staff.status === 'Active' ? 'bg-success' : 'bg-secondary'}">${staff.status}</span>
+                    <span class="badge ${staff.status.toLowerCase() === 'active' ? 'bg-success' : 'bg-secondary'}">${statusDisplay}</span>
                 </td>
                 <td class="actionCol">
                     <div class="action-header-buttons d-flex justify-content-center gap-2">
@@ -611,8 +619,43 @@ document.addEventListener('DOMContentLoaded', function () {
             `;
             staffBody.appendChild(row);
         });
+
+        updatePagination(totalItems);
     }
 
+    function updatePagination(totalItems) {
+        if (!paginationControls) return;
+        paginationControls.innerHTML = '';
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+        if (totalPages <= 1) return;
+
+        // Previous
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); changePage(${currentPage - 1})">&laquo;</a>`;
+        paginationControls.appendChild(prevLi);
+
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement('li');
+            li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+            li.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); changePage(${i})">${i}</a>`;
+            paginationControls.appendChild(li);
+        }
+
+        // Next
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+        nextLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); changePage(${currentPage + 1})">&raquo;</a>`;
+        paginationControls.appendChild(nextLi);
+    }
+
+    window.changePage = function(page) {
+        const totalPages = Math.ceil(filteredStaff.length / itemsPerPage);
+        if (page < 1 || (totalPages > 0 && page > totalPages)) return;
+        currentPage = page;
+        renderTable();
+    };
     function filterStaff() {
         const searchTerm = (searchInput ? searchInput.value : '').toLowerCase();
         const sourceData = showingArchived ? archivedStaffData : allStaffData;
@@ -637,11 +680,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    if (prevPageBtn) prevPageBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderTable(); } });
-    if (nextPageBtn) nextPageBtn.addEventListener('click', () => {
-        const totalPages = Math.ceil(filteredStaff.length / itemsPerPage);
-        if (currentPage < totalPages) { currentPage++; renderTable(); }
-    });
 
     window.toggleArchive = function (id, currentStatus) {
         const newStatus = currentStatus == 1 ? 0 : 1;

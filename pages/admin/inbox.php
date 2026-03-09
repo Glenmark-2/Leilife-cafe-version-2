@@ -27,9 +27,9 @@ $messages = $inboxService->getInboxMessages();
 </div>
 
 <div class="table-container">
-    <div class="table-wrapper">
+    <div class="table-wrapper" style="max-height: 500px; overflow-y: auto;">
         <table>
-            <thead>
+            <thead style="position: sticky; top: 0; z-index: 1; background-color: #e1d1bbff;">
                 <tr>
                     <th class="nameCol">Name</th>
                     <th class="emailCol">Email</th>
@@ -43,12 +43,15 @@ $messages = $inboxService->getInboxMessages();
             </tbody>
         </table>
     </div>
-    <!-- Pagination -->
-    <div class="pagination-container">
-        <button id="prevPage" class="btn-primary-custom" disabled>Previous</button>
-        <span id="page-info">Showing 0 of 0 messages</span>
-        <button id="nextPage" class="btn-primary-custom" disabled>Next</button>
-    </div>
+</div>
+
+<div id="pagination-container" class="pagination-container mt-3 d-flex justify-content-between align-items-center">
+    <div id="page-info" class="text-muted fw-bold">Showing 0 to 0 of 0 entries</div>
+    <nav aria-label="Inbox pagination">
+        <ul class="pagination pagination-sm mb-0" id="pagination-controls">
+            <!-- Pagination items will be populated by JS -->
+        </ul>
+    </nav>
 </div>
 
 <!-- View Message Modal -->

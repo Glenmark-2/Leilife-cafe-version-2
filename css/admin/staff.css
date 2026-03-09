@@ -99,7 +99,7 @@ table {
 }
 
 thead {
-    background-color: #f8f9fa;
+    background-color: transparent;
     border-bottom: 2px solid #eee;
 }
 
@@ -160,7 +160,7 @@ tr:hover {
 }
 
 .modal-header {
-    background-color: #f8f9fa;
+    background-color: transparent;
     border-bottom: 1px solid #eee;
     border-radius: 12px 12px 0 0;
     flex-shrink: 0; /* Keep header fixed */
@@ -284,4 +284,39 @@ td {
     align-items: center;
     margin-top: 15px;
     gap: 10px;
+}
+/* Scrollable Table Content */
+.table-wrapper::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+    background: #d0b28c;
+    border-radius: 10px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #c4a076;
+}
+
+/* Pagination Style */
+.pagination .page-link {
+    color: #d0b28c !important;
+    border-color: #eee !important;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #d0b28c !important;
+    border-color: #d0b28c !important;
+    color: white !important;
+}
+
+.pagination .page-link:focus {
+    box-shadow: 0 0 0 0.25rem rgba(208, 178, 140, 0.25) !important;
 }

@@ -171,3 +171,33 @@
         width: 20%; 
     }
 }
+
+/* Unavailable Products */
+.card-box.unavailable {
+    opacity: 0.7;
+    filter: grayscale(0.8);
+    position: relative;
+    pointer-events: none; /* Disable interaction but let them see it */
+}
+
+.card-box.unavailable::after {
+    content: 'SOLD OUT';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    background: rgba(220, 53, 69, 0.9);
+    color: white;
+    padding: 5px 15px;
+    font-weight: 800;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    border: 2px solid white;
+    z-index: 2;
+}
+
+.card-box.unavailable .buyBtn {
+    background-color: #ccc !important;
+    cursor: not-allowed;
+}

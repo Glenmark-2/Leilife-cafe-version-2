@@ -2,6 +2,8 @@ let statusModal;
 let orderDetailsModal;
 let confirmationModal;
 let pendingStatusUpdate = null; // Store (status, orderId) to execute after confirmation
+let currentPage = 1;
+const currentLimit = 10;
 
 // Debounce function to limit how often a function is called
 function debounce(func, delay) {
@@ -50,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add filter listener
     document.getElementById('sortOrders').addEventListener('change', function () {
+        currentPage = 1;
         fetchDashboardData();
     });
 
@@ -131,11 +134,12 @@ async function executeStatusUpdate(newStatus) {
 async function fetchDashboardData() {
     try {
         const filter = document.getElementById('sortOrders').value;
-        const response = await fetch(`${window.BASE_URL}/backend/api/admin/get_dashboard_data.php?filter=${filter}`);
+        const response = await fetch(`${window.BASE_URL}/backend/api/admin/get_dashboard_data.php?filter=${filter}&page=${currentPage}&limit=${currentLimit}`);
         const result = await response.json();
 
         if (result.status === 'success') {
             updateDashboardUI(result.data);
+            renderPagination(result.data.totalRecentOrders);
         } else {
             console.error('Failed to fetch dashboard data:', result.message);
         }
@@ -174,18 +178,25 @@ function updateDashboardUI(data) {
             }
         };
 
-        const customerName = `${order.first_name || ''} ${order.last_name || ''}`.trim() || 'Guest';
+        const customerName = `${capitalizeFirstLetter(order.first_name || '')} ${capitalizeFirstLetter(order.last_name || '')}`.trim() || 'Guest';
         const isCancelled = order.status === 'cancelled';
         const typeBadge = order.delivery_method === 'delivery' ? 'bg-secondary' : 'bg-info text-dark';
         const statusClass = `status-${order.status.toLowerCase()}`;
 
         const createdDate = new Date(order.created_at);
-        const dateTime = createdDate.toLocaleDateString() + ' ' + createdDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const mon = monthNames[createdDate.getMonth()];
+        const day = createdDate.getDate();
+        let hours = createdDate.getHours();
+        const mins = String(createdDate.getMinutes()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+        const dateTime = `${mon} ${day}, ${hours}:${mins}${ampm}`;
 
         row.innerHTML = `
             <td>${order.order_number}</td>
             <td>${customerName}</td>
-            <td><span class="badge ${typeBadge}">${order.delivery_method}</span></td>
+            <td><span class="badge ${typeBadge}">${capitalizeFirstLetter(order.delivery_method)}</span></td>
             <td>
                 <button class="status-badge ${statusClass} btn btn-sm" 
                         ${isCancelled ? 'disabled style="opacity: 0.8; cursor: not-allowed;"' : ''} 
@@ -209,7 +220,8 @@ function downloadReceipt(orderId) {
     window.open(`${window.BASE_URL}/pages/admin/pos_receipt.php?order_id=${orderId}`, '_blank');
 }
 function capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
+    if (!string) return '';
+    return string.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 }
 
 function openStatusModal(orderId, orderNumber, currentStatus, deliveryMethod, paymentStatus) {
@@ -280,7 +292,7 @@ async function openOrderDetails(orderId) {
                 });
 
                 tr.innerHTML = `
-                    <td>${item.product_name}</td>
+                    <td>${capitalizeFirstLetter(item.product_name)}</td>
                     <td>₱${parseFloat(item.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                     <td>${item.quantity}</td>
                     <td>₱${parseFloat(item.subtotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
@@ -357,4 +369,49 @@ async function markAsPaid() {
         console.error('Error marking as paid:', error);
         alert('An error occurred.');
     }
+}
+
+function renderPagination(totalItems) {
+    const totalPages = Math.ceil(totalItems / currentLimit);
+    const controls = document.getElementById('pagination-controls');
+    const info = document.getElementById('pagination-info');
+    
+    // Update Info
+    const start = totalItems === 0 ? 0 : (currentPage - 1) * currentLimit + 1;
+    const end = Math.min(currentPage * currentLimit, totalItems);
+    info.innerText = `Showing ${start} to ${end} of ${totalItems} entries`;
+
+    if (totalPages <= 1) {
+        controls.innerHTML = '';
+        return;
+    }
+
+    let html = `
+        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="event.preventDefault(); changePage(${currentPage - 1})">&laquo;</a>
+        </li>`;
+
+    for (let i = 1; i <= totalPages; i++) {
+        html += `
+            <li class="page-item ${i === currentPage ? 'active' : ''}">
+                <a class="page-link" href="#" onclick="event.preventDefault(); changePage(${i})">${i}</a>
+            </li>`;
+    }
+
+    html += `
+        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="event.preventDefault(); changePage(${currentPage + 1})">&raquo;</a>
+        </li>`;
+
+    controls.innerHTML = html;
+}
+
+function changePage(page) {
+    const totalItems = parseInt(document.getElementById('pagination-info').innerText.split('of ')[1]) || 0;
+    const totalPages = Math.ceil(totalItems / currentLimit);
+
+    if (page < 1 || (totalPages > 0 && page > totalPages)) return;
+    
+    currentPage = page;
+    fetchDashboardData();
 }

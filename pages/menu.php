@@ -50,21 +50,29 @@ $firstCategory = array_key_first($menuData);
     const menuData = <?php echo json_encode($menuData); ?>;
     const initialCategory = <?php echo json_encode($firstCategory); ?>;
 
+    function capitalizeFirstLetter(string) {
+        if (!string) return '';
+        return string.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    }
+
     /**
      * Renders a single product card HTML using the structure from partials/menu_card.php
      */
     function createCardHtml(product) {
-        // Using "card-box" structure strictly as requested.
-        // CSS handles width and margins now.
+        const isUnavailable = product.is_available === false;
+        const capitalizedName = capitalizeFirstLetter(product.name);
+
         return `
             <div class="col">
-                <div class="card-box" onclick="window.location.href='index.php?page=solo_product&id=${product.id}'" style="cursor: pointer;">
-                    <img class="product-image" src="${(product.image && typeof product.image === 'string' && product.image.trim() !== '' ? ((!product.image.startsWith('http') && !product.image.startsWith('/')) ? (window.BASE_URL ? window.BASE_URL : '/Leilife_2nd') + '/public/assets/products/' + product.image.trim() : product.image) : (window.BASE_URL ? window.BASE_URL : '/Leilife_2nd') + '/public/assets/products/not_available.png')}" alt="${product.name}">
+                <div class="card-box ${isUnavailable ? 'unavailable' : ''}" 
+                     onclick="${isUnavailable ? 'return false;' : `window.location.href='index.php?page=solo_product&id=${product.id}'`}" 
+                     style="cursor: ${isUnavailable ? 'default' : 'pointer'};">
+                    <img class="product-image" src="${(product.image && typeof product.image === 'string' && product.image.trim() !== '' ? ((!product.image.startsWith('http') && !product.image.startsWith('/')) ? (window.BASE_URL ? window.BASE_URL : '/Leilife_2nd') + '/public/assets/products/' + product.image.trim() : product.image) : (window.BASE_URL ? window.BASE_URL : '/Leilife_2nd') + '/public/assets/products/food_photo.png')}" alt="${capitalizedName}" onerror="this.src='${(window.BASE_URL ? window.BASE_URL : '/Leilife_2nd') + '/public/assets/products/food_photo.png'}'">
                     <div style="padding: 8px;">
-                        <p class="mb-1 text-truncate" title="${product.name}">${product.name}</p>
+                        <p class="mb-1 text-truncate" title="${capitalizedName}">${capitalizedName}</p>
                         <div id="price-div">
                             <p>₱${product.price.toFixed(2)}</p>
-                            <button class="buyBtn">Buy</button>
+                            <button class="buyBtn" ${isUnavailable ? 'disabled' : ''}>${isUnavailable ? 'Sold Out' : 'Buy'}</button>
                         </div>
                     </div>
                 </div>

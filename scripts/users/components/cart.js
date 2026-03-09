@@ -135,7 +135,11 @@ function renderCart() {
 
     // Calculate Totals
     let subtotal = 0;
-    cart.forEach(item => subtotal += item.price * item.qty);
+    cart.forEach(item => {
+        if (item.is_available !== false) {
+            subtotal += item.price * item.qty;
+        }
+    });
 
     // Update Badge (Count unique items, not total quantity)
     const badge = document.getElementById('cart-badge');
@@ -168,8 +172,9 @@ function renderCart() {
     // Check out button
     const checkoutBtn = document.querySelector('.totals-box .btn-primary-custom.justify-content-center');
     if (checkoutBtn) {
-        // Disable on init if empty
-        if (cart.length === 0) {
+        // Disable on init if empty OR only unavailable items
+        const hasAvailableItems = cart.some(item => item.is_available !== false);
+        if (cart.length === 0 || !hasAvailableItems) {
             checkoutBtn.setAttribute('disabled', true);
             checkoutBtn.style.opacity = '0.6';
             checkoutBtn.style.cursor = 'not-allowed';
@@ -180,7 +185,7 @@ function renderCart() {
         }
 
         checkoutBtn.onclick = () => {
-            if (cart.length === 0) return;
+            if (cart.length === 0 || !hasAvailableItems) return;
 
             if (window.isStoreOpen === false) {
                 alert("Sorry, the store is currently closed. We are not accepting orders at the moment.");
@@ -216,14 +221,21 @@ function renderCart() {
         const minusAction = isTrash ? `removeCartItem(${index})` : `updateCartQty(${index}, -1)`;
         const minusClass = isTrash ? 'btn-outline-danger' : 'btn-outline-secondary';
 
+        const capitalizedName = capitalizeFirstLetter(item.name);
+
         if (!el) {
             el = document.createElement('div');
             el.className = 'cart-item';
-            // Removed inline styles (width, display, justifyContent, alignItems, padding)
-            // Relies on css/users/components/cart.css .cart-item
+            if (item.is_available === false) el.classList.add('unavailable-item');
             el.innerHTML = getCartItemHTML(item, index, minusIcon, minusAction, minusClass, imageSrc);
             container.appendChild(el);
         } else {
+            if (item.is_available === false) {
+                el.classList.add('unavailable-item');
+            } else {
+                el.classList.remove('unavailable-item');
+            }
+            
             const minusBtn = el.querySelector('.btn-minus');
             const plusBtn = el.querySelector('.btn-plus');
             const qtySpan = el.querySelector('.qty-span');
@@ -238,34 +250,51 @@ function renderCart() {
                 }
                 plusBtn.setAttribute('onclick', `updateCartQty(${index}, 1)`);
                 if (qtySpan.textContent != item.qty) qtySpan.textContent = item.qty;
-                priceStrong.textContent = '₱' + (item.price * item.qty).toFixed(2);
-                if (nameSpan && nameSpan.textContent !== item.name) {
-                    nameSpan.textContent = item.name;
-                    nameSpan.title = item.name;
+                
+                if (item.is_available === false) {
+                    priceStrong.innerHTML = '<span class="badge bg-danger">Unavailable</span>';
+                } else {
+                    priceStrong.textContent = '₱' + (item.price * item.qty).toFixed(2);
+                }
+
+                if (nameSpan && nameSpan.textContent !== capitalizedName) {
+                    nameSpan.textContent = capitalizedName;
+                    nameSpan.title = capitalizedName;
+                    nameSpan.style.textDecoration = 'none'; // Ensure no line-through
                 }
             } else {
-                el.innerHTML = getCartItemHTML(item, index, minusIcon, minusAction, minusClass, imageSrc); // Re-render if structure damaged
+                el.innerHTML = getCartItemHTML(item, index, minusIcon, minusAction, minusClass, imageSrc);
             }
         }
     });
 }
 
 function getCartItemHTML(item, index, minusIcon, minusAction, minusClass, imageSrc) {
-    // Optionally include image if desired, but current design might not have it in the list view?
-    // The previous implementation was:
+    const isUnavailable = item.is_available === false;
+    const priceDisplay = isUnavailable 
+        ? '<span class="badge bg-danger" style="font-size: 0.7rem;">Unavailable</span>' 
+        : `₱${(item.price * item.qty).toFixed(2)}`;
+    
+    const capitalizedName = capitalizeFirstLetter(item.name);
+    
     return `
-        <div style="display:flex; align-items:center; gap:12px; flex-grow: 1;">
+        <div style="display:flex; align-items:center; gap:12px; flex-grow: 1; ${isUnavailable ? 'opacity: 0.7;' : ''}">
             <div style="display: flex; align-items: center; gap: 8px;">
                 <button class="btn btn-sm ${minusClass} py-0 px-2 btn-minus" onclick="${minusAction}">${minusIcon}</button>
                 <span class="qty-span">${item.qty}</span>
-                <button class="btn btn-sm btn-outline-secondary py-0 px-2 btn-plus" onclick="updateCartQty(${index}, 1)">+</button>
+                <button class="btn btn-sm btn-outline-secondary py-0 px-2 btn-plus" onclick="updateCartQty(${index}, 1)" ${isUnavailable ? 'disabled' : ''}>+</button>
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
-                <span class="text-truncate name-span" style="max-width: 140px;" title="${item.name}">${item.name}</span>
+                <span class="text-truncate name-span" style="max-width: 140px;" title="${capitalizedName}">${capitalizedName}</span>
             </div>
         </div>
-        <strong class="price-strong">₱${(item.price * item.qty).toFixed(2)}</strong>
+        <strong class="price-strong">${priceDisplay}</strong>
     `;
+}
+
+function capitalizeFirstLetter(string) {
+    if (!string) return '';
+    return string.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 }
 
 window.removeCartItem = function (index) {
@@ -330,7 +359,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     } else {
         cart = JSON.parse(localStorage.getItem('leilife_cart')) || [];
-        renderCart();
+        if (cart.length > 0) {
+            checkGuestCartStatus(cart);
+        } else {
+            renderCart();
+        }
+    }
+
+    async function checkGuestCartStatus(items) {
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'check_guest_availability', items: items })
+            });
+            const data = await response.json();
+            if (data.success) {
+                cart = data.cart || [];
+                renderCart();
+            }
+        } catch (error) {
+            console.error('Error checking guest availability:', error);
+            renderCart();
+        }
     }
 
     const shouldOpen = sessionStorage.getItem('trigger_cart_open');

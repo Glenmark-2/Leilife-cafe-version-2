@@ -28,7 +28,7 @@
         }
 
         foreach ($featuredProducts as $index => $product) {
-            $title = $product['name'];
+            $title = ucwords(strtolower($product['name']));
             $price = $product['price'];
             $id = $product['product_id'];
             // Using category name as "Size" placeholder since size isn't in DB, or empty string
@@ -40,7 +40,7 @@
                 // dynamic path handling
                 $image = UrlHelper::getBaseUrl() . "/public/assets/products/" . $img;
             } else {
-                $image = $img ?: UrlHelper::getBaseUrl() . "/public/assets/products/not_available.png";
+                $image = $img ?: UrlHelper::getBaseUrl() . "/public/assets/products/food_photo.png";
             }
 
             $description = $product['description'];
@@ -66,21 +66,21 @@
     <div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-inner" style="max-height: 400px;">
             <div class="carousel-item active">
-                <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/products/lasagna_supreme.jpg" class="d-block w-100" style="object-fit: cover; height: 400px;" alt="Lasagna Supreme">
+                <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/products/lasagna_supreme.jpg" class="d-block w-100" style="object-fit: cover; height: 400px;" alt="Lasagna Supreme" onerror="this.src='<?= UrlHelper::getBaseUrl() ?>/public/assets/products/food_photo.png'">
                 <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded">
                     <h5>Lasagna Supreme</h5>
                     <p>Layers of pasta, meat sauce, and cheese.</p>
                 </div>
             </div>
             <div class="carousel-item">
-                <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/products/matcha_latte.jpg" class="d-block w-100" style="object-fit: cover; height: 400px;" alt="Matcha Latte">
+                <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/products/matcha_latte.jpg" class="d-block w-100" style="object-fit: cover; height: 400px;" alt="Matcha Latte" onerror="this.src='<?= UrlHelper::getBaseUrl() ?>/public/assets/products/food_photo.png'">
                 <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded">
                     <h5>Matcha Latte</h5>
                     <p>Premium green tea milk for a refreshing sip.</p>
                 </div>
             </div>
             <div class="carousel-item">
-                <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/products/chicken_teriyaki_bowl.jpg" class="d-block w-100" style="object-fit: cover; height: 400px;" alt="Chicken Teriyaki">
+                <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/products/chicken_teriyaki_bowl.jpg" class="d-block w-100" style="object-fit: cover; height: 400px;" alt="Chicken Teriyaki" onerror="this.src='<?= UrlHelper::getBaseUrl() ?>/public/assets/products/food_photo.png'">
                 <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded">
                     <h5>Chicken Teriyaki</h5>
                     <p>Sweet and savory grilled chicken perfection.</p>

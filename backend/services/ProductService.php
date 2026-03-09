@@ -2,25 +2,28 @@
 
 require_once __DIR__ . '/../repositories/ProductRepository.php';
 
-class ProductService {
+class ProductService
+{
     private $productRepo;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->productRepo = new ProductRepository();
     }
 
-    public function getMenuStructure() {
+    public function getMenuStructure()
+    {
         $rawData = $this->productRepo->getFullMenuData();
         $menuData = [];
 
         foreach ($rawData as $row) {
             $mainCat = $row['main_category'];
             $subCat = $row['sub_category'];
-            
+
             if (!isset($menuData[$mainCat])) {
                 $menuData[$mainCat] = [];
             }
-            
+
             if (!isset($menuData[$mainCat][$subCat])) {
                 $menuData[$mainCat][$subCat] = [];
             }
@@ -30,50 +33,61 @@ class ProductService {
                 'name' => $row['product_name'],
                 'price' => (float)$row['price'],
                 'image' => $row['image_path'], // Mapping image_path to image for frontend compatibility
-                'description' => $row['description']
+                'description' => $row['description'],
+                'is_available' => (bool)$row['is_available']
             ];
         }
 
         return $menuData;
     }
 
-    public function getProductById($id) {
+    public function getProductById($id)
+    {
         return $this->productRepo->findById($id);
     }
 
-    public function addFavorite($user_id, $product_id) {
+    public function addFavorite($user_id, $product_id)
+    {
         return $this->productRepo->addFavorite($user_id, $product_id);
     }
 
-    public function removeFavorite($user_id, $product_id) {
+    public function removeFavorite($user_id, $product_id)
+    {
         return $this->productRepo->removeFavorite($user_id, $product_id);
     }
 
-    public function isFavorite($user_id, $product_id) {
+    public function isFavorite($user_id, $product_id)
+    {
         return $this->productRepo->isFavorite($user_id, $product_id);
     }
 
-    public function getUserFavorites($user_id) {
+    public function getUserFavorites($user_id)
+    {
         return $this->productRepo->getFavoritesByUserId($user_id);
     }
 
-    public function getAllProductsAdmin($filter = []) {
+    public function getAllProductsAdmin($filter = [])
+    {
         return $this->productRepo->getAllProductsAdmin($filter);
     }
 
-    public function getAllCategories() {
+    public function getAllCategories()
+    {
         return $this->productRepo->getAllCategories();
     }
 
-    public function archiveProduct($productId, $isArchived = 1) {
+    public function archiveProduct($productId, $isArchived = 1)
+    {
         return $this->productRepo->updateArchivedStatus($productId, $isArchived);
     }
 
-    public function updateProduct($id, $data) {
+    public function updateProduct($id, $data)
+    {
         return $this->productRepo->updateProduct($id, $data);
     }
 
-    public function createProduct($data) {
+    public function createProduct($data)
+    {
         return $this->productRepo->createProduct($data);
     }
 }

@@ -108,18 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
     fromDate.addEventListener('change', () => { currentPage = 1; saveFilters(); fetchSalesData(); });
     toDate.addEventListener('change', () => { currentPage = 1; saveFilters(); fetchSalesData(); });
 
-    prevBtn.addEventListener('click', () => {
-        if (currentPage > 1) {
-            currentPage--;
-            fetchSalesData();
-        }
-    });
-
-    nextBtn.addEventListener('click', () => {
-        currentPage++;
-        fetchSalesData();
-    });
-
     async function fetchSalesData() {
         const params = new URLSearchParams({
             status: statusFilter.value,
@@ -139,19 +127,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 updatePagination(result.pagination);
             } else {
                 console.error('Error fetching data:', result.message);
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Error loading data: ${result.message}</td></tr>`;
+                const salesBody = document.getElementById('sales-body');
+                if (salesBody) salesBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Error loading data: ${result.message}</td></tr>`;
             }
         } catch (error) {
             console.error('Network error:', error);
-            tbody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Network error: ${error.message}. Check console for details.</td></tr>`;
+            const salesBody = document.getElementById('sales-body');
+            if (salesBody) salesBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Network error: ${error.message}. Check console for details.</td></tr>`;
         }
     }
 
     function renderTable(data) {
-        tbody.innerHTML = '';
+        const salesBody = document.getElementById('sales-body');
+        if (!salesBody) return;
+        salesBody.innerHTML = '';
 
         if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="text-align: center; padding: 20px;">No records found</td></tr>';
+            salesBody.innerHTML = '<tr><td colspan="6" class="text-center" style="text-align: center; padding: 20px;">No records found</td></tr>';
             return;
         }
 
@@ -162,7 +154,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const orderId = order.order_number || `#${order.id}`;
 
             // Format Name
-            const name = (order.first_name || 'Guest') + ' ' + (order.last_name || '');
+            const firstName = capitalizeFirstLetter(order.first_name || '');
+            const lastName = capitalizeFirstLetter(order.last_name || '');
+            const name = (firstName + ' ' + lastName).trim() || 'Guest';
 
             // Format Amount
             const amount = '₱' + parseFloat(order.total_amount).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -193,17 +187,60 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td class="dateCol">${date}</td>
             `;
 
-            tbody.appendChild(tr);
+            salesBody.appendChild(tr);
         });
     }
 
     function updatePagination(pagination) {
         currentPage = parseInt(pagination.current_page);
         const totalPages = parseInt(pagination.total_pages);
+        const totalItems = parseInt(pagination.total_records);
+        
+        const pageInfo = document.getElementById('page-info');
+        const controls = document.getElementById('pagination-controls');
+        
+        if (pageInfo) {
+            const start = totalItems === 0 ? 0 : (currentPage - 1) * limit + 1;
+            const end = Math.min(currentPage * limit, totalItems);
+            pageInfo.innerText = `Showing ${start} to ${end} of ${totalItems} entries`;
+        }
 
-        pageInfo.textContent = `Page ${currentPage} of ${totalPages || 1}`;
+        if (controls) {
+            controls.innerHTML = '';
+            if (totalPages <= 1) return;
 
-        prevBtn.disabled = currentPage <= 1;
-        nextBtn.disabled = currentPage >= totalPages;
+            // Previous
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); window.changePage(${currentPage - 1})">&laquo;</a>`;
+            controls.appendChild(prevLi);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); window.changePage(${i})">${i}</a>`;
+                controls.appendChild(li);
+            }
+
+            // Next
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); window.changePage(${currentPage + 1})">&raquo;</a>`;
+            controls.appendChild(nextLi);
+        }
+    }
+
+    window.changePage = function(page) {
+        // Need to know totalPages from pagination object or re-calculate
+        // For simplicity, fetchSalesData will handle out-of-bounds in backend or here via previous pagination state
+        // Let's just call fetchSalesData if page is valid
+        if (page < 1) return;
+        currentPage = page;
+        fetchSalesData();
+    };
+
+    function capitalizeFirstLetter(string) {
+        if (!string) return '';
+        return string.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
     }
 });
