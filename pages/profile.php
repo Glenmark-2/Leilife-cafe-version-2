@@ -39,14 +39,14 @@ if (!$user) {
                 <div class="box-input">
                     <div class="info">
                         <p class="label">First Name</p>
-                        <p class="display-value"><?php echo htmlspecialchars($user->first_name); ?></p>
-                        <input class="edit-input" type="text" name="first_name" value="<?php echo htmlspecialchars($user->first_name); ?>" style="display:none;">
+                        <p class="display-value"><?php echo ucwords(strtolower(htmlspecialchars($user->first_name))); ?></p>
+                        <input class="edit-input" type="text" name="first_name" value="<?php echo ucwords(strtolower(htmlspecialchars($user->first_name))); ?>" style="display:none;">
                     </div>
 
                     <div class="info">
                         <p class="label">Last Name</p>
-                        <p class="display-value"><?php echo htmlspecialchars($user->last_name); ?></p>
-                        <input class="edit-input" type="text" name="last_name" value="<?php echo htmlspecialchars($user->last_name); ?>" style="display:none;">
+                        <p class="display-value"><?php echo ucwords(strtolower(htmlspecialchars($user->last_name))); ?></p>
+                        <input class="edit-input" type="text" name="last_name" value="<?php echo ucwords(strtolower(htmlspecialchars($user->last_name))); ?>" style="display:none;">
                     </div>
 
                     <div class="info">
@@ -83,35 +83,34 @@ if (!$user) {
                 <div class="box-input">
                     <div class="info">
                         <p class="label">Street</p>
-                        <p class="display-value"><?php echo htmlspecialchars($user->street ?? 'Not set'); ?></p>
-                        <input class="edit-input" type="text" name="street" value="<?php echo htmlspecialchars($user->street ?? ''); ?>" style="display:none;">
+                        <p class="display-value"><?php echo ucwords(strtolower(htmlspecialchars($user->street ?? 'Not set'))); ?></p>
+                        <input class="edit-input" type="text" name="street" value="<?php echo ucwords(strtolower(htmlspecialchars($user->street ?? ''))); ?>" style="display:none;">
                     </div>
 
                     <div class="info">
                         <p class="label">Barangay</p>
-                        <p class="display-value"><?php echo htmlspecialchars($user->barangay ?? 'Not set'); ?></p>
-                        <input class="edit-input" type="text" name="barangay" value="<?php echo htmlspecialchars($user->barangay ?? ''); ?>" style="display:none;">
+                        <p class="display-value"><?php echo ucwords(strtolower(htmlspecialchars($user->barangay ?? 'Not set'))); ?></p>
+                        <input class="edit-input" type="text" name="barangay" value="<?php echo ucwords(strtolower(htmlspecialchars($user->barangay ?? ''))); ?>" style="display:none;">
                     </div>
 
                     <div class="info">
                         <p class="label">City</p>
-                        <p class="display-value"><?php echo htmlspecialchars($user->city ?? 'Caloocan City'); ?></p>
-                        <input class="edit-input" type="tel" name="city" value="<?php echo htmlspecialchars($user->city ?? ''); ?>" style="display:none;">
+                        <p class="display-value"><?php echo ucwords(strtolower(htmlspecialchars($user->city ?? 'Caloocan City'))); ?></p>
+                        <input class="edit-input" type="tel" name="city" value="<?php echo ucwords(strtolower(htmlspecialchars($user->city ?? ''))); ?>" style="display:none;">
                     </div>
 
                     <div class="info">
                         <p class="label">Province</p>
-                        <p class="display-value"><?php echo htmlspecialchars($user->province ?? 'Metro Manila'); ?></p>
-                        <input class="edit-input" type="text" name="province" value="<?php echo htmlspecialchars($user->province ?? ''); ?>" style="display:none;">
+                        <p class="display-value"><?php echo ucwords(strtolower(htmlspecialchars($user->province ?? 'Metro Manila'))); ?></p>
+                        <input class="edit-input" type="text" name="province" value="<?php echo ucwords(strtolower(htmlspecialchars($user->province ?? ''))); ?>" style="display:none;">
                     </div>
 
                     <div class="info">
                         <p class="label">Region</p>
-                        <p class="display-value"><?php echo htmlspecialchars($user->region ?? 'NCR'); ?></p>
-                        <input class="edit-input" type="text" name="region" value="<?php echo htmlspecialchars($user->region ?? ''); ?>" style="display:none;">
+                        <p class="display-value"><?php echo ucwords(strtolower(htmlspecialchars($user->region ?? 'NCR'))); ?></p>
+                        <input class="edit-input" type="text" name="region" value="<?php echo ucwords(strtolower(htmlspecialchars($user->region ?? ''))); ?>" style="display:none;">
                     </div>
                 </div>
-
             <?php endif; ?>
         </div>
 
@@ -151,18 +150,32 @@ if (!$user) {
             <script>
                 const userFavorites = <?php echo json_encode($jsFavorites); ?>;
 
+                function capitalizeFirstLetter(string) {
+                    if (!string) return '';
+                    return string.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                }
+
                 // Duplicated from menu.php for consistency as requested
                 function createCardHtml(product) {
-                    // Using "card-box" structure strictly as requested.
-                    // CSS handles width and margins now.
+                    const baseUrl = window.BASE_URL || '/Leilife_2nd';
+                    const imagePath = (product.image && typeof product.image === 'string' && product.image.trim() !== '') ?
+                        ((!product.image.startsWith('http') && !product.image.startsWith('/')) ? baseUrl + '/public/assets/products/' + product.image.trim() : product.image) :
+                        baseUrl + '/public/assets/products/food_photo.png';
+
+                    const capitalizedName = capitalizeFirstLetter(product.name);
+
                     return `
                         <div class="col" style="width: 200px;">
-                            <div class="card-box" onclick="window.location.href='solo_product.php?id=${product.id}'" style="cursor: pointer; border: 1px solid #ddd; border-radius: 10px; overflow: hidden;">
-                                <img class="product-image" src="${(product.image && typeof product.image === 'string' && product.image.trim() !== '' ? ((!product.image.startsWith('http') && !product.image.startsWith('/')) ? '/Leilife_2nd/public/assets/products/' + product.image.trim() : product.image) : '/Leilife_2nd/public/assets/products/not_available.png')}" alt="${product.name}" style="width: 100%; height: 150px; object-fit: cover;">
+                            <div class="card-box" onclick="window.location.href='index.php?page=solo_product&id=${product.id}'" style="cursor: pointer; border: 1px solid #ddd; border-radius: 10px; overflow: hidden;">
+                                <img class="product-image" 
+                                     src="${imagePath}" 
+                                     alt="${capitalizedName}" 
+                                     style="width: 100%; height: 150px; object-fit: cover;"
+                                     onerror="this.src='${baseUrl}/public/assets/products/food_photo.png'">
                                 <div style="padding: 8px;">
-                                    <p class="mb-1 text-truncate" title="${product.name}" style="font-weight: bold; margin-bottom: 5px;">${product.name}</p>
+                                    <p class="mb-1 text-truncate" title="${capitalizedName}" style="font-weight: bold; margin-bottom: 5px;">${capitalizedName}</p>
                                     <div id="price-div" style="display: flex; justify-content: space-between; align-items: center;">
-                                        <p>₱${product.price ? product.price.toFixed(2) : '0.00'}</p>
+                                        <p>₱${product.price ? parseFloat(product.price).toFixed(2) : '0.00'}</p>
                                         <button class="buyBtn btn-primary-custom" style="padding: 5px 15px; font-size: 0.8rem;">Buy</button>
                                     </div>
                                 </div>

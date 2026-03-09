@@ -11,15 +11,15 @@ $isActive = $isActive ?? false; // if selected
 
     <div class="product-card <?= $isActive ? 'active' : '' ?>"
         data-id="<?= $id ?? '' ?>"
-        data-name="<?= htmlspecialchars($title) ?>"
+        data-name="<?= ucwords(strtolower(htmlspecialchars($title))) ?>"
         data-price="<?= $price ?>"
         data-image="<?= $image ?>">
 
         <div class="product-image">
-            <img src="<?= $image ?>" alt="<?= htmlspecialchars($title) ?>">
+            <img src="<?= $image ?>" alt="<?= htmlspecialchars($title) ?>" onerror="this.src='<?= UrlHelper::getBaseUrl() ?>/public/assets/products/food_photo.png'">
         </div>
 
-        <h5 class="product-title"><?= htmlspecialchars($title) ?></h5>
+        <h5 class="product-title"><?= ucwords(strtolower(htmlspecialchars($title))) ?></h5>
 
         <p class="product-desc"><?= htmlspecialchars($description) ?></p>
 

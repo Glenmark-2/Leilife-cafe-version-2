@@ -20,7 +20,7 @@
     display: flex;
     flex-direction: column;
     padding: 24px;
-    background: #f8fafc;
+    
     min-height: calc(100vh - 80px);
 }
 
@@ -100,8 +100,8 @@
 }
 
 .dashboard-table thead th {
-    background: #f8fafc;
-    color: #64748b;
+    background: transparent;
+    color: #555;
     font-weight: 600;
     text-transform: uppercase;
     font-size: 0.75rem;
@@ -204,4 +204,48 @@
 
 .dlBtn:hover {
     background-color: #f1f5f9;
+}
+/* Pagination Style (Products Page Style) */
+.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    gap: 10px;
+    padding: 0 10px;
+}
+
+.pagination .page-link {
+    color: #d0b28c !important;
+    border-color: #eee !important;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #d0b28c !important;
+    border-color: #d0b28c !important;
+    color: white !important;
+}
+
+.pagination .page-link:focus {
+    box-shadow: 0 0 0 0.25rem rgba(208, 178, 140, 0.25) !important;
+}
+
+/* Scrollbar Style */
+.table-responsive::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #d0b28c;
+    border-radius: 10px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #c4a076;
 }

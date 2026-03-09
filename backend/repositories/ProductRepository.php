@@ -31,11 +31,12 @@ class ProductRepository
                 p.name AS product_name,
                 p.description,
                 p.price,
-                p.image_path
+                p.image_path,
+                p.is_available
             FROM " . $this->table_products . " p
             JOIN " . $this->table_categories . " c ON p.category_id = c.category_id
             JOIN " . $this->table_categories . " parent ON c.parent_id = parent.category_id
-            WHERE p.is_available = 1 AND p.is_archived = 0
+            WHERE p.is_archived = 0
             ORDER BY parent.category_id, c.category_id, p.name ASC
         ";
 

@@ -4,8 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sortSelect = document.getElementById('sortInbox');
     const toggleArchiveBtn = document.getElementById('toggle-archive');
     const pageInfo = document.getElementById('page-info');
-    const prevPageBtn = document.getElementById('prevPage');
-    const nextPageBtn = document.getElementById('nextPage');
+    const paginationControls = document.getElementById('pagination-controls');
 
     let messages = [...allMessages];
     let filteredMessages = [];
@@ -15,29 +14,32 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentPage = 1;
     const itemsPerPage = 10;
 
+    function capitalizeFirstLetter(string) {
+        if (!string) return '';
+        return string.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    }
+
     function renderTable() {
+        if (!inboxTableBody) return;
         inboxTableBody.innerHTML = '';
 
         const totalItems = filteredMessages.length;
         const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-        // Update pagination buttons state
-        prevPageBtn.disabled = currentPage === 1;
-        nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
-
         // Slice data for current page
         const start = (currentPage - 1) * itemsPerPage;
-        const end = start + itemsPerPage;
+        const end = Math.min(start + itemsPerPage, totalItems);
         const pageItems = filteredMessages.slice(start, end);
 
         // Update page info
         if (totalItems === 0) {
-            pageInfo.innerText = 'Showing 0 of 0 messages';
+            if (pageInfo) pageInfo.innerText = 'Showing 0 to 0 of 0 entries';
             inboxTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px;">No ${showingArchived ? 'archived' : ''} messages found.</td></tr>`;
+            updatePagination(0);
             return;
         }
 
-        pageInfo.innerText = `Showing ${start + 1} to ${Math.min(end, totalItems)} of ${totalItems} messages`;
+        if (pageInfo) pageInfo.innerText = `Showing ${start + 1} to ${end} of ${totalItems} entries`;
 
         pageItems.forEach(msg => {
             const row = document.createElement('tr');
@@ -59,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const archiveTitle = msg.is_archived == 1 ? 'Restore' : 'Archive';
 
             row.innerHTML = `
-                <td class="nameCol">${msg.name || '<span class="text-muted">N/A</span>'}</td>
+                <td class="nameCol">${capitalizeFirstLetter(msg.name) || '<span class="text-muted">N/A</span>'}</td>
                 <td class="emailCol">${msg.email}</td>
                 <td class="subCol">${msg.subject || 'No Subject'}</td>
                 <td class="dateCol">${dateStr}</td>
@@ -72,7 +74,43 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             inboxTableBody.appendChild(row);
         });
+
+        updatePagination(totalItems);
     }
+
+    function updatePagination(totalItems) {
+        if (!paginationControls) return;
+        paginationControls.innerHTML = '';
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+        if (totalPages <= 1) return;
+
+        // Previous
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); window.changePage(${currentPage - 1})">&laquo;</a>`;
+        paginationControls.appendChild(prevLi);
+
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement('li');
+            li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+            li.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); window.changePage(${i})">${i}</a>`;
+            paginationControls.appendChild(li);
+        }
+
+        // Next
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+        nextLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); window.changePage(${currentPage + 1})">&raquo;</a>`;
+        paginationControls.appendChild(nextLi);
+    }
+
+    window.changePage = function(page) {
+        const totalPages = Math.ceil(filteredMessages.length / itemsPerPage);
+        if (page < 1 || (totalPages > 0 && page > totalPages)) return;
+        currentPage = page;
+        renderTable();
+    };
 
     function filterMessages() {
         const searchTerm = (searchInput.value || '').toLowerCase();
@@ -101,21 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderTable();
     }
 
-    // Pagination Listeners
-    prevPageBtn.addEventListener('click', () => {
-        if (currentPage > 1) {
-            currentPage--;
-            renderTable();
-        }
-    });
-
-    nextPageBtn.addEventListener('click', () => {
-        const totalPages = Math.ceil(filteredMessages.length / itemsPerPage);
-        if (currentPage < totalPages) {
-            currentPage++;
-            renderTable();
-        }
-    });
 
     searchInput.addEventListener('input', filterMessages);
     sortSelect.addEventListener('change', filterMessages);

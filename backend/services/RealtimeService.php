@@ -39,7 +39,7 @@ class RealtimeService
     {
         try {
             self::init();
-            
+
             // Check if credentials exist before triggering
             if (empty(getenv('PUSHER_KEY'))) {
                 error_log("Pusher Error: PUSHER_KEY is not set in .env");

@@ -4,17 +4,20 @@ require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../models/Cart.php';
 require_once __DIR__ . '/../models/CartItem.php';
 
-class CartRepository {
+class CartRepository
+{
     private $conn;
     private $table_carts = "carts";
     private $table_items = "cart_items";
 
-    public function __construct($db) {
+    public function __construct($db)
+    {
         $this->conn = $db;
         $this->ensureTablesExist();
     }
 
-    private function ensureTablesExist() {
+    private function ensureTablesExist()
+    {
         if (!$this->conn) return;
 
         $sql = "CREATE TABLE IF NOT EXISTS carts (
@@ -38,7 +41,8 @@ class CartRepository {
         $this->conn->exec($sql2);
     }
 
-    public function getCartByUserId($userId) {
+    public function getCartByUserId($userId)
+    {
         $query = "SELECT * FROM " . $this->table_carts . " WHERE user_id = :user_id LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':user_id', $userId);
@@ -53,11 +57,12 @@ class CartRepository {
         return null;
     }
 
-    public function createCart($userId) {
+    public function createCart($userId)
+    {
         $query = "INSERT INTO " . $this->table_carts . " (user_id) VALUES (:user_id)";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':user_id', $userId);
-        
+
         if ($stmt->execute()) {
             $cartId = $this->conn->lastInsertId();
             return $this->getCartById($cartId);
@@ -65,7 +70,8 @@ class CartRepository {
         return false;
     }
 
-    public function getCartById($id) {
+    public function getCartById($id)
+    {
         $query = "SELECT * FROM " . $this->table_carts . " WHERE id = :id LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id', $id);
@@ -78,12 +84,13 @@ class CartRepository {
         return null;
     }
 
-    public function getCartItems($cartId) {
-        $query = "SELECT ci.*, p.name as product_name, p.price, p.image_path 
+    public function getCartItems($cartId)
+    {
+        $query = "SELECT ci.*, p.name as product_name, p.price, p.image_path, p.is_available 
                   FROM " . $this->table_items . " ci
                   JOIN products p ON ci.product_id = p.product_id
                   WHERE ci.cart_id = :cart_id";
-        
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':cart_id', $cartId);
         $stmt->execute();
@@ -95,7 +102,8 @@ class CartRepository {
         return $items;
     }
 
-    public function addItem($cartId, $productId, $quantity) {
+    public function addItem($cartId, $productId, $quantity)
+    {
         // Check if item exists first
         $query = "SELECT id, quantity FROM " . $this->table_items . " WHERE cart_id = :cart_id AND product_id = :product_id LIMIT 1";
         $stmt = $this->conn->prepare($query);
@@ -119,7 +127,8 @@ class CartRepository {
         }
     }
 
-    public function updateItemQty($cartId, $productId, $quantity) {
+    public function updateItemQty($cartId, $productId, $quantity)
+    {
         if ($quantity <= 0) {
             return $this->removeItem($cartId, $productId);
         }
@@ -132,15 +141,17 @@ class CartRepository {
         return $stmt->execute();
     }
 
-    public function removeItem($cartId, $productId) {
+    public function removeItem($cartId, $productId)
+    {
         $query = "DELETE FROM " . $this->table_items . " WHERE cart_id = :cart_id AND product_id = :product_id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':cart_id', $cartId);
         $stmt->bindParam(':product_id', $productId);
         return $stmt->execute();
     }
-    
-    public function clearCart($cartId) {
+
+    public function clearCart($cartId)
+    {
         $query = "DELETE FROM " . $this->table_items . " WHERE cart_id = :cart_id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':cart_id', $cartId);

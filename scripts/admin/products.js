@@ -1,3 +1,8 @@
+function capitalizeFirstLetter(str) {
+    if (!str) return '';
+    return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const productsTableBody = document.getElementById('products-body');
     const searchInput = document.getElementById('product-search');
@@ -30,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         paginatedProducts.forEach(product => {
             const row = document.createElement('tr');
 
-            const imageFilename = (product.image_path && product.image_path.trim() !== '') ? product.image_path.trim().replace(/\s+/g, '_') : 'not_available.png';
+            const imageFilename = (product.image_path && product.image_path.trim() !== '') ? product.image_path.trim().replace(/\s+/g, '_') : 'food_photo.png';
             const imagePath = `${window.BASE_URL}/public/assets/products/${imageFilename}`;
 
             const statusClass = product.is_available == 1 ? 'status-available' : 'status-unavailable';
@@ -42,15 +47,15 @@ document.addEventListener('DOMContentLoaded', () => {
             row.innerHTML = `
                 <td class="nameCol">
                     <div class="prodNameDiv">
-                        <img src="${imagePath}" alt="${product.name}" class="productPhoto" onerror="this.src='${window.BASE_URL}/public/assets/leilife.png'">
+                        <img src="${imagePath}" alt="${product.name}" class="productPhoto" onerror="this.src='${window.BASE_URL}/public/assets/products/food_photo.png'">
                         <div>
-                            <p class="prodName">${product.name} ${product.is_archived == 1 ? '<span class="badge bg-secondary">Archived</span>' : ''}</p>
-                            <p class="prodDescription">${product.description || 'No description available.'}</p>
+                            <p class="prodName">${capitalizeFirstLetter(product.name)} ${product.is_archived == 1 ? '<span class="badge bg-secondary">Archived</span>' : ''}</p>
+                            <p class="prodDescription">${product.description ? product.description.charAt(0).toUpperCase() + product.description.slice(1).toLowerCase() : 'No description available.'}</p>
                         </div>
                     </div>
                 </td>
                 <td class="priceCol">P ${parseFloat(product.price).toFixed(2)}</td>
-                <td class="catCol">${product.category_name || 'N/A'}</td>
+                <td class="catCol">${capitalizeFirstLetter(product.category_name) || 'N/A'}</td>
                 <td class="statusCol"><span class="${statusClass}">${statusText}</span></td>
                 <td class="actionsCol">
                     <div class="action-header-buttons">
@@ -203,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
         editForm.reset();
         editForm.classList.remove('was-validated');
         document.getElementById('edit-product-id').value = '';
-        document.getElementById('edit-img-preview').src = `${window.BASE_URL}/public/assets/products/not_available.png`;
+        document.getElementById('edit-img-preview').src = `${window.BASE_URL}/public/assets/products/food_photo.png`;
 
         // Update Modal UI
         modalTitle.innerText = 'Add New Product';
@@ -230,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Populate Image Preview
         const preview = document.getElementById('edit-img-preview');
-        const filename = (product.image_path && product.image_path.trim() !== '') ? product.image_path.trim().replace(/\s+/g, '_') : 'not_available.png';
+        const filename = (product.image_path && product.image_path.trim() !== '') ? product.image_path.trim().replace(/\s+/g, '_') : 'food_photo.png';
         preview.src = `${window.BASE_URL}/public/assets/products/${filename}`;
 
         // Reset file input

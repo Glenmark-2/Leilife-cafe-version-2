@@ -1,7 +1,9 @@
 <?php
 
-class EnvLoader {
-    public static function load($path) {
+class EnvLoader
+{
+    public static function load($path)
+    {
         if (!file_exists($path)) {
             return; // Or throw an exception
         }

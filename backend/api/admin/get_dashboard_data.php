@@ -11,9 +11,11 @@ $db = $database->getConnection();
 
 $dashboardService = new DashboardService($db);
 $filter = $_GET['filter'] ?? 'date_desc';
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
 
 try {
-    $data = $dashboardService->getDashboardData($filter);
+    $data = $dashboardService->getDashboardData($page, $limit, $filter);
     error_log("Dashboard Data: " . json_encode($data));
     http_response_code(200);
     echo json_encode([

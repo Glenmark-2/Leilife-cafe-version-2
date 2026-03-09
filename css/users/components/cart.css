@@ -171,4 +171,17 @@
     }
 }
 
+.unavailable-item {
+    opacity: 0.6;
+    filter: grayscale(0.5);
+    background-color: #fce4e4; /* Light red background to indicate error/unavailable */
+    border-radius: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.unavailable-item .name-span {
+    color: #888;
+}
+
    
