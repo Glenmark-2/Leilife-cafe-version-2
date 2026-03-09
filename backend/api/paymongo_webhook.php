@@ -7,6 +7,7 @@ header("Content-Type: application/json; charset=UTF-8");
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../repositories/OrderRepository.php';
 require_once __DIR__ . '/../repositories/TransactionRepository.php';
+require_once __DIR__ . '/../repositories/CartRepository.php';
 require_once __DIR__ . '/../services/PayMongoService.php';
 require_once __DIR__ . '/../helpers/EnvLoader.php';
 
@@ -69,6 +70,7 @@ $database = new Database();
 $db = $database->getConnection();
 $orderRepo = new OrderRepository($db);
 $transactionRepo = new TransactionRepository($db);
+$cartRepo = new CartRepository($db);
 $payMongo = new PayMongoService();
 
 // Get event type
@@ -78,11 +80,11 @@ $eventData = $event['data']['attributes']['data'] ?? [];
 // Handle different event types
 switch ($eventType) {
     case 'source.chargeable':
-        handleSourceChargeable($eventData, $orderRepo, $transactionRepo, $payMongo, $db);
+        handleSourceChargeable($eventData, $orderRepo, $transactionRepo, $payMongo, $db, $cartRepo);
         break;
     
     case 'payment.paid':
-        handlePaymentPaid($eventData, $orderRepo, $transactionRepo);
+        handlePaymentPaid($eventData, $orderRepo, $transactionRepo, $cartRepo);
         break;
     
     case 'payment.failed':
@@ -106,7 +108,7 @@ exit;
 // Event Handlers
 // ============================================================================
 
-function handleSourceChargeable($data, $orderRepo, $transactionRepo, $payMongo, $db) {
+function handleSourceChargeable($data, $orderRepo, $transactionRepo, $payMongo, $db, $cartRepo) {
     $sourceId = $data['id'] ?? null;
     $amount = $data['attributes']['amount'] ?? 0;
     
@@ -156,6 +158,12 @@ function handleSourceChargeable($data, $orderRepo, $transactionRepo, $payMongo, 
             'payment_method' => $order->payment_method,
             'raw_response' => $paymentResult
         ]);
+
+        // Clear cart after confirmed payment.
+        $cart = $cartRepo->getCartByUserId($order->user_id);
+        if ($cart) {
+            $cartRepo->clearCart($cart->id);
+        }
         
         error_log("PayMongo Webhook: Payment successful for order: " . $order->id);
     } else {
@@ -175,7 +183,7 @@ function handleSourceChargeable($data, $orderRepo, $transactionRepo, $payMongo, 
     }
 }
 
-function handlePaymentPaid($data, $orderRepo, $transactionRepo) {
+function handlePaymentPaid($data, $orderRepo, $transactionRepo, $cartRepo) {
     $paymentId = $data['id'] ?? null;
     $metadata = $data['attributes']['metadata'] ?? [];
     $orderId = $metadata['order_id'] ?? null;
@@ -195,6 +203,12 @@ function handlePaymentPaid($data, $orderRepo, $transactionRepo) {
     if ($order->payment_status !== 'paid') {
         $orderRepo->updatePaymentStatus($orderId, 'paid');
         error_log("PayMongo Webhook: Payment confirmed for order: " . $orderId);
+    }
+
+    // Ensure cart is cleared for paid orders.
+    $cart = $cartRepo->getCartByUserId($order->user_id);
+    if ($cart) {
+        $cartRepo->clearCart($cart->id);
     }
 }
 

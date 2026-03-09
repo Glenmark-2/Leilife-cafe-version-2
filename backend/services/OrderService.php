@@ -144,9 +144,12 @@ class OrderService
                 // Construct Redirect URLs
                 // Assuming running on localhost/Leilife_2nd
                 // Construct Redirect URLs dynamically
-                $platform = $data['platform'] ?? 'web';
-                $successUrl = UrlHelper::getFullUrl("/backend/api/paymongo_callback.php?status=success&order_id=" . $orderId . "&platform=" . $platform);
-                $failedUrl = UrlHelper::getFullUrl("/backend/api/paymongo_callback.php?status=failed&order_id=" . $orderId . "&platform=" . $platform);
+            $platform = $data['platform'] ?? 'web';
+            $appRedirectReturn = $data['return_url'] ?? '';
+            $appRedirectCancel = $data['cancel_url'] ?? '';
+
+            $successUrl = UrlHelper::getFullUrl("/backend/api/paymongo_callback.php?status=success&order_id=" . $orderId . "&platform=" . $platform . (!empty($appRedirectReturn) ? "&app_redirect=" . urlencode($appRedirectReturn) : ""));
+            $failedUrl = UrlHelper::getFullUrl("/backend/api/paymongo_callback.php?status=failed&order_id=" . $orderId . "&platform=" . $platform . (!empty($appRedirectCancel) ? "&app_redirect=" . urlencode($appRedirectCancel) : ""));
 
                 $sourceResult = $payMongo->createSource($amountInCentavos, $successUrl, $failedUrl, 'PHP', $order->payment_method, [
                     'order_id' => $orderId

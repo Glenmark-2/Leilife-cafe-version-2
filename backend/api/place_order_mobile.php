@@ -1,8 +1,10 @@
-<?php
+﻿<?php
 // backend/api/place_order_mobile.php
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST");
+ini_set('display_errors', '0');
+require_once __DIR__ . '/../helpers/SessionManager.php';
 
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../repositories/OrderRepository.php';
@@ -29,13 +31,32 @@ $userRepo = new UserRepository($db);
 $orderService = new OrderService($orderRepo, $productRepo, $cartRepo, $transactionRepo);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    try {
+    SessionManager::startSession();
     $data = json_decode(file_get_contents("php://input"), true);
-    $userId = $data['user_id'] ?? null;
+    $sessionUserId = SessionManager::get('user_id');
+    $sessionRole = SessionManager::get('user_role');
+    $requestedUserId = $data['user_id'] ?? null;
 
-    if (!$userId) {
-        echo json_encode(['success' => false, 'message' => 'User ID is required for mobile orders.']);
+    if (!$sessionUserId) {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Unauthorized.']);
         exit;
     }
+
+    if ($sessionRole && !in_array(strtolower($sessionRole), ['customer', 'user'], true)) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'message' => 'Forbidden: customer access required.']);
+        exit;
+    }
+
+    if ($requestedUserId !== null && strval($requestedUserId) !== strval($sessionUserId)) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'message' => 'Forbidden: user mismatch.']);
+        exit;
+    }
+
+    $userId = $sessionUserId;
 
     $settings = $settingsRepo->getSettings();
     if (!StoreStatusHelper::isStoreOpen($settings)) {
@@ -89,32 +110,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $data['platform'] = 'mobile';
+    $data['user_id'] = $userId;
     $result = $orderService->placeOrder($userId, $data);
 
     if ($result['success']) {
         http_response_code(201);
 
         // --- NEW: Notify Admins via Push ---
-        try {
-            $adminTokens = NotificationHelper::getTokensByRole('admin', $db);
-            if (!empty($adminTokens)) {
-                $orderNum = $result['order_number'] ?? 'New';
-                NotificationHelper::sendPushToMany(
-                    $adminTokens,
-                    "New Order 🔔",
-                    "A new order (#$orderNum) has been placed.",
-                    ["orderId" => $result['order_id'] ?? null, "type" => "new_order"]
-                );
+        // ONLY notify immediately if it's COD. For GCash/GrabPay, notify via callback once authorized!
+        if (isset($data['payment_method']) && strtolower($data['payment_method']) === 'cod') {
+            try {
+                $adminTokens = NotificationHelper::getTokensByRole('admin', $db);
+                if (!empty($adminTokens)) {
+                    $orderNum = $result['order_number'] ?? 'New';
+                    NotificationHelper::sendPushToMany(
+                        $adminTokens,
+                        "New Order 🔔",
+                        "A new order (#$orderNum) has been placed.",
+                        ["orderId" => $result['order_id'] ?? null, "type" => "new_order"]
+                    );
+                }
+            } catch (Exception $e) {
+                error_log("Failed to send admin notification: " . $e->getMessage());
             }
-        } catch (Exception $e) {
-            error_log("Failed to send admin notification: " . $e->getMessage());
         }
     } else {
         http_response_code(400);
     }
 
     echo json_encode($result);
+    } catch (Throwable $e) {
+        error_log('place_order_mobile fatal: ' . $e->getMessage());
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Internal server error while placing mobile order.', 'error' => $e->getMessage()]);
+    }
 } else {
     http_response_code(405);
     echo json_encode(['success' => false, 'message' => 'Method Not Allowed']);
 }
+

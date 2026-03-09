@@ -1,7 +1,5 @@
 <?php
-// Let's force errors to show if they happen so we can see them in the mobile terminal
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', '0');
 
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
@@ -18,7 +16,7 @@ $db = $database->getConnection();
 
 $data = json_decode(file_get_contents("php://input"));
 
-if(!empty($data->user_id) && !empty($data->push_token)) {
+if(isset($data->user_id) && isset($data->push_token)) {
     try {
         $role = $data->role ?? 'customer';
         $table = 'users';
@@ -39,7 +37,8 @@ if(!empty($data->user_id) && !empty($data->push_token)) {
         $query = "UPDATE $table SET push_token = ? WHERE $idColumn = ?";
         $stmt = $db->prepare($query);
         
-        if($stmt->execute([$data->push_token, $data->user_id])) {
+        $pushToken = trim((string)$data->push_token);
+        if($stmt->execute([$pushToken === '' ? null : $pushToken, $data->user_id])) {
             echo json_encode(["status" => "success", "success" => true, "message" => "Token saved for $role."]);
         } else {
             echo json_encode(["status" => "error", "success" => false, "message" => "Update failed."]);

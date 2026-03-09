@@ -2,6 +2,8 @@
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET");
+ini_set('display_errors', '0');
+require_once __DIR__ . '/../../helpers/SessionManager.php';
 
 require_once __DIR__ . '/../../config/Database.php';
 require_once __DIR__ . '/../../repositories/SettingsRepository.php';
@@ -14,6 +16,26 @@ $settingsRepo = new SettingsRepository($db);
 $userRepo = new UserRepository($db);
 
 try {
+    SessionManager::startSession();
+    $sessionUserId = SessionManager::get('user_id');
+    $requestedUserId = $_GET['user_id'] ?? null;
+    if (!$sessionUserId) {
+        http_response_code(401);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Unauthorized.'
+        ]);
+        exit;
+    }
+    if ($requestedUserId !== null && strval($requestedUserId) !== strval($sessionUserId)) {
+        http_response_code(403);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Forbidden: user mismatch.'
+        ]);
+        exit;
+    }
+
     $settings = $settingsRepo->getSettings();
     $storeCoords = DeliveryQuoteService::getStoreCoordsFromSettings($settings);
 
@@ -28,8 +50,8 @@ try {
     $lat = DeliveryQuoteService::parseCoord($_GET['latitude'] ?? null);
     $lng = DeliveryQuoteService::parseCoord($_GET['longitude'] ?? null);
 
-    if (($lat === null || $lng === null) && !empty($_GET['user_id'])) {
-        $user = $userRepo->findById($_GET['user_id']);
+    if ($lat === null || $lng === null) {
+        $user = $userRepo->findById($sessionUserId);
         if ($user) {
             $lat = DeliveryQuoteService::parseCoord($user->latitude ?? null);
             $lng = DeliveryQuoteService::parseCoord($user->longitude ?? null);
@@ -39,7 +61,8 @@ try {
     if ($lat === null || $lng === null) {
         echo json_encode([
             'success' => false,
-            'message' => 'Customer coordinates are missing.'
+            'message' => 'Customer coordinates are missing.',
+            'code' => 'ADDRESS_REQUIRED'
         ]);
         exit;
     }
@@ -71,4 +94,3 @@ try {
         'message' => $e->getMessage(),
     ]);
 }
-
