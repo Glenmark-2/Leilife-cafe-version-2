@@ -270,4 +270,17 @@
 
 </div>
 
+<!-- Option 2: Floating Sticky App Downloader -->
+<div class="floating-app-download d-none d-md-flex">
+    <div class="qr-content shadow">
+        <h6 class="mb-2 fw-bold text-center" style="color: #5a4b40;">Get Our App!</h6>
+        <img src="<?= UrlHelper::getBaseUrl() ?>/public/assets/qr_download.png" alt="Scan QR" class="img-fluid rounded border p-1 bg-white">
+        <p class="mt-2 mb-0 text-center" style="font-size: 0.8rem; color: #6c757d;">Scan to download</p>
+    </div>
+    <div class="floating-btn shadow">
+        <i class="fas fa-mobile-alt me-2"></i>
+        <span>Download our App</span>
+    </div>
+</div>
+
 <script src="../scripts/users/home.js"></script>
